@@ -132,10 +132,10 @@ fun OnboardingPage(
                 Text(
                     text = "Ketuk bukan alat medis dan belum mendeteksi jatuh. Ketuk hanya tahu kalau aktivitas berhenti. Tetap hubungi 112/119 untuk keadaan gawat.",
                     style = MaterialTheme.typography.bodySmall,
-                    fontSize = 11.sp,
-                    color = Arang.copy(alpha = 0.5f),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     textAlign = TextAlign.Center,
-                    lineHeight = 14.sp,
+                    lineHeight = 16.sp,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))

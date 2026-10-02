@@ -14,3 +14,16 @@ val KremGelap = Color(0xFFE3D5BC)
 // Warna tambahan dari Figma
 val Peach = Color(0xFFFFDAB3)
 val Sage = Color(0xFFA8C5A3)
+
+// Warna kartu role
+val CardWali = Color(0xFFFDF0E4)
+val CardPenjaga = Color(0xFFFEF3E5)
+val CardOma = Color(0xFFF8F2E6)
+
+val BorderWali = Color(0xFFF0C5B3)
+val BorderPenjaga = Color(0xFFF5D5A8)
+val BorderOma = Color(0xFFD5DBC7)
+
+val TintWali = Color(0xFFEFBCAA)
+val TintPenjaga = Color(0xFFF9D9B1)
+val TintOma = Color(0xFFC5CEBA)

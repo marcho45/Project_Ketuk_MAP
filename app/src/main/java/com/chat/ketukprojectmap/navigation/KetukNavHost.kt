@@ -10,7 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.chat.ketukprojectmap.ui.screens.login.LoginScreen
 import com.chat.ketukprojectmap.ui.screens.onboarding.OnboardingScreen
+import com.chat.ketukprojectmap.ui.screens.role.RoleSelectScreen
 import com.chat.ketukprojectmap.ui.screens.splash.SplashScreen
 
 @Composable
@@ -42,27 +44,26 @@ fun KetukNavHost() {
         }
 
         composable(Routes.login) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Login",
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }
+            LoginScreen(
+                onNavigateToRole = {
+                    navController.navigate(Routes.role) {
+                        popUpTo(Routes.login) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(Routes.role) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Role",
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }
+            RoleSelectScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToHome = {
+                    navController.navigate(Routes.home) {
+                        popUpTo(Routes.role) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(Routes.home) {

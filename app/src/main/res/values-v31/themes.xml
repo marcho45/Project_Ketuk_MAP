@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.KetukProjectMAP" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/ketuk_cream</item>
+        <item name="android:windowSplashScreenBackground">@color/ketuk_cream</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_empty</item>
+    </style>
+</resources>
