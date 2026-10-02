@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.chat.ketukprojectmap.ui.screens.onboarding.OnboardingScreen
+import com.chat.ketukprojectmap.ui.screens.splash.SplashScreen
 
 @Composable
 fun KetukNavHost() {
@@ -20,27 +22,23 @@ fun KetukNavHost() {
         startDestination = Routes.splash
     ) {
         composable(Routes.splash) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Splash",
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }
+            SplashScreen(
+                onNavigateToOnboarding = {
+                    navController.navigate(Routes.onboarding) {
+                        popUpTo(Routes.splash) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(Routes.onboarding) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Onboarding",
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }
+            OnboardingScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Routes.login) {
+                        popUpTo(Routes.onboarding) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(Routes.login) {
