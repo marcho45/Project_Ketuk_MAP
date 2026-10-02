@@ -2,10 +2,15 @@ package com.chat.ketukprojectmap.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Palet Ketuk
+val KremBackground = Color(0xFFFFF7EC)
+val Terakota = Color(0xFFC4552D)
+val HijauDaun = Color(0xFF2F7D4F)
+val Arang = Color(0xFF1F2328)
+val KuningMadu = Color(0xFFE9A23B)
+val BiruAbu = Color(0xFF5B6B7A)
+val KremGelap = Color(0xFFE3D5BC)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Warna tambahan dari Figma
+val Peach = Color(0xFFFFDAB3)
+val Sage = Color(0xFFA8C5A3)
