@@ -1,0 +1,65 @@
+# Aturan proyek Ketuk (WAJIB dibaca sebelum mengubah apa pun)
+
+## Tentang proyek
+Ketuk adalah app Android (Kotlin, Jetpack Compose) untuk tugas IF570 / Mobile Application Programming, UMN.
+Ide: HP lansia yang hening tak biasa memicu alur Sapa -> Wali -> Penjaga (tetangga) yang mengetuk pintu.
+Satu APK, tiga peran: Wali (anak/cucu), Penjaga (tetangga/saudara), Oma/Opa (lansia).
+Package: com.chat.ketukprojectmap. Bahasa teks antarmuka: Indonesia.
+Di UI pakai istilah "Oma/Opa" (sesuai Figma). Di kode pakai nama Inggris netral, misalnya `elder`, `guardian`, `family`.
+
+## Sumber kebenaran desain
+- docs/SCREENS.md : spesifikasi tiap layar (teks, urutan elemen, perilaku)
+- docs/ASSETS.md  : daftar aset dan di layar mana dipakai
+- docs/figma/*.png: gambar layar dari Figma. LIHAT gambarnya sebelum membuat layar.
+Kalau ada yang tidak jelas atau bertentangan, TANYA. Jangan menebak.
+
+## Tahap saat ini: TAHAP 1 = UI/UX + animasi, data palsu
+DILARANG menambah backend sekarang: Supabase, Firebase/FCM, Room, Hilt, WorkManager, sensor, SMS, GPS, CameraX.
+Semua data memakai model dan data contoh lokal (hardcoded di ViewModel). Struktur dibuat siap diganti Repository nanti.
+
+## Stack (dikunci)
+Kotlin, Jetpack Compose + Material 3, Navigation Compose, arsitektur MVVM (ViewModel + StateFlow), font Inter.
+Dependency yang BOLEH ditambah di tahap 1: navigation-compose, material-icons-extended, lifecycle-viewmodel-compose.
+Selain itu jangan tambah library, jangan ubah versi, jangan ubah compileSdk/minSdk/targetSdk.
+Gunakan version catalog (gradle/libs.versions.toml) kalau project memakainya.
+
+## Struktur paket (di bawah com.chat.ketukprojectmap)
+- navigation/        : KetukNavHost + object Routes
+- ui/theme/          : Color.kt, Type.kt, Theme.kt (pakai file bawaan template, ubah isinya)
+- ui/components/     : komponen bersama (KetukButton, KetukTextField, StatusChip, KetukBottomBar, dst)
+- ui/screens/<nama>/ : satu folder per layar: <Nama>Screen.kt + <Nama>ViewModel.kt (bila perlu)
+- data/model/        : data class dan data contoh
+
+## Aturan desain
+- Warna dan font HANYA dari ui/theme. Dilarang hardcode Color(0x...) di layar.
+- Palet: Krem #FFF7EC (latar), Terakota #C4552D (aksi/alarm), Hijau Daun #2F7D4F (aman), Arang #1F2328 (teks),
+  Kuning Madu #E9A23B (Sapa/L1), Biru Abu #5B6B7A (Ketuk terputus), Krem Gelap #E3D5BC (kartu/divider).
+  Warna lain yang terlihat di Figma (peach, sage, dst): ambil perkiraan dari gambar, taruh di Color.kt dengan nama jelas.
+- Font: Inter (res/font/inter_regular|medium|semibold|bold.ttf).
+- Sudut membulat: kartu 16-20dp, tombol pill (50%).
+- Ikon umum: Material Icons Rounded. Pengecualian: ikon navbar dan ilustrasi memakai aset di drawable-nodpi.
+- Layar untuk lansia (Oma/Opa): huruf >= 24sp, tombol >= 72dp, satu aksi utama per layar, kontras tinggi.
+- Status jangan hanya warna: sertakan ikon dan teks.
+- Animasi: pakai API Compose (AnimatedVisibility, animate*AsState, rememberInfiniteTransition, HorizontalPager). Tidak perlu library animasi.
+  Hormati reduced motion kalau mudah. Animasi harus menjelaskan perubahan, bukan hiasan.
+
+## Aset
+- Semua gambar ada di app/src/main/res/drawable-nodpi/ (DATAR, tanpa subfolder). Nama huruf kecil + underscore.
+- Pakai painterResource(R.drawable.nama). JANGAN membuat, menggambar, atau mengganti aset gambar sendiri.
+- Kalau butuh aset yang belum ada, tulis di jawaban dan pakai placeholder sederhana, jangan mengarang.
+- Beberapa aset kecil (ikon navbar, avatar). Tampilkan dengan ukuran dp wajar, jangan di-upscale besar.
+
+## Yang TIDAK boleh diubah tanpa bertanya
+- AndroidManifest.xml dan izin
+- applicationId / package name
+- Rute di Routes dan alur navigasi yang sudah disepakati
+- Isi palet di ui/theme (boleh menambah warna, tidak boleh mengubah yang ada)
+- File di docs/ dan .clinerules
+
+## Cara kerja
+1. Mulai dengan Plan: jelaskan singkat file apa yang akan dibuat/diubah, lalu kerjakan.
+2. Satu tugas = satu layar atau satu komponen. Jangan sentuh file yang tidak terkait.
+3. Jangan refactor besar tanpa diminta. Jangan menghapus kode yang bukan buatan sendiri.
+4. Setelah selesai, pastikan project bisa di-build dan jalankan @Preview bila ada.
+5. Jangan pernah menulis secret/key ke repo.
+6. Di akhir, laporkan: file yang dibuat/diubah, apa yang belum selesai, dan hal yang perlu diputuskan tim.
