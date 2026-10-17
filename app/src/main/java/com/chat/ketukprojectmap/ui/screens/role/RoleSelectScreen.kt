@@ -1,29 +1,47 @@
 package com.chat.ketukprojectmap.ui.screens.role
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chat.ketukprojectmap.R
 import com.chat.ketukprojectmap.ui.components.KetukButton
-import com.chat.ketukprojectmap.ui.theme.*
+import com.chat.ketukprojectmap.ui.theme.Arang
+import com.chat.ketukprojectmap.ui.theme.KetukTheme
+import com.chat.ketukprojectmap.ui.theme.Terakota
 
 @Composable
 fun RoleSelectScreen(
@@ -31,100 +49,118 @@ fun RoleSelectScreen(
     onNavigateToHome: () -> Unit,
     viewModel: RoleSelectViewModel = viewModel()
 ) {
-    val selectedRole by viewModel.selectedRole.collectAsState()
+    val selectedRole by viewModel.selectedRole.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val configuration = LocalConfiguration.current
+
+    BackHandler(onBack = onNavigateBack)
+
+    // Ukuran ilustrasi mengikuti tinggi layar, dibatasi 80dp sampai 96dp
+    val illustrationSize = (configuration.screenHeightDp.dp * 0.11f).coerceIn(80.dp, 96.dp)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .systemBarsPadding()
-            .padding(horizontal = 24.dp)
     ) {
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Tombol kembali
+        // Ikon di x = 32dp, sejajar dengan tepi kartu
         IconButton(
             onClick = onNavigateBack,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier
+                .padding(start = 20.dp)
+                .size(48.dp)
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = "Kembali",
-                tint = MaterialTheme.colorScheme.onSurface
+                tint = Arang
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column(modifier = Modifier.padding(horizontal = 32.dp)) {
+            Text(
+                text = "Siapa kamu?",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Arang
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = "Pilih peranmu untuk melanjutkan",
+                fontSize = 12.sp,
+                color = Arang
             )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Judul
-        Text(
-            text = "Siapa kamu?",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        // fill = false: tombol menempel di bawah kartu kalau muat (sesuai Figma),
+        // dan tetap terlihat di bawah layar kalau kartu perlu di-scroll
+        Column(
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 32.dp, vertical = 4.dp)
+        ) {
+            RoleCard(
+                illustration = R.drawable.role_wali,
+                illustrationSize = illustrationSize,
+                title = "Saya wali Oma dan Opa",
+                description = "Saya adalah anak, cucu, atau keluarga yang merawat Oma dan Opa.",
+                isSelected = selectedRole == UserRole.WALI,
+                onClick = { viewModel.selectRole(UserRole.WALI) }
+            )
 
-        Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Subjudul
-        Text(
-            text = "Pilih peranmu untuk melanjutkan",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-        )
+            RoleCard(
+                illustration = R.drawable.role_penjaga,
+                illustrationSize = illustrationSize,
+                title = "Saya penjaga Oma dan Opa",
+                description = "Saya adalah tetangga atau orang yang paling dekat dari rumah Oma dan Opa.",
+                isSelected = selectedRole == UserRole.PENJAGA,
+                onClick = { viewModel.selectRole(UserRole.PENJAGA) }
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Kartu 1: Wali
-        RoleCard(
-            illustration = R.drawable.wali_dengan_tok,
-            title = "Saya wali Oma dan Opa",
-            description = "Saya adalah anak, cucu, atau keluarga yang merawat Oma dan Opa.",
-            backgroundColor = CardWali,
-            borderColor = BorderWali,
-            tintColor = TintWali,
-            isSelected = selectedRole == UserRole.WALI,
-            onClick = { viewModel.selectRole(UserRole.WALI) }
-        )
+            RoleCard(
+                illustration = R.drawable.role_opa,
+                illustrationSize = illustrationSize,
+                title = "Saya adalah Oma/Opa",
+                description = "Saya ingin memantau kesehatan dan aktivitas saya sendiri.",
+                isSelected = selectedRole == UserRole.OMA_OPA,
+                onClick = { viewModel.selectRole(UserRole.OMA_OPA) }
+            )
+        }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Kartu 2: Penjaga
-        RoleCard(
-            illustration = R.drawable.rumah_desa,
-            title = "Saya penjaga",
-            description = "Saya adalah tetangga atau orang yang paling dekat dari rumah Oma dan Opa.",
-            backgroundColor = CardPenjaga,
-            borderColor = BorderPenjaga,
-            tintColor = TintPenjaga,
-            isSelected = selectedRole == UserRole.PENJAGA,
-            onClick = { viewModel.selectRole(UserRole.PENJAGA) }
-        )
+        // Pesan error simpan role
+        if (state.error != null) {
+            Text(
+                text = state.error.orEmpty(),
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(horizontal = 36.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Kartu 3: Oma/Opa
-        RoleCard(
-            illustration = R.drawable.oma_daun,
-            title = "Saya adalah Oma/Opa",
-            description = "Saya ingin memantau kesehatan dan aktivitas saya sendiri.",
-            backgroundColor = CardOma,
-            borderColor = BorderOma,
-            tintColor = TintOma,
-            isSelected = selectedRole == UserRole.OMA_OPA,
-            onClick = { viewModel.selectRole(UserRole.OMA_OPA) }
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        // Tombol Lanjutkan
-        KetukButton(
-            text = "Lanjutkan",
-            onClick = {
-                // TODO: Peran penjaga dan oma/opa juga menuju home sementara
-                onNavigateToHome()
-            },
-            enabled = selectedRole != null
-        )
+        Box(modifier = Modifier.padding(horizontal = 32.dp)) {
+            KetukButton(
+                text = if (state.isSaving) "Menyimpan..." else "Lanjutkan",
+                onClick = {
+                    // TODO: peran penjaga dan oma/opa sementara juga menuju home
+                    viewModel.confirm(onSuccess = onNavigateToHome)
+                },
+                enabled = selectedRole != null && !state.isSaving
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
     }
@@ -133,110 +169,109 @@ fun RoleSelectScreen(
 @Composable
 fun RoleCard(
     illustration: Int,
+    illustrationSize: Dp,
     title: String,
     description: String,
-    backgroundColor: Color,
-    borderColor: Color,
-    tintColor: Color,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    val scale by animateFloatAsState(
-        targetValue = if (isSelected) 1.02f else 1f,
-        animationSpec = tween(300),
-        label = "scale"
+    // Terpilih: peach (terakota 15% di atas putih). Tidak terpilih: putih
+    val containerColor by animateColorAsState(
+        targetValue = if (isSelected) {
+            Terakota.copy(alpha = 0.15f).compositeOver(Color.White)
+        } else {
+            Color.White
+        },
+        animationSpec = tween(250),
+        label = "containerColor"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = if (isSelected) Terakota.copy(alpha = 0.35f) else Color.Transparent,
+        animationSpec = tween(250),
+        label = "borderColor"
     )
 
     Card(
         onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .scale(scale),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = backgroundColor
-        ),
-        border = BorderStroke(
-            width = if (isSelected) 2.dp else 1.dp,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else borderColor
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        border = BorderStroke(1.dp, borderColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            // Konten teks
-            Column(
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // Ilustrasi di kiri, teks di kanan
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(end = 64.dp),
-                horizontalAlignment = Alignment.Start
+                    .padding(start = 24.dp, top = 26.dp, bottom = 26.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // Ilustrasi
                 Image(
                     painter = painterResource(illustration),
                     contentDescription = null,
+                    modifier = Modifier.size(illustrationSize),
+                    contentScale = ContentScale.Fit
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                // end = 48.dp menyisakan ruang untuk tombol panah
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(96.dp),
-                    contentScale = ContentScale.Fit,
-                    alignment = Alignment.CenterStart
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Judul
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                // Deskripsi
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
-                )
-            }
-
-            // Tombol panah di pojok kanan bawah
-            Surface(
-                modifier = Modifier
-                    .size(44.dp)
-                    .align(Alignment.BottomEnd),
-                shape = CircleShape,
-                color = tintColor,
-                onClick = onClick
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center
+                        .weight(1f)
+                        .padding(end = 48.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                        contentDescription = null,
-                        tint = Arang
+                    Text(
+                        text = title,
+                        fontSize = 14.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Arang
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = description,
+                        fontSize = 10.sp,
+                        lineHeight = 14.sp,
+                        color = Arang
                     )
                 }
+            }
+
+            // Tombol panah terakota di kanan bawah
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(12.dp)
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(Terakota),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
             }
         }
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview(showBackground = true)
+@Preview(name = "Normal", showBackground = true)
 @Composable
 fun RoleSelectScreenPreview() {
     KetukTheme {
-        RoleSelectScreen(
-            onNavigateBack = {},
-            onNavigateToHome = {}
-        )
+        RoleSelectScreen(onNavigateBack = {}, onNavigateToHome = {})
     }
 }
 
-
+@Preview(name = "Kecil", widthDp = 360, heightDp = 640, fontScale = 1.3f, showBackground = true)
+@Composable
+fun RoleSelectScreenSmallPreview() {
+    KetukTheme {
+        RoleSelectScreen(onNavigateBack = {}, onNavigateToHome = {})
+    }
+}

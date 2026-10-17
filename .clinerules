@@ -1,65 +1,327 @@
-# Aturan proyek Ketuk (WAJIB dibaca sebelum mengubah apa pun)
+# ATURAN KERJA PROYEK KETUK
+# Android | Kotlin | Jetpack Compose | minSdk 23
+# Berlaku untuk SEMUA tugas. Aturan ini lebih tinggi dari prompt tugas, kecuali aku
+# secara eksplisit menulis "abaikan aturan X" di tugas.
 
-## Tentang proyek
-Ketuk adalah app Android (Kotlin, Jetpack Compose) untuk tugas IF570 / Mobile Application Programming, UMN.
-Ide: HP lansia yang hening tak biasa memicu alur Sapa -> Wali -> Penjaga (tetangga) yang mengetuk pintu.
-Satu APK, tiga peran: Wali (anak/cucu), Penjaga (tetangga/saudara), Oma/Opa (lansia).
-Package: com.chat.ketukprojectmap. Bahasa teks antarmuka: Indonesia.
-Di UI pakai istilah "Oma/Opa" (sesuai Figma). Di kode pakai nama Inggris netral, misalnya `elder`, `guardian`, `family`.
+======================================================================
+0. KONTEKS PROYEK
+======================================================================
+- Nama: Ketuk. Aplikasi pemantau aktivitas HP orang tua (Oma/Opa) untuk keluarga.
+- Tiga peran: Wali (keluarga), Penjaga (tetangga terdekat), Oma/Opa (yang dipantau).
+- Alur: Loading -> Onboarding (4 halaman) -> Login -> Pilih Peran -> Home sesuai peran.
+- Fase kerja: Initial Phase (01, 02, 03) dikerjakan lebih dulu. Core Phase (04, 05) belakangan.
+- Stack: Kotlin, Jetpack Compose, Material theme bawaan proyek, minSdk 23.
+- Folder docs/ sejajar dengan app/. Isinya: figma/, ASSETS.md, SCREENS.md, CLINE_PROMPTS.md,
+  PROJECT_SUMMARY.md, CHANGELOG_HISTORY.md.
+- Aku bukan developer berpengalaman. Jelaskan keputusan teknis dengan bahasa sederhana,
+  dan jangan mengasumsikan aku tahu istilah teknis tanpa penjelasan singkat.
 
-## Sumber kebenaran desain
-- docs/SCREENS.md : spesifikasi tiap layar (teks, urutan elemen, perilaku)
-- docs/ASSETS.md  : daftar aset dan di layar mana dipakai
-- docs/figma/*.png: gambar layar dari Figma. LIHAT gambarnya sebelum membuat layar.
-Kalau ada yang tidak jelas atau bertentangan, TANYA. Jangan menebak.
+======================================================================
+1. URUTAN KERJA (WAJIB, TIDAK BOLEH DILOMPATI)
+======================================================================
+Fase A, Baca (tanpa mengedit apa pun):
+  1. Baca docs/PROJECT_SUMMARY.md.
+  2. Baca docs/CHANGELOG_HISTORY.md. Fokus pada entri terbaru dan semua bagian
+     "Error/masalah" serta "Yang GAGAL/jangan diulang".
+  3. Baca docs/ASSETS.md dan docs/SCREENS.md.
+  4. Buka gambar di docs/figma/ yang relevan dengan tugas.
+  5. Baca file kode yang akan disentuh SEBELUM merencanakan perubahan.
+  Jika PROJECT_SUMMARY.md atau CHANGELOG_HISTORY.md belum ada: BERHENTI dan beri tahu aku.
 
-## Tahap saat ini: TAHAP 1 = UI/UX + animasi, data palsu
-DILARANG menambah backend sekarang: Supabase, Firebase/FCM, Room, Hilt, WorkManager, sensor, SMS, GPS, CameraX.
-Semua data memakai model dan data contoh lokal (hardcoded di ViewModel). Struktur dibuat siap diganti Repository nanti.
+Fase B, Ringkasan pra-kerja (tulis di chat, sebelum edit):
+  (a) Apa yang sudah pernah dikerjakan terkait tugas ini.
+  (b) Error/kesalahan lalu yang relevan dan cara menghindarinya.
+  (c) Perbedaan antara SCREENS.md dan gambar figma yang ditemukan.
+  (d) Rencana langkah, daftar file yang akan diubah/dibuat/dihapus, dan alasannya.
+  (e) Hal yang tidak jelas dan butuh jawabanku.
 
-## Stack (dikunci)
-Kotlin, Jetpack Compose + Material 3, Navigation Compose, arsitektur MVVM (ViewModel + StateFlow), font Inter.
-Dependency yang BOLEH ditambah di tahap 1: navigation-compose, material-icons-extended, lifecycle-viewmodel-compose.
-Selain itu jangan tambah library, jangan ubah versi, jangan ubah compileSdk/minSdk/targetSdk.
-Gunakan version catalog (gradle/libs.versions.toml) kalau project memakainya.
+Fase C, Persetujuan:
+  - Mulai di mode Plan. Jangan edit file kode sebelum rencana kusetujui.
+  - Pengecualian: tugas yang murni dokumentasi (file di docs/ saja).
 
-## Struktur paket (di bawah com.chat.ketukprojectmap)
-- navigation/        : KetukNavHost + object Routes
-- ui/theme/          : Color.kt, Type.kt, Theme.kt (pakai file bawaan template, ubah isinya)
-- ui/components/     : komponen bersama (KetukButton, KetukTextField, StatusChip, KetukBottomBar, dst)
-- ui/screens/<nama>/ : satu folder per layar: <Nama>Screen.kt + <Nama>ViewModel.kt (bila perlu)
-- data/model/        : data class dan data contoh
+Fase D, Kerjakan:
+  - Kerjakan sesuai rencana yang disetujui, satu langkah logis demi satu langkah.
+  - Kalau rencana perlu berubah di tengah jalan, berhenti dan minta persetujuan ulang.
 
-## Aturan desain
-- Warna dan font HANYA dari ui/theme. Dilarang hardcode Color(0x...) di layar.
-- Palet: Krem #FFF7EC (latar), Terakota #C4552D (aksi/alarm), Hijau Daun #2F7D4F (aman), Arang #1F2328 (teks),
-  Kuning Madu #E9A23B (Sapa/L1), Biru Abu #5B6B7A (Ketuk terputus), Krem Gelap #E3D5BC (kartu/divider).
-  Warna lain yang terlihat di Figma (peach, sage, dst): ambil perkiraan dari gambar, taruh di Color.kt dengan nama jelas.
-- Font: Inter (res/font/inter_regular|medium|semibold|bold.ttf).
-- Sudut membulat: kartu 16-20dp, tombol pill (50%).
-- Ikon umum: Material Icons Rounded. Pengecualian: ikon navbar dan ilustrasi memakai aset di drawable-nodpi.
-- Layar untuk lansia (Oma/Opa): huruf >= 24sp, tombol >= 72dp, satu aksi utama per layar, kontras tinggi.
-- Status jangan hanya warna: sertakan ikon dan teks.
-- Animasi: pakai API Compose (AnimatedVisibility, animate*AsState, rememberInfiniteTransition, HorizontalPager). Tidak perlu library animasi.
-  Hormati reduced motion kalau mudah. Animasi harus menjelaskan perubahan, bukan hiasan.
+Fase E, Verifikasi:
+  - Jalankan ./gradlew assembleDebug. Kalau perlu juga ./gradlew lint.
+  - Periksa ulang hasil terhadap gambar figma (lihat bagian 9).
 
-## Aset
-- Semua gambar ada di app/src/main/res/drawable-nodpi/ (DATAR, tanpa subfolder). Nama huruf kecil + underscore.
-- Pakai painterResource(R.drawable.nama). JANGAN membuat, menggambar, atau mengganti aset gambar sendiri.
-- Kalau butuh aset yang belum ada, tulis di jawaban dan pakai placeholder sederhana, jangan mengarang.
-- Beberapa aset kecil (ikon navbar, avatar). Tampilkan dengan ukuran dp wajar, jangan di-upscale besar.
+Fase F, Dokumentasi dan laporan (bagian 11 dan 12).
 
-## Yang TIDAK boleh diubah tanpa bertanya
-- AndroidManifest.xml dan izin
-- applicationId / package name
-- Rute di Routes dan alur navigasi yang sudah disepakati
-- Isi palet di ui/theme (boleh menambah warna, tidak boleh mengubah yang ada)
-- File di docs/ dan .clinerules
+======================================================================
+2. BATASAN SCOPE
+======================================================================
+- Kerjakan HANYA yang tertulis di tugas. Layar, fase, atau fitur lain jangan disentuh.
+- Dilarang menambah fitur, layar, tombol, animasi, atau logika yang tidak diminta.
+- Dilarang membuat: autentikasi sungguhan, backend, networking, database, penyimpanan lokal,
+  analytics, push notification, atau izin (permission) baru, kecuali tugas memintanya.
+- Dilarang mengarang desain, teks, warna, atau asset. Kalau tidak ada di figma/SCREENS.md/ASSETS.md:
+  berhenti dan tanya, atau beri placeholder netral dan tandai TODO + catat di laporan.
+- Dilarang refactor, rename, reformat, atau "merapikan" kode di luar scope, meski terlihat jelek.
+  Kalau menemukan masalah di luar scope, CATAT di laporan, jangan diperbaiki.
+- Dilarang mengganti arsitektur, state management, atau pola navigasi yang sudah ada.
+- Batas perubahan: maksimal 8 file kode (.kt/.xml) diubah atau dibuat per tugas.
+  Kalau butuh lebih, berhenti dan minta izin beserta alasannya. File di docs/ tidak dihitung.
+- Layar yang BELUM didesain (Pairing, Alarm Aktif, Tugas Penjaga, Riwayat, Sinkron, dan sejenisnya)
+  JANGAN dibuat.
 
-## Cara kerja
-1. Mulai dengan Plan: jelaskan singkat file apa yang akan dibuat/diubah, lalu kerjakan.
-2. Satu tugas = satu layar atau satu komponen. Jangan sentuh file yang tidak terkait.
-3. Jangan refactor besar tanpa diminta. Jangan menghapus kode yang bukan buatan sendiri.
-4. Setelah selesai, pastikan project bisa di-build dan jalankan @Preview bila ada.
-5. Jangan pernah menulis secret/key ke repo.
-6. Di akhir, laporkan: file yang dibuat/diubah, apa yang belum selesai, dan hal yang perlu diputuskan tim.
+======================================================================
+3. FILE DAN FOLDER YANG DILINDUNGI
+======================================================================
+Dilarang diubah, dipindah, di-rename, atau dihapus tanpa izin eksplisit dariku:
+
+[Konfigurasi build]
+- build.gradle.kts (root dan app), settings.gradle.kts, gradle.properties
+- folder gradle/ (termasuk libs.versions.toml dan wrapper)
+- Versi plugin Gradle, compileSdk, targetSdk, minSdk, versi Kotlin, versi Compose
+- Dependency: butuh library baru? Tanya dulu. Sebutkan nama, versi, alasan, dan alternatif tanpa library.
+
+[Manifest dan icon launcher]
+- AndroidManifest.xml
+- mipmap-anydpi/, mipmap-anydpi-v26/
+- ic_launcher_foreground.xml, ic_launcher_background.xml
+- Vector fallback launcher JANGAN dipindah ke drawable. Manifest merujuk @mipmap/ic_launcher,
+  dan peringatan IDE "vector should be in drawable" sengaja diabaikan.
+
+[Desain dan rahasia]
+- docs/figma/ (read-only, hanya boleh dibaca)
+- local.properties, keystore, file .jks/.keystore, file berisi API key atau password
+
+[Folder otomatis]
+- .idea/, .gradle/, .kotlin/, build/ (jangan diedit, jangan di-commit)
+
+======================================================================
+4. ASSET DAN RESOURCE
+======================================================================
+- Sumber asset yang sah: yang terdaftar di docs/ASSETS.md dan ada di app/src/main/res/.
+- Nama resource: snake_case huruf kecil, hanya a-z, 0-9, underscore. Tanpa spasi, kurung,
+  huruf besar, atau tanda hubung. Contoh benar: asset_ketuk_7. Contoh salah: "Asset Ketuk 7 (1).png".
+- Pastikan nama folder resource valid. Cek ejaan seperti drawable-nodpi (bukan "drawble").
+  Kalau menemukan nama folder salah eja, JANGAN langsung rename; laporkan dulu.
+- Jangan mengubah isi, ukuran, kompresi, atau format file gambar. Jangan mengubah gambar rasterisasi
+  jadi vector atau sebaliknya tanpa izin.
+- Jangan menghapus asset sebelum:
+  1. Mencari seluruh referensinya (R.drawable.nama, @drawable/nama, di .kt dan .xml).
+  2. Menuliskan hasil pencarian itu di laporan.
+  3. Memastikan nol referensi tersisa.
+- Asset kurang atau tidak cocok: jangan membuat pengganti. Catat nama, ukuran (px), dan format
+  yang perlu kuekspor dari Figma, lalu tandai di laporan sebagai "asset kurang".
+- Jangan mengganti nama asset lama yang masih direferensikan tanpa memperbarui SEMUA referensinya
+  dan ASSETS.md.
+- Asset bitmap dipakai apa adanya. Hindari menskala sangat besar sehingga pecah. Untuk elemen yang
+  harus mengisi lebar (contoh: pagar), gunakan tiling atau repeat, bukan meregangkan.
+
+======================================================================
+5. STANDAR KODE (JETPACK COMPOSE)
+======================================================================
+Umum:
+- Jetpack Compose saja. Jangan membuat layout XML baru untuk layar.
+- Ikuti arsitektur, struktur package, dan penamaan yang sudah ada (lihat PROJECT_SUMMARY.md).
+  Kalau belum ada pola, pilih yang paling sederhana dan jelaskan pilihannya.
+- Satu layar = satu file Composable utama. Komponen yang dipakai berulang dipisah jadi
+  Composable kecil yang bisa dipakai ulang.
+- Composable layar menerima state dan callback sebagai parameter (state hoisting).
+  Hindari menaruh logika navigasi di dalam komponen kecil.
+- Beri Modifier sebagai parameter dengan default Modifier pada Composable yang dapat dipakai ulang.
+
+Tema dan ukuran:
+- Warna, tipografi, dan bentuk diambil dari Material theme proyek. Jangan hardcode warna hex
+  di banyak tempat. Kalau warna dari figma belum ada di theme, tambahkan SEKALI di theme
+  dan catat di laporan.
+- Pakai dp untuk ukuran dan sp untuk teks. Jangan hardcode ukuran berdasarkan satu perangkat.
+- Layout harus responsif: pakai fillMaxWidth, weight, aspectRatio, BoxWithConstraints,
+  atau constraint relatif. Hindari offset/ukuran absolut kecuali memang dari figma dan diberi alasan.
+- Uji mentalnya di layar kecil (360dp lebar), sedang, dan besar. Pastikan tidak ada teks terpotong
+  atau elemen saling menimpa.
+- Tangani system bars (status bar, navigation bar) dengan benar. Pastikan konten tidak tertutup.
+- Hormati ukuran font sistem: jangan kunci tinggi komponen yang berisi teks kalau teks bisa membesar.
+
+Teks:
+- Teks UI harus PERSIS seperti di SCREENS.md atau figma (ejaan, tanda baca, huruf besar).
+- Ikuti konvensi proyek: jika sudah memakai strings.xml, gunakan stringResource; jika belum,
+  jangan mengubah konvensi di tugas ini, cukup konsisten.
+- Teks yang meragukan atau kemungkinan salah salin: beri komentar // TODO(tim): ... di kode
+  dan catat di laporan. Jangan diubah diam-diam.
+
+Animasi:
+- Gunakan API Compose standar: animate*AsState, AnimatedVisibility, AnimatedContent, Crossfade,
+  rememberInfiniteTransition, Animatable. Jangan menambah library animasi.
+- Animasi hanya yang tertulis di SCREENS.md/figma. Durasi wajar (150 sampai 600 ms) kecuali ditentukan lain.
+- Efek samping (LaunchedEffect) harus punya key yang benar. Pastikan tidak terpicu ulang tanpa sengaja
+  saat rotasi atau recomposition, terutama untuk auto-navigasi di Loading.
+
+State dan navigasi:
+- Pakai remember/rememberSaveable seperlunya. State yang harus bertahan saat rotasi gunakan rememberSaveable.
+- Ikuti pola navigasi yang sudah ada. Pastikan tombol Back bekerja logis (misal dari Login tidak
+  kembali ke Loading).
+- Tahap 1: tombol "lanjut" cukup berpindah layar. Jangan menambah validasi atau autentikasi sungguhan.
+
+Kualitas:
+- Beri @Preview untuk setiap layar baru atau yang diubah, kalau proyek sudah memakai preview.
+- Beri contentDescription pada gambar yang bermakna, null untuk yang dekoratif.
+- Area sentuh tombol minimal 48dp.
+- Hindari memory/performance trap: jangan decode bitmap besar di dalam composition, jangan membuat
+  objek mahal di tiap recomposition tanpa remember.
+- Kode harus bisa dibaca pemula: nama jelas, komentar singkat untuk bagian yang tidak jelas.
+- Dilarang: !! (non-null assertion) tanpa alasan, GlobalScope, try/catch kosong, @Suppress untuk
+  menutupi warning, dan menonaktifkan lint demi lolos build.
+
+Kompatibilitas minSdk 23:
+- Jangan memakai API Android yang butuh level di atas 23 tanpa pengaman Build.VERSION.SDK_INT.
+- Jangan memakai fitur yang hanya ada di API 26+ (contoh: adaptive icon API langsung, font di XML tertentu)
+  tanpa fallback.
+- Setiap kali menambah kode baru, cek apakah lint memberi peringatan NewApi.
+
+======================================================================
+6. DESIGN SYSTEM DAN KONSISTENSI VISUAL
+======================================================================
+- Acuan utama: gambar di docs/figma/. SCREENS.md adalah pelengkap (teks, alur, animasi).
+- Kalau SCREENS.md dan gambar bertentangan: IKUTI GAMBAR, lalu catat perbedaannya di laporan.
+- Nama file figma di SCREENS.md bisa usang. Petakan ke file asli di docs/figma/ lalu perbarui SCREENS.md.
+- Core Phase (04, 05) boleh dibaca hanya untuk konsistensi warna, tipografi, dan komponen berulang.
+  Jangan diedit atau dikerjakan kecuali tugas memintanya.
+- Komponen yang dipakai di banyak layar (tombol pill terakota, kartu, input field, indikator, bottom bar)
+  harus konsisten: bentuk, tinggi, radius, warna, dan tipografi sama di semua layar.
+- Saat mencocokkan dengan figma, periksa: posisi, ukuran relatif, jarak (spacing), radius sudut,
+  warna, ketebalan font, urutan elemen, dan teks. Sebutkan hal yang tidak bisa dicocokkan persis.
+
+======================================================================
+7. COMMAND DAN GIT
+======================================================================
+Boleh dijalankan:
+- ./gradlew assembleDebug, ./gradlew test, ./gradlew lint, ./gradlew tasks
+- Perintah baca: dir, type, findstr, tree, git status, git diff, git log
+
+DILARANG tanpa izin eksplisit dariku:
+- git commit, push, pull, fetch, reset, checkout, switch, restore, clean, stash, rebase, merge,
+  branch -D, tag, dan semua yang mengubah riwayat atau working tree.
+- Menghapus lewat command: del, rm, rmdir, Remove-Item, rd.
+- Memindah/menyalin massal lewat command: move, robocopy, xcopy (untuk file kode/asset).
+- Mengubah pengaturan sistem, environment variable, atau konfigurasi Gradle global.
+- Mengunduh atau menjalankan script dari internet (curl | sh, iwr, dsb).
+- Menginstal software atau paket global.
+- Flag yang mem-bypass pengecekan: --force, --no-verify, --offline-bypass, -x lint untuk menutupi error.
+- ./gradlew clean (kecuali sudah kuizinkan karena masalah cache yang terbukti).
+
+Catatan:
+- Jangan menjalankan perintah yang bisa lama atau berulang tanpa batas (watch, daemon baru).
+- Satu command satu tujuan. Jelaskan singkat kenapa command itu dijalankan.
+
+======================================================================
+8. KAPAN HARUS BERHENTI DAN BERTANYA
+======================================================================
+Berhenti, jelaskan situasinya, dan tunggu jawabanku jika:
+1. Build gagal dan sudah 3 kali percobaan perbaikan tidak berhasil. Jangan menambal terus.
+   Laporkan: pesan error lengkap, penyebab yang kamu duga, dan opsi solusi.
+2. Error yang sama muncul lagi, atau pendekatan yang akan dipakai sama dengan yang tercatat gagal
+   di CHANGELOG_HISTORY.md.
+3. Desain, asset, atau teks tidak jelas atau saling bertentangan.
+4. Perubahan akan menyentuh file di daftar dilindungi (bagian 3).
+5. Perubahan jauh lebih besar dari rencana, atau melewati batas 8 file.
+6. Ada risiko kehilangan data, asset, atau kode yang tidak yakin masih dipakai.
+7. Butuh library, permission, atau versi SDK baru.
+8. Instruksi di tugas bertentangan dengan aturan ini.
+9. Kamu tidak yakin. Tanya lebih baik daripada menebak.
+
+Cara bertanya: ajukan pertanyaan spesifik, beri 2 sampai 3 opsi beserta rekomendasimu dan alasannya.
+
+======================================================================
+9. PEMERIKSAAN SEBELUM MENYATAKAN SELESAI
+======================================================================
+Centang semuanya (tulis hasilnya di laporan):
+[ ] ./gradlew assembleDebug sukses (tulis hasil akhirnya, jangan hanya "sukses").
+[ ] Tidak ada resource hilang, nama file tidak valid, atau referensi menggantung.
+[ ] Tidak ada peringatan lint baru yang berkaitan dengan perubahanmu (NewApi, HardcodedText, dll).
+[ ] Setiap teks UI dibandingkan dengan SCREENS.md/figma.
+[ ] Setiap layar dibandingkan dengan gambar figma: posisi, warna, spacing, tipografi, asset.
+[ ] Perilaku di layar kecil dan besar sudah dipikirkan, tidak ada elemen terpotong.
+[ ] Navigasi dan tombol Back masuk akal.
+[ ] Animasi sesuai spesifikasi dan tidak terpicu berulang.
+[ ] Tidak ada file di daftar dilindungi yang berubah.
+[ ] Jumlah file kode yang berubah tidak melebihi 8.
+[ ] Tidak ada asset dihapus tanpa bukti search.
+[ ] Semua TODO dan asumsi dicatat.
+Kalau ada satu saja yang tidak terpenuhi, jangan klaim selesai. Laporkan apa adanya.
+
+======================================================================
+10. PENANGANAN ERROR
+======================================================================
+Saat error muncul:
+1. Baca pesan error sampai habis. Salin bagian pentingnya ke laporan.
+2. Cari akar masalah, bukan gejala. Jelaskan penyebabnya dengan bahasa sederhana.
+3. Periksa CHANGELOG_HISTORY.md: apakah error serupa pernah terjadi? Apa yang dulu gagal?
+4. Perbaiki dengan perubahan sekecil mungkin.
+5. Setelah berhasil, catat: error, penyebab, solusi, dan pelajaran di CHANGELOG.
+6. Pendekatan yang dicoba dan gagal HARUS dicatat di bagian "Yang GAGAL/jangan diulang",
+   lengkap dengan alasannya.
+Dilarang: menyembunyikan error, menonaktifkan pengecekan, mengomentari kode yang rusak lalu
+menyatakan selesai, atau menghapus fitur agar build lolos.
+
+======================================================================
+11. FORMAT DOKUMENTASI (WAJIB DIPERBARUI SETIAP TUGAS)
+======================================================================
+A) docs/CHANGELOG_HISTORY.md
+- Entri terbaru di PALING ATAS. Jangan pernah menghapus atau menulis ulang entri lama.
+- Format satu entri:
+
+  ## [YYYY-MM-DD HH:mm] Judul singkat
+  - **Tujuan:** kenapa perubahan ini dibuat
+  - **Referensi desain:** file figma dan bagian SCREENS.md yang dipakai
+  - **Ringkasan perubahan:** 2 sampai 5 kalimat
+  - **File dibuat:** daftar path
+  - **File diubah:** daftar path + apa yang berubah
+  - **File dihapus:** daftar path + bukti search referensi
+  - **Error/masalah:** pesan error dan penyebab (atau "tidak ada")
+  - **Solusi yang berhasil:** ...
+  - **Yang GAGAL/jangan diulang:** pendekatan yang gagal + alasan (atau "tidak ada")
+  - **Perbedaan figma vs SCREENS.md:** ...
+  - **Asumsi dan TODO:** ...
+  - **Status build:** assembleDebug sukses/gagal (+ catatan lint)
+  - **Belum selesai:** sisa pekerjaan
+
+B) docs/PROJECT_SUMMARY.md
+- Selalu ditimpa agar mencerminkan kondisi TERKINI (bukan ditumpuk). Bagian wajib:
+  1. Gambaran proyek dan peran pengguna
+  2. Tech stack, minSdk/targetSdk, dependency utama
+  3. Arsitektur dan struktur folder/package
+  4. Daftar layar + status (belum ada / sebagian / sesuai figma) dipetakan ke file figma
+  5. Alur navigasi
+  6. Ringkasan asset dan pemakaiannya (rujuk ASSETS.md)
+  7. Design system: warna, tipografi, bentuk, spacing, komponen berulang
+  8. Konfigurasi penting (launcher icon, manifest, dll) dan alasannya
+  9. Masalah yang masih terbuka dan TODO
+  10. Pelajaran dan kesalahan yang jangan diulang (ringkasan dari CHANGELOG)
+  11. Tanggal update terakhir
+
+C) docs/ASSETS.md
+- Perbarui jika ada asset ditambah, diganti, atau dihapus. Pertahankan format tabel yang ada.
+
+D) docs/SCREENS.md
+- Perbarui status layar dan nama file figma yang usang. Jangan menghapus spesifikasi asli;
+  tambahkan catatan "Perbedaan dengan figma" bila ada.
+
+======================================================================
+12. FORMAT LAPORAN AKHIR (DI CHAT)
+======================================================================
+Tulis dengan bahasa sederhana, singkat, dan jujur:
+1. Yang selesai (per layar atau per tugas).
+2. Daftar file: dibuat / diubah / dihapus.
+3. Status build dan lint.
+4. Bagian yang BELUM sesuai figma dan alasannya.
+5. Asset yang kurang (nama, ukuran, format).
+6. Keputusan yang butuh jawabanku.
+7. Hal di luar scope yang kutemukan tapi tidak kuubah.
+8. Cara mengetes hasilnya di emulator/HP.
+
+======================================================================
+13. KEJUJURAN DAN LARANGAN KERAS
+======================================================================
+- Jangan menyatakan "selesai" tanpa build sukses dan dokumentasi terbarui.
+- Jangan melaporkan sesuatu sudah dikerjakan jika tidak benar-benar dilakukan.
+- Jangan mengklaim sudah mencocokkan dengan figma jika tidak membuka gambarnya.
+- Jangan mengarang nama file, fungsi, atau isi file yang belum dibaca. Baca dulu.
+- Jangan menebak jika bisa bertanya atau memeriksa.
+- Jangan menghapus atau menulis ulang entri lama CHANGELOG.
+- Jangan menutupi error dengan try/catch kosong, @Suppress, atau menonaktifkan lint.
+- Jika tidak bisa melakukan sesuatu, katakan terus terang dan jelaskan alasannya.

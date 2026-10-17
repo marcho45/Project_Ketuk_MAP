@@ -27,3 +27,23 @@ val BorderOma = Color(0xFFD5DBC7)
 val TintWali = Color(0xFFEFBCAA)
 val TintPenjaga = Color(0xFFF9D9B1)
 val TintOma = Color(0xFFC5CEBA)
+
+// Warna Home
+val CardHome = Color(0xFFFCF1E3)
+val BarBackground = Color(0xFFFCF1E3)
+val BarDivider = Color(0xFFC4BDB4)
+val ActivePill = Color(0xFFF3E0CA)
+val ChipSehat = Color(0xFFB7D0AC)
+
+// Warna tambahan untuk Home screen
+val CardPutih = Color(0xFFFFFFFF)
+val AksiAktivitas = Color(0xFFFAE6D8)
+val AksiSapa = Color(0xFFFEEEDA)
+val AksiHp = Color(0xFFEEEBDD)
+val IkonHijau = Color(0xFF559766)
+val IkonBiru = Color(0xFF4D7BA4)
+val IkonOranye = Color(0xFFFAAC46)
+val ChipFilter = Color(0xFFF0C1B0)
+val CardNetral = Color(0xFFF9F7F5)
+val ChipAman = Color(0xFFBBD5BA)
+val SheetBackground = Color(0xFFF8EFE2)

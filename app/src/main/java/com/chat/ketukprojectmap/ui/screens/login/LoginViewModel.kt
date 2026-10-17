@@ -1,0 +1,80 @@
+package com.chat.ketukprojectmap.ui.screens.login
+
+
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.chat.ketukprojectmap.data.repository.AuthRepository
+import io.github.jan.supabase.compose.auth.composable.NativeSignInResult
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+data class LoginState(
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
+
+class LoginViewModel(
+    private val repository: AuthRepository = AuthRepository()
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(LoginState())
+    val state: StateFlow<LoginState> = _state.asStateFlow()
+
+    fun clearError() {
+        if (_state.value.error != null) _state.update { it.copy(error = null) }
+    }
+
+    fun login(
+        email: String,
+        password: String,
+        onSuccess: () -> Unit,
+        onNeedVerification: () -> Unit
+    ) {
+        if (email.isBlank() || password.isBlank()) {
+            _state.update { it.copy(error = "Email dan password wajib diisi") }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { LoginState(isLoading = true) }
+            try {
+                repository.login(email, password)
+                _state.update { LoginState() }
+                onSuccess()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                val msg = e.message.orEmpty().lowercase()
+                if ("not confirmed" in msg || "email_not_confirmed" in msg) {
+                    _state.update { LoginState() }
+                    onNeedVerification()
+                } else {
+                    _state.update { LoginState(error = mapError(msg)) }
+                }
+            }
+        }
+    }
+
+    fun onGoogleResult(result: NativeSignInResult, onSuccess: () -> Unit) {
+        when (result) {
+            is NativeSignInResult.Success -> onSuccess()
+            is NativeSignInResult.ClosedByUser -> Unit
+            is NativeSignInResult.NetworkError ->
+                _state.update { it.copy(error = "Tidak ada koneksi internet") }
+            is NativeSignInResult.Error ->
+                _state.update { it.copy(error = "Login Google gagal") }
+        }
+    }
+
+    private fun mapError(msg: String): String = when {
+        "invalid login credentials" in msg || "invalid_credentials" in msg ->
+            "Email atau password salah"
+        "network" in msg || "unable to resolve" in msg || "timeout" in msg ->
+            "Tidak ada koneksi internet"
+        else -> "Gagal masuk, coba lagi"
+    }
+}
