@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chat.ketukprojectmap.R
 import com.chat.ketukprojectmap.data.dummy.DummyData
+import com.chat.ketukprojectmap.ui.components.KetukDarkModeCard
+import com.chat.ketukprojectmap.ui.components.KetukLogoutButton
 import com.chat.ketukprojectmap.ui.theme.*
 
 // TODO(tim): Layar Profil Wali tidak punya frame khusus di Figma 04; diisi kartu info akun Wali, Oma Diyas, dan tombol Keluar
@@ -47,8 +49,6 @@ fun ProfileScreen(
     val guardian = DummyData.primaryGuardian
     val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val colors = KetukTheme.colors
-    val isDarkTheme = KetukTheme.isDark
-    val onToggleDarkTheme = LocalDarkThemeToggle.current
 
     Box(
         modifier = Modifier
@@ -255,101 +255,15 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // TODO(tim): tidak ada di Figma
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
-                border = BorderStroke(1.dp, colors.cardBorder),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            modifier = Modifier.size(38.dp),
-                            shape = CircleShape,
-                            color = Terakota.copy(alpha = 0.14f)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = if (isDarkTheme) Icons.Rounded.DarkMode else Icons.Rounded.LightMode,
-                                    contentDescription = "Mode gelap",
-                                    tint = Terakota,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Column {
-                            Text(
-                                text = "Mode gelap",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = colors.textPrimary
-                            )
-                            Text(
-                                text = if (isDarkTheme) "Aktif" else "Nonaktif",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = colors.textPrimary.copy(alpha = 0.65f)
-                            )
-                        }
-                    }
-
-                    Switch(
-                        checked = isDarkTheme,
-                        onCheckedChange = { onToggleDarkTheme(it) },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = colors.onAccent,
-                            checkedTrackColor = Terakota,
-                            uncheckedThumbColor = colors.textPrimary.copy(alpha = 0.7f),
-                            uncheckedTrackColor = colors.divider,
-                            uncheckedBorderColor = colors.cardBorder
-                        )
-                    )
-                }
-            }
+            KetukDarkModeCard()
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // Tombol Keluar
-            OutlinedButton(
+            KetukLogoutButton(
                 onClick = { showLogoutDialog = true },
-                enabled = !isLoggingOut,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = Terakota,
-                    disabledContainerColor = Color.Transparent,
-                    disabledContentColor = Terakota.copy(alpha = 0.5f)
-                ),
-                border = BorderStroke(1.5.dp, if (isLoggingOut) Terakota.copy(alpha = 0.5f) else Terakota)
-            ) {
-                if (isLoggingOut) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        color = Terakota
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                }
-                Text(
-                    text = if (isLoggingOut) "Keluar..." else "Keluar",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 16.sp
-                    )
-                )
-            }
+                isLoggingOut = isLoggingOut
+            )
         }
     }
 

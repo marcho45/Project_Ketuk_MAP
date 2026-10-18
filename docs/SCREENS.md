@@ -75,14 +75,14 @@ Jika teks spesifikasi berbeda dengan gambar Figma, **ikuti gambar Figma** dan ca
   - **Tab 0 (Beranda - M6):** Header `"Halo, Nandaa"` (dilengkapi tombol panah kembali khusus `BuildConfig.DEMO_MODE == true` untuk menengok layar Pilih Peran), kartu Oma Diyas, Status hari ini (`"Lihat detail >"` membuka `DetailAlertScreen("act_2")`), 3 kartu Aksi cepat dengan Snackbar mockup, dan Timeline Aktivitas terbaru yang bisa diklik ke `DetailAlertScreen`.
   - **Tab 1 (Riwayat Aktivitas - M7):** `LazyColumn` 8 item dari `DummyData.initialActivities` + 4 filter chip (`Semua`, `Aktivitas`, `HP`, `Sapa`). Klik item membuka `DetailAlertScreen(item.id)`.
   - **Tab 2 (Lokasi Oma Diyas - M9):** Peta statis `peta_lokasi`, bottom sheet info Oma Diyas (`67 tahun`), tombol `"Lihat Rute"` & `"Hubungi Oma"` (menampilkan Snackbar simulasi), serta kartu Penjaga terdekat (`Markolintang`, `170 m`) dengan foto `penjaga_lintang`.
-  - **Tab 3 (Profil Wali):** Kartu akun Wali (`Nanda Valeri`, `wali@ketuk.app`), kartu Lansia yang dipantau (`Oma Diyas`, `67 Tahun`), kartu switch `"Mode gelap"` (`Icons.Rounded.LightMode`/`DarkMode`, tersimpan di `SharedPreferences` `"dark_theme"`, ditandai `// TODO(tim): tidak ada di Figma`), dan tombol `"Keluar"` + dialog konfirmasi.
+  - **Tab 3 (Profil Wali):** Kartu akun Wali (`Nanda Valeri`, `wali@ketuk.app`), kartu Lansia yang dipantau (`Oma Diyas`, `67 Tahun`), kartu switch `"Mode gelap"` (`KetukDarkModeCard`), dan tombol outline `"Keluar"` (`KetukLogoutButton`) + dialog konfirmasi.
 - **Detail Alert / Aktivitas (`DetailAlertScreen` - M8):** Menerima argumen `itemId` dari NavHost (`detail_alert/{itemId}`), menampilkan level eskalasi (`NORMAL` / `L1` / `L2` / `L3`), waktu, status reaktif, deskripsi lengkap, lokasi Oma Diyas, dan 3 tombol aksi (`"Telepon Oma"`, `"Konfirmasi Oma Aman"`, `"Minta Penjaga Mengecek"`).
 
 ### C. Alur Oma/Opa (`03. Initial Phase oma.png` & Flowchart M4–M5)
 - **Pindai QR (M4):** Judul `"Pindai QR"`, mockup kamera dengan bingkai scan + kartu petunjuk `"Arahkan ke QR code di HP wali"` + tombol `"Simulasikan Pindai"`.
 - **Loading Pairing (M4):** Latar blur `qr_pairing_blur` + spinner biru + `"Loading Pairing..."` (delay otomatis 2 detik).
 - **Persetujuan & Izin (M4):** Kartu `"Yang dipantau"` (3 item), kartu `"Izin yang diperlukan"` (4 poin bernomor), persetujuan privasi yang mengaktifkan tombol `"Saya Setuju"`.
-- **Mode Pasif Oma/Opa (M5):** Tampilan ramah lansia huruf besar + simulasi kartu/dialog Sapa L1 `"Oma baik-baik saja?"` (`"Saya baik-baik saja"` / `"Butuh bantuan"`) + tombol `"Keluar"`.
+- **Mode Pasif Oma/Opa (M5):** Tampilan ramah lansia huruf besar + kartu simulasi satu baris `"Simulasi Sapaan L1"` dengan tombol satu baris `"Munculkan Sapaan"` -> dialog Sapa L1 `"Oma baik-baik saja?"` (`"Saya baik-baik saja"` / `"Butuh bantuan"`) + switch mode gelap (`KetukDarkModeCard`) + tombol outline `"Keluar"` (`KetukLogoutButton`) yang konsisten dengan ProfileScreen.
 
 ### D. Alur Penjaga (`05. Core Phase Penjaga.png` & Flowchart M10)
 - **Core Penjaga (3 Tab Bottom Bar: Beranda, Lokasi, Profil):**

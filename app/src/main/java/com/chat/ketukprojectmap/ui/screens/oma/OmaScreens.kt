@@ -46,6 +46,8 @@ import com.chat.ketukprojectmap.BuildConfig
 import com.chat.ketukprojectmap.R
 import com.chat.ketukprojectmap.data.dummy.DummyData
 import com.chat.ketukprojectmap.ui.components.KetukButton
+import com.chat.ketukprojectmap.ui.components.KetukDarkModeCard
+import com.chat.ketukprojectmap.ui.components.KetukLogoutButton
 import com.chat.ketukprojectmap.ui.components.KetukSecondaryButton
 import com.chat.ketukprojectmap.ui.screens.profile.ProfileViewModel
 import com.chat.ketukprojectmap.ui.theme.*
@@ -686,8 +688,6 @@ fun OmaPassiveScreen(
     profileViewModel: ProfileViewModel = viewModel()
 ) {
     val colors = KetukTheme.colors
-    val isDarkTheme = KetukTheme.isDark
-    val toggleDarkTheme = LocalDarkThemeToggle.current
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val isLoggingOut by profileViewModel.isLoggingOut.collectAsState()
@@ -877,7 +877,7 @@ fun OmaPassiveScreen(
                         }
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Simulasi Sapaan L1 (HP Hening)",
+                            text = "Simulasi Sapaan L1",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = colors.textPrimary
@@ -887,7 +887,7 @@ fun OmaPassiveScreen(
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
-                        text = "Jika HP Oma hening lebih dari 4 jam, sistem memunculkan dialog sapa untuk mengonfirmasi keadaan Oma.",
+                        text = "Simulasi kondisi HP hening: jika HP hening lebih dari 4 jam, sistem memunculkan dialog sapa untuk mengonfirmasi keadaan Oma.",
                         style = MaterialTheme.typography.bodySmall,
                         color = colors.textSecondary,
                         lineHeight = 18.sp
@@ -897,7 +897,7 @@ fun OmaPassiveScreen(
 
                     // Tombol untuk memicu Dialog Sapa L1
                     KetukButton(
-                        text = "Munculkan Sapaan \"Oma baik-baik saja?\"",
+                        text = "Munculkan Sapaan",
                         onClick = { showSapaDialog = true },
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -968,78 +968,20 @@ fun OmaPassiveScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // PENGATURAN MODE GELAP (// TODO(tim): tidak ada di Figma)
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
-                border = BorderStroke(1.dp, colors.cardBorder),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            modifier = Modifier.size(38.dp),
-                            shape = CircleShape,
-                            color = Terakota.copy(alpha = 0.14f)
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = if (isDarkTheme) Icons.Rounded.DarkMode else Icons.Rounded.LightMode,
-                                    contentDescription = "Mode gelap",
-                                    tint = Terakota,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Column {
-                            Text(
-                                text = "Mode gelap",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = colors.textPrimary
-                            )
-                            Text(
-                                text = if (isDarkTheme) "Tema gelap aktif" else "Tema terang aktif",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = colors.textSecondary
-                            )
-                        }
-                    }
-
-                    Switch(
-                        checked = isDarkTheme,
-                        onCheckedChange = { toggleDarkTheme(it) },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = colors.onAccent,
-                            checkedTrackColor = Terakota,
-                            uncheckedThumbColor = colors.textPrimary.copy(alpha = 0.7f),
-                            uncheckedTrackColor = colors.divider,
-                            uncheckedBorderColor = colors.cardBorder
-                        )
-                    )
-                }
-            }
+            KetukDarkModeCard()
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // TOMBOL KELUAR (LOGOUT)
-            KetukSecondaryButton(
-                text = if (isLoggingOut) "Sedang keluar..." else "Keluar dari Akun Oma",
+            KetukLogoutButton(
                 onClick = {
                     if (!isLoggingOut) {
                         showLogoutDialog = true
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                isLoggingOut = isLoggingOut,
+                text = "Keluar",
+                loadingText = "Keluar..."
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -1055,59 +997,76 @@ fun OmaPassiveScreen(
                         text = "Oma baik-baik saja?",
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary
+                        color = colors.textPrimary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 },
                 text = {
-                    Text(
-                        text = "Ketuk mendeteksi HP hening beberapa jam. Tekan tombol di bawah untuk mengabari Nanda dan keluarga bahwa Oma aman.",
-                        fontSize = 15.sp,
-                        color = colors.textSecondary,
-                        lineHeight = 22.sp
-                    )
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            showSapaDialog = false
-                            sapaStatusText = "Status: Oma mengonfirmasi 'Saya baik-baik saja'"
-                            scope.launch {
-                                snackbarHostState.currentSnackbarData?.dismiss()
-                                snackbarHostState.showSnackbar("Status Normal: Kabar baik dikirim ke Nanda (Wali)")
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = colors.accentGreen),
-                        shape = RoundedCornerShape(12.dp)
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Saya baik-baik saja",
-                            color = colors.onAccent,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
+                            text = "Ketuk mendeteksi HP hening beberapa jam. Tekan tombol di bawah untuk mengabari Nanda dan keluarga bahwa Oma aman.",
+                            fontSize = 15.sp,
+                            color = colors.textSecondary,
+                            lineHeight = 22.sp,
+                            textAlign = TextAlign.Center
                         )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        Button(
+                            onClick = {
+                                showSapaDialog = false
+                                sapaStatusText = "Status: Oma mengonfirmasi 'Saya baik-baik saja'"
+                                scope.launch {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar("Status Normal: Kabar baik dikirim ke Nanda (Wali)")
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = colors.accentGreen),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text(
+                                text = "Saya baik-baik saja",
+                                color = colors.onAccent,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Button(
+                            onClick = {
+                                showSapaDialog = false
+                                sapaStatusText = "Status: Memanggil bantuan darurat ke Wali & Penjaga"
+                                scope.launch {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar("Simulasi Mockup: Peringatan L2 dikirim ke Wali & Penjaga!")
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Terakota),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text(
+                                text = "Butuh bantuan",
+                                color = colors.onAccent,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
+                        }
                     }
                 },
-                dismissButton = {
-                    Button(
-                        onClick = {
-                            showSapaDialog = false
-                            sapaStatusText = "Status: Memanggil bantuan darurat ke Wali & Penjaga"
-                            scope.launch {
-                                snackbarHostState.currentSnackbarData?.dismiss()
-                                snackbarHostState.showSnackbar("Simulasi Mockup: Peringatan L2 dikirim ke Wali & Penjaga!")
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(containerColor = Terakota),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text(
-                            text = "Butuh bantuan",
-                            color = colors.onAccent,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
+                confirmButton = {}
             )
         }
 
@@ -1310,3 +1269,12 @@ private fun PreviewOmaPassiveDark() {
         OmaPassiveScreen(onLogout = {})
     }
 }
+
+@Preview(name = "Oma Passive - 360dp FontScale 1.3", widthDp = 360, fontScale = 1.3f, showBackground = true)
+@Composable
+private fun PreviewOmaPassiveAccessibility() {
+    KetukTheme(darkTheme = false) {
+        OmaPassiveScreen(onLogout = {})
+    }
+}
+

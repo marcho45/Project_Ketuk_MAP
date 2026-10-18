@@ -1,3 +1,33 @@
+## [2026-10-19 05:50] Tugas Khusus: Perapian Tampilan OmaPassiveScreen & Ekstraksi Komponen Bersama (KetukLogoutButton & KetukDarkModeCard)
+
+- **Tujuan:** Merapikan tampilan `OmaPassiveScreen` sesuai arahan tanpa mengubah logika bisnis (dialog sapa, signOut, navigasi) atau tampilan mode terang, dengan mengekstrak komponen bersama `KetukLogoutButton` dan `KetukDarkModeCard` ke `ui/components/` serta memastikan keterbacaan pada mode terang/gelap, lebar 360dp, dan fontScale 1.3.
+- **Referensi desain:** `ProfileScreen.kt`, `OmaScreens.kt`, dan `docs/SCREENS.md`.
+- **Ringkasan perubahan:**
+  - Membuat `KetukLogoutButton.kt`: tombol outline Terakota 52dp radius 12dp standar yang dipakai bersama oleh `ProfileScreen` dan `OmaPassiveScreen`.
+  - Membuat `KetukDarkModeCard.kt`: kartu pengaturan switch mode gelap standar dengan status "Aktif"/"Nonaktif" dan warna switch kontras tinggi berbasis `KetukTheme.colors` (aktif Terakota) yang dipakai bersama di `ProfileScreen` dan `OmaPassiveScreen`.
+  - Memperbarui `ProfileScreen.kt`: mengganti switch dan tombol keluar inline dengan `KetukDarkModeCard` dan `KetukLogoutButton` (tampilan visual 100% konsisten tanpa perubahan).
+  - Memperbarui `OmaScreens.kt` (`OmaPassiveScreen`):
+    1. Mengganti tombol keluar menjadi `KetukLogoutButton` dengan label seragam `"Keluar"` (dialog konfirmasi tetap utuh).
+    2. Mengubah teks tombol simulasi sapaan menjadi satu baris `"Munculkan Sapaan"` pada `KetukButton` standar agar tidak terpotong atau janggal dalam pil, termasuk saat fontScale 1.3.
+    3. Mempersingkat judul kartu simulasi menjadi satu baris `"Simulasi Sapaan L1"`, dan memindahkan keterangan "HP hening" ke teks deskripsi di bawahnya.
+    4. Mengganti switch mode gelap menjadi `KetukDarkModeCard`.
+    5. Menambahkan `@Preview` `PreviewOmaPassiveAccessibility` (width 360dp, fontScale 1.3f).
+- **File dibuat:**
+  1. `app/src/main/java/com/chat/ketukprojectmap/ui/components/KetukLogoutButton.kt`
+  2. `app/src/main/java/com/chat/ketukprojectmap/ui/components/KetukDarkModeCard.kt`
+- **File diubah:**
+  1. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/profile/ProfileScreen.kt`
+  2. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/oma/OmaScreens.kt`
+  3. `docs/SCREENS.md`
+  4. `docs/CHANGELOG_HISTORY.md`
+- **File dihapus:** Tidak ada
+- **Error/masalah:** Tidak ada
+- **Solusi yang berhasil:** Ekstraksi komponen bersama berhasil merapikan UI dan menyeragamkan kedua layar dengan tepat 4 file kode.
+- **Status build:** `./gradlew assembleDemoDebug assembleFullDebug` **BUILD SUCCESSFUL**
+- **Belum selesai:** Tahap 4 (Alur Penjaga M10 + Riwayat Lokasi 7 Hari), Tahap 5 (`README.txt` & Finalisasi UTS).
+
+---
+
 ## [2026-10-19 05:31] Tugas Khusus: Perbaikan Kecil Hasil Audit MVVM & Coroutine (OmaPassiveScreen SignOut, CancellationException, rememberSaveable & Warna Semantik OmaScreens)
 
 - **Tujuan:** Menerapkan perbaikan terarah dari hasil audit arsitektur MVVM & coroutine pada maksimal 5 file kode tanpa mengubah tampilan mode terang atau menyentuh `LoginViewModel`, `SupabaseAuthRepository`, `FakeAuthRepository`, maupun `build.gradle.kts`.
