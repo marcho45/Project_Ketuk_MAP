@@ -1,6 +1,6 @@
 # Spesifikasi Layar & Pemetaan Rubrik UTS (dari Figma)
 
-**Terakhir diperbarui:** 2026-10-19 (Tugas Khusus: Tombol Tema Manual via `SharedPreferences` & Pembersihan Dark Mode Semantik di Seluruh Layar)
+**Terakhir diperbarui:** 2026-10-19 (Tahap 3: Alur Setup & Core Oma/Opa M4-M5, Dialog Sapa L1, Switch Mode Gelap & Panah Demo)
 
 Gambar acuan utama ada di `docs/figma/` dan alur navigasi mengacu pada `docs/figma/flowchart.png`.
 Jika teks spesifikasi berbeda dengan gambar Figma, **ikuti gambar Figma** dan catat di bagian "Perbedaan dengan Figma".
@@ -41,10 +41,10 @@ Jika teks spesifikasi berbeda dengan gambar Figma, **ikuti gambar Figma** dan ca
 | M9 | Lokasi Oma Diyas (Wali) | Wali | `04. Core Phase Wali.png` | `LokasiScreen.kt` (Tab 2) | `home` (Tab 2) | **Native Mockup** | ✅ Sesuai Figma (Umur `67`, `penjaga_lintang`, Snackbar aksi, Light & Dark Mode) |
 | - | Notifikasi | Wali/Penjaga | *(Ikon lonceng M6/M10)* | `NotifikasiScreen.kt` | `notifikasi` | Free Choice | ✅ Selesai (`LazyColumn` 5 item `NotificationItem` + klik ke M8, Light & Dark Mode) |
 | - | Tab Profil Wali | Wali | `04. Core Phase Wali.png` | `ProfileScreen.kt` (Tab 3) | `home` (Tab 3) | Free Choice | ✅ Selesai (Kartu akun Wali, kartu lansia, Switch `"Mode gelap"`, & tombol Keluar) |
-| M4 | Pindai QR | Oma/Opa | `03. Initial Phase oma.png` | *(Tahap 3)* | *(Tahap 3)* | **Native Mockup** | ❌ Belum (Tahap 3) |
-| M4 | Loading Pairing (Oma) | Oma/Opa | `03. Initial Phase oma.png` | *(Tahap 3)* | *(Tahap 3)* | **Native Mockup** | ❌ Belum (Tahap 3) |
-| M4 | Persetujuan & Izin | Oma/Opa | `03. Initial Phase oma.png` | *(Tahap 3)* | *(Tahap 3)* | **Native Mockup** | ❌ Belum (Tahap 3) |
-| M5 | Mode Pasif Oma/Opa | Oma/Opa | `flowchart.png` *(tanpa frame khusus)* | *(Tahap 3)* | *(Tahap 3)* | Free Choice | ❌ Belum (Tahap 3) |
+| M4 | Pindai QR | Oma/Opa | `03. Initial Phase oma.png` | `OmaScreens.kt` (`ScanQrScreen`) | `scan_qr` | **Native Mockup** | ✅ Sesuai Figma (Mockup kamera + reticle + laser animasi + Flash, Light & Dark Mode) |
+| M4 | Loading Pairing (Oma) | Oma/Opa | `03. Initial Phase oma.png` | `OmaScreens.kt` (`LoadingPairingOmaScreen`) | `loading_pairing_oma` | **Native Mockup** | ✅ Sesuai Figma (`qr_pairing_blur` + `ic_spinner` 2 detik) |
+| M4 | Persetujuan & Izin | Oma/Opa | `03. Initial Phase oma.png` | `OmaScreens.kt` (`OmaPermissionsScreen`) | `oma_permissions` | **Native Mockup** | ✅ Sesuai Figma (2 kartu: Yang dipantau & Izin yang diperlukan + komitmen privasi, Light & Dark Mode) |
+| M5 | Mode Pasif Oma/Opa | Oma/Opa | `flowchart.png` *(tanpa frame khusus)* | `OmaScreens.kt` (`OmaPassiveScreen`) | `oma_passive` | Free Choice | ✅ Sesuai Flowchart (Hero Oma, dialog Sapa L1 interaktif, Switch mode gelap, panah demo, & tombol Keluar) |
 | M10 | Beranda Penjaga | Penjaga | `05. Core Phase Penjaga.png` | *(Tahap 4)* | *(Tahap 4)* | Free Choice | ❌ Belum (Tahap 4) |
 | M10 | Lokasi Oma Diyas (Penjaga) | Penjaga | `05. Core Phase Penjaga.png` | *(Tahap 4)* | *(Tahap 4)* | **Native Mockup** | ❌ Belum (Tahap 4) |
 | - | Riwayat Lokasi (7 Hari) | Penjaga | *(Dari kartu Riwayat Lokasi M10)* | *(Tahap 4)* | *(Tahap 4)* | Free Choice | ❌ Belum (Tahap 4) |

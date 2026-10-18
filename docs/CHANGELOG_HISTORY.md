@@ -1,3 +1,65 @@
+## [2026-10-19 05:31] Tugas Khusus: Perbaikan Kecil Hasil Audit MVVM & Coroutine (OmaPassiveScreen SignOut, CancellationException, rememberSaveable & Warna Semantik OmaScreens)
+
+- **Tujuan:** Menerapkan perbaikan terarah dari hasil audit arsitektur MVVM & coroutine pada maksimal 5 file kode tanpa mengubah tampilan mode terang atau menyentuh `LoginViewModel`, `SupabaseAuthRepository`, `FakeAuthRepository`, maupun `build.gradle.kts`.
+- **Referensi desain:** Audit Arsitektur MVVM & Coroutine (`OmaScreens.kt`, `ProfileViewModel.kt`, `Theme.kt`).
+- **Ringkasan perubahan:**
+  - `ProfileViewModel.kt`: Menambahkan `catch (e: CancellationException) { throw e }` sebelum `catch (_: Exception)` di dalam `logout()` agar kooperatif terhadap pembatalan coroutine.
+  - `Theme.kt`: Menambahkan dua properti warna semantik baru di `KetukExtendedColors` (`LightExtendedColors` & `DarkExtendedColors`): `scannerViewport` (`DarkSurface`) dan `overlayScrim` (`Color.Black.copy(alpha = 0.45f)`).
+  - `OmaScreens.kt`:
+    1. Mengubah `OmaPassiveScreen` agar menggunakan `ProfileViewModel.logout()` (`authRepository.signOut()`) sebelum memanggil `onLogout()` (navigasi `popUpTo(0)` ke Login), dilengkapi indikator loading `isLoggingOut` dan penonaktifan tombol selama proses keluar agar tidak ditekan dua kali.
+    2. Mengganti `remember` menjadi `rememberSaveable` untuk `isPrivacyChecked`, `isSimulatingLoading`, `isFlashOn`, `showSapaDialog`, `showLogoutDialog`, dan `sapaStatusText`.
+    3. Mengganti seluruh sisa warna langsung (`Color.White`, `Color.Black`, `Color(0xFF231D19)`, `CardPutih`, `HijauDaun`, `KuningMadu`) di `OmaScreens.kt` dengan warna semantik dari `KetukTheme.colors` (`scannerViewport`, `overlayScrim`, `qrSurface`, `onAccent`, `accentGreen`, `accentAmber`).
+- **File dibuat:** Tidak ada
+- **File diubah:**
+  1. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/profile/ProfileViewModel.kt`
+  2. `app/src/main/java/com/chat/ketukprojectmap/ui/theme/Theme.kt`
+  3. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/oma/OmaScreens.kt`
+  4. `docs/CHANGELOG_HISTORY.md`
+- **File dihapus:** Tidak ada
+- **Error/masalah:** Tidak ada
+- **Solusi yang berhasil:** Pemanfaatan `ProfileViewModel` di `OmaPassiveScreen` menjaga jumlah file yang diubah seminimal mungkin (3 file kode).
+- **Status build:** `./gradlew assembleDemoDebug assembleFullDebug` **BUILD SUCCESSFUL**
+- **Belum selesai:** Tahap 4 (Alur Penjaga M10 + Riwayat Lokasi 7 Hari), Tahap 5 (`README.txt` & Finalisasi UTS).
+
+---
+
+## [2026-10-19 05:12] Tahap 3: Alur Oma/Opa (Pindai QR M4, Loading Pairing, Persetujuan & Izin, dan Mode Pasif M5 dengan Dialog Sapa L1)
+
+- **Tujuan:** Mengimplementasikan seluruh alur Oma/Opa sesuai `03. Initial Phase oma.png` dan `flowchart.png`, mencakup Pindai QR kamera mockup dengan laser animasi, Loading Pairing 2 detik, Persetujuan & Izin (Yang dipantau & 4 izin sistem + komitmen privasi), serta Mode Pasif ramah lansia dengan dialog interaktif Sapa L1 "Oma baik-baik saja?", tombol panah kembali khusus demo, switch mode gelap, dan tombol keluar.
+- **Referensi desain:** `docs/figma/03. Initial Phase oma.png`, `docs/figma/flowchart.png`, dan `docs/SCREENS.md`.
+- **Ringkasan perubahan:**
+  - Membuat `OmaScreens.kt` berisi 4 composable utama:
+    1. `ScanQrScreen` (M4): Header judul & subjudul, mockup kamera statis berlatar gelap hangat, reticle sudut putih (`ScanCornerReticle`), kartu QR `qr_pairing`, garis laser animasi naik-turun, kontrol flash mockup, kartu petunjuk dengan ikon bohlam, tombol "Simulasikan Pindai", dan transisi halus ke loading pairing.
+    2. `LoadingPairingOmaScreen` / `LoadingPairingOmaContent` (M4): Latar blur `qr_pairing_blur`, spinner berputar `ic_spinner`, teks "Loading Pairing..." dan "Menghubungkan ke HP Wali Nanda...", delay otomatis 2000 ms menuju Persetujuan & Izin.
+    3. `OmaPermissionsScreen` (M4): Header judul & subjudul, Kartu 1 "Yang dipantau" (Gerakan & Aktivitas HP, Status HP, Lokasi darurat), Kartu 2 "Izin yang diperlukan" (Kamera, Notifikasi, Sensor Gerak, Lokasi), catatan komitmen privasi dengan checkbox, dan tombol utama "Saya Setuju" dengan feedback Snackbar mockup.
+    4. `OmaPassiveScreen` (M5): Layar ramah lansia berhuruf besar dan kontras tinggi; header dengan tombol panah kembali khusus `BuildConfig.DEMO_MODE == true` ke `Routes.role` + `BackHandler` (// TODO(tim)); Hero Card Oma Diyas (`oma_avatar`, 67 Tahun, badge perlindungan aktif "Aman", statistik langkah/baterai/status); kartu simulasi sapaan L1 dengan dialog interaktif "Oma baik-baik saja?" (pilihan "Saya baik-baik saja" & "Butuh bantuan" eskalasi L2); kartu kontak & sensor dengan feedback Snackbar; kartu Switch "Mode gelap" terhubung ke `LocalDarkThemeToggle` (// TODO(tim)); serta tombol "Keluar dari Akun Oma" dengan konfirmasi dialog yang membersihkan back stack.
+  - Memperbarui `Routes.kt`: menambahkan route `scanQr`, `loadingPairingOma`, `omaPermissions`, `omaPassive`, serta memperbarui pemetaan peran `homeRouteForRole("oma_opa") = omaPassive` dan `setupRouteForRole("oma_opa") = scanQr`.
+  - Memperbarui `KetukNavHost.kt`: mendaftarkan 4 composable rute Oma/Opa dan menghubungkan alur setup & logout.
+  - Memperbarui `HomeSampleData.kt`: mengoreksi teks sapaan `userName` menjadi `"Nandaa"` (dua huruf 'a') persis sesuai gambar `04. Core Phase Wali.png`.
+  - Memperbarui `.clinerules`: menambahkan bagian H Pengecualian yang disetujui pengguna di 2A, serta mengoreksi minSdk 26, SUPABASE_ANON_KEY, password 8 karakter, dan rentang umur 40–120 tahun.
+- **File dibuat:**
+  1. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/oma/OmaScreens.kt`
+- **File diubah:**
+  1. `.clinerules` — Tambah Bagian H Pengecualian, koreksi minSdk 26, SUPABASE_ANON_KEY, password 8 karakter.
+  2. `app/src/main/java/com/chat/ketukprojectmap/data/model/HomeSampleData.kt` — Koreksi userName menjadi "Nandaa".
+  3. `app/src/main/java/com/chat/ketukprojectmap/navigation/Routes.kt` — Tambah rute Oma/Opa dan perbarui helper route peran.
+  4. `app/src/main/java/com/chat/ketukprojectmap/navigation/KetukNavHost.kt` — Daftarkan navigasi rute Oma/Opa.
+  5. `docs/SCREENS.md`, `docs/CHANGELOG_HISTORY.md` — Dokumentasi Tahap 3.
+- **File dihapus:** Tidak ada
+- **Error/masalah:** Tidak ada
+- **Solusi yang berhasil:**
+  - Pembuatan alur Oma/Opa 100% menggunakan `KetukTheme.colors` dan `SnackbarHost` untuk semua interaksi native mockup.
+- **Yang GAGAL/jangan diulang:**
+  - Tidak ada.
+- **Perbedaan figma vs SCREENS.md:**
+  - Tombol panah kembali di `OmaPassiveScreen` khusus mode `demo` dan baris Switch "Mode gelap" ditandai `// TODO(tim): tidak ada di Figma`.
+- **Asumsi dan TODO:**
+  - Siap lanjut ke Tahap 4 (Alur Penjaga M10 + Riwayat Lokasi 7 Hari).
+- **Status build:** `./gradlew assembleDemoDebug assembleFullDebug` **BUILD SUCCESSFUL**
+- **Belum selesai:** Tahap 4 (Alur Penjaga M10 + Riwayat Lokasi 7 Hari), Tahap 5 (`README.txt` & Finalisasi UTS).
+
+---
+
 ## [2026-10-19 04:08] Tugas Khusus: Tombol Tema Manual (SharedPreferences) & Pembersihan Dark Mode Semantik di Seluruh Layar
 
 - **Tujuan:** Mengganti tema otomatis sistem HP (`isSystemInDarkTheme()`) menjadi tombol manual (`Switch` `"Mode gelap"`) yang disimpan di `SharedPreferences` (`"dark_theme"`, default `false` = terang), serta merapikan tampilan Dark Mode di seluruh 16 layar dan komponen bersama tanpa mengubah tampilan mode terang sedikit pun.

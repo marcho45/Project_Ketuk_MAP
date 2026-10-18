@@ -22,6 +22,10 @@ import com.chat.ketukprojectmap.ui.screens.walisetup.CircleKeluargaScreen
 import com.chat.ketukprojectmap.ui.screens.walisetup.DetailOmaOpaScreen
 import com.chat.ketukprojectmap.ui.screens.walisetup.PilihPenjagaScreen
 import com.chat.ketukprojectmap.ui.screens.walisetup.QrWaliScreen
+import com.chat.ketukprojectmap.ui.screens.oma.LoadingPairingOmaScreen
+import com.chat.ketukprojectmap.ui.screens.oma.OmaPermissionsScreen
+import com.chat.ketukprojectmap.ui.screens.oma.OmaPassiveScreen
+import com.chat.ketukprojectmap.ui.screens.oma.ScanQrScreen
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -265,6 +269,63 @@ fun KetukNavHost() {
                 itemId = itemId,
                 onNavigateBack = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        // ===== Setup & Core Oma/Opa (03. Initial Phase oma & Flowchart M4-M5) =====
+        composable(Routes.scanQr) {
+            ScanQrScreen(
+                onNavigateBack = {
+                    navController.navigate(Routes.role) {
+                        popUpTo(Routes.scanQr) { inclusive = true }
+                    }
+                },
+                onScanSuccess = {
+                    navController.navigate(Routes.omaPermissions) {
+                        popUpTo(Routes.scanQr) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.loadingPairingOma) {
+            LoadingPairingOmaScreen(
+                onPairingComplete = {
+                    navController.navigate(Routes.omaPermissions) {
+                        popUpTo(Routes.loadingPairingOma) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.omaPermissions) {
+            OmaPermissionsScreen(
+                onNavigateBack = {
+                    navController.navigate(Routes.scanQr) {
+                        popUpTo(Routes.omaPermissions) { inclusive = true }
+                    }
+                },
+                onAgree = {
+                    navController.navigate(Routes.omaPassive) {
+                        popUpTo(Routes.role) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.omaPassive) {
+            OmaPassiveScreen(
+                // TODO(tim): tombol khusus demo, tidak ada di Figma
+                onNavigateBackToRole = {
+                    navController.navigate(Routes.role) {
+                        popUpTo(Routes.omaPassive) { inclusive = true }
+                    }
+                },
+                onLogout = {
+                    navController.navigate(Routes.login) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }

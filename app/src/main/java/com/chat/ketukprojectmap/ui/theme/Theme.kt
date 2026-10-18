@@ -42,7 +42,9 @@ data class KetukExtendedColors(
     val linkColor: Color,
     val qrSurface: Color,
     val qrCardWali: Color,
-    val onAccent: Color
+    val onAccent: Color,
+    val scannerViewport: Color,
+    val overlayScrim: Color
 )
 
 private val LightExtendedColors = KetukExtendedColors(
@@ -77,7 +79,9 @@ private val LightExtendedColors = KetukExtendedColors(
     linkColor = LinkBiru,
     qrSurface = CardPutih,
     qrCardWali = CardWali,
-    onAccent = Color.White
+    onAccent = Color.White,
+    scannerViewport = DarkSurface,
+    overlayScrim = Color.Black.copy(alpha = 0.45f)
 )
 
 private val DarkExtendedColors = KetukExtendedColors(
@@ -112,7 +116,9 @@ private val DarkExtendedColors = KetukExtendedColors(
     linkColor = DarkLinkBiru,
     qrSurface = CardPutih,
     qrCardWali = CardPutih,
-    onAccent = Color.White
+    onAccent = Color.White,
+    scannerViewport = DarkSurface,
+    overlayScrim = Color.Black.copy(alpha = 0.45f)
 )
 
 val LocalKetukColors = staticCompositionLocalOf { LightExtendedColors }

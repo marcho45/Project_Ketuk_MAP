@@ -50,7 +50,7 @@ enum class ActivityIconType {
 
 object HomeSampleData {
     val homeData = HomeData(
-        userName = "Nanda",
+        userName = "Nandaa",
         elderName = "Oma Diyas",
         elderStatus = "Sehat",
         elderActivity = "Aktivitas normal",

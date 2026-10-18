@@ -1,5 +1,5 @@
 # ATURAN KERJA PROYEK KETUK
-# Android | Kotlin | Jetpack Compose | minSdk 23
+# Android | Kotlin | Jetpack Compose | minSdk 26
 # Berlaku untuk SEMUA tugas. Aturan ini lebih tinggi dari prompt tugas, kecuali aku
 # secara eksplisit menulis "abaikan aturan X" di tugas.
 # Versi: diperbarui untuk MODE UTS (Build Variant `demo` vs `full`).
@@ -13,7 +13,7 @@
 - Alur: Loading/Splash -> Onboarding (4 halaman) -> Login/Register -> Pilih Peran -> Setup/Home sesuai peran.
 - Fase kerja SAAT INI: membangun Build Variant `demo` untuk UTS (mencakup seluruh UI/UX tiga peran dengan dummy data dari Initial Phase 01, 02, 03 dan Core Phase 04 Wali, 05 Penjaga) sekaligus menjaga kode Initial Phase Supabase yang sudah jadi di Build Variant `full` (untuk UAS).
 - PENTING: Kode autentikasi Supabase, Google OAuth, dan verifikasi OTP yang sudah selesai di Initial Phase DILARANG KERAS dihapus atau dirusak. Kode tersebut wajib dibungkus ke dalam `SupabaseAuthRepository` dan dijalankan saat memakai variant `full`.
-- Stack: Kotlin, Jetpack Compose, Material 3 dengan custom theme proyek, minSdk 23.
+- Stack: Kotlin, Jetpack Compose, Material 3 dengan custom theme proyek, minSdk 26.
 - Folder docs/ sejajar dengan app/. Isinya: figma/, ASSETS.md, SCREENS.md, CLINE_PROMPTS.md, PROJECT_SUMMARY.md, CHANGELOG_HISTORY.md.
 - File figma di docs/figma/:
   1. 01. Initial Phase (2).png
@@ -91,13 +91,13 @@ B. Product Flavors (`demo` vs `full`) & Flag Demo:
      2. `full`:
         - `dimension = "mode"`
         - `buildConfigField("boolean", "DEMO_MODE", "false")`
-   - `SUPABASE_URL` dan `SUPABASE_KEY` dibaca dari `local.properties` dengan fallback string kosong `""`. Build TIDAK boleh gagal bila `local.properties` atau key tidak ada.
+   - `SUPABASE_URL` dan `SUPABASE_ANON_KEY` dibaca dari `local.properties` dengan fallback string kosong `""`. Build TIDAK boleh gagal bila `local.properties` atau key tidak ada.
    - Saat `BuildConfig.DEMO_MODE == true` (variant `demo`): client Supabase tidak pernah diinisialisasi, dan tidak ada panggilan jaringan di `Application.onCreate` maupun `init` ViewModel. Aplikasi `demo` harus berjalan 100% normal dalam mode pesawat (tanpa internet).
 
 C. Autentikasi Demo vs Full:
    - Buat interface `AuthRepository` (`login`, `register`, `verifySignupCode`, `resendSignupCode`, `hasSession`, `getRole`, `updateRole`, `signOut`, `signInWithGoogle`), `FakeAuthRepository` (delay 800 ms lalu sukses secara in-memory), dan `SupabaseAuthRepository` (membungkus kode Supabase Auth, Google OAuth, dan OTP yang sudah ada tanpa menghapusnya).
    - Pemilihan implementasi dilakukan di SATU tempat terpusat berdasarkan `BuildConfig.DEMO_MODE`.
-   - Validasi form (format email, nomor HP angka, password minimal 6 karakter, jumlah digit OTP) TETAP berjalan di ViewModel baik pada mode `demo` maupun `full`.
+   - Validasi form (format email, nomor HP angka, password minimal 8 karakter, jumlah digit OTP) TETAP berjalan di ViewModel baik pada mode `demo` maupun `full`.
    - `DemoAccounts` (khusus mode `demo`):
      1. `wali@ketuk.app` (sandi: `Ketuk123`, nama: `Nanda Valeri`, role: `WALI`)
      2. `oma@ketuk.app` (sandi: `Ketuk123`, nama: `Sri Diyas Anjarwati`, role: `OMA_OPA`)
@@ -156,6 +156,12 @@ G. State Management & Form Validation (Wajib untuk Nilai Sempurna Rubrik UTS):
      2. Menolak input tidak valid pada field angka (contoh: umur hanya menerima digit angka dan memvalidasi rentang wajar 40–120 tahun; field wajib tidak boleh kosong).
      3. Menampilkan feedback error langsung pada komponen (`isError = true` dan `supportingText` yang jelas) serta menonaktifkan/memblokir tombol submit sampai semua input valid.
 
+H. Pengecualian yang sudah disetujui pengguna:
+   - `SharedPreferences("ketuk_prefs")` boleh dipakai HANYA untuk pilihan tema (kunci `"dark_theme"`). Dilarang untuk data lain.
+   - Tombol panah kembali khusus `BuildConfig.DEMO_MODE` di layar Home setiap peran (kembali ke `Routes.role`, `popUpTo` inklusif, plus `BackHandler`), tandai `// TODO(tim)`.
+   - Baris "Mode gelap" (`Switch`) di layar profil setiap peran.
+   - Semua warna baru WAJIB lewat `KetukTheme.colors`. Dilarang `Color(0x...)`, `Color.White`, atau warna tetap langsung di layar.
+
 ======================================================================
 3. FILE DAN FOLDER YANG DILINDUNGI
 ======================================================================
@@ -166,7 +172,7 @@ Dilarang diubah, dipindah, di-rename, atau dihapus tanpa izin eksplisit dariku:
 - folder `gradle/` (termasuk `libs.versions.toml` dan wrapper)
 - Versi plugin Gradle, `compileSdk`, `targetSdk`, `minSdk`, versi Kotlin, versi Compose.
 - Dependency: butuh library baru? Tanya dulu. Sebutkan nama, versi, alasan, dan alternatif tanpa library.
-- PENGECUALIAN TERBATAS (wajib tercantum di rencana Tahap 1): di `app/build.gradle.kts` diizinkan menambahkan `buildFeatures { buildConfig = true }`, konfigurasi `flavorDimensions += "mode"` beserta 2 `productFlavors` (`demo` dan `full`) dengan `buildConfigField("boolean", "DEMO_MODE", ...)`, serta pembacaan `SUPABASE_URL`/`SUPABASE_KEY` dari `local.properties` dengan fallback string kosong `""`. Dilarang mengubah `compileSdk`/`minSdk`/`targetSdk`/versi plugin.
+- PENGECUALIAN TERBATAS (wajib tercantum di rencana Tahap 1): di `app/build.gradle.kts` diizinkan menambahkan `buildFeatures { buildConfig = true }`, konfigurasi `flavorDimensions += "mode"` beserta 2 `productFlavors` (`demo` dan `full`) dengan `buildConfigField("boolean", "DEMO_MODE", ...)`, serta pembacaan `SUPABASE_URL`/`SUPABASE_ANON_KEY` dari `local.properties` dengan fallback string kosong `""`. Dilarang mengubah `compileSdk`/`minSdk`/`targetSdk`/versi plugin.
 - Jika build gagal karena versi SDK/AGP/Gradle: JANGAN memperbaikinya sendiri. Tempel output error ASLI apa adanya dan tunggu keputusanku.
 
 [Manifest dan icon launcher]
@@ -215,11 +221,11 @@ Teks & Animasi:
 - Gunakan API animasi Compose standar (`animate*AsState`, `AnimatedVisibility`, `Crossfade`, dll.) tanpa library tambahan.
 - `LaunchedEffect` harus memiliki key yang tepat agar auto-navigasi (seperti di Splash dan Loading Pairing) tidak terpicu berulang saat rotasi layar.
 
-Kualitas & Kompatibilitas minSdk 23:
+Kualitas & Kompatibilitas minSdk 26:
 - Tambahkan `@Preview` untuk setiap layar baru atau yang diubah.
 - Beri `contentDescription` pada gambar bermakna (`null` untuk dekoratif). Area sentuh minimal `48.dp`.
 - Dilarang memakai `!!` tanpa alasan, `GlobalScope`, `try/catch` kosong, atau `@Suppress` untuk menutupi error.
-- Jangan memakai API di atas level 23 tanpa pengecekan `Build.VERSION.SDK_INT`. Jangan memakai `Modifier.blur` (hanya Android 12+); gunakan drawable `qr_pairing_blur` yang sudah tersedia.
+- Jangan memakai API di atas level 26 tanpa pengecekan `Build.VERSION.SDK_INT`. Jangan memakai `Modifier.blur` (hanya Android 12+); gunakan drawable `qr_pairing_blur` yang sudah tersedia.
 
 ======================================================================
 6. DESIGN SYSTEM DAN KONSISTENSI VISUAL

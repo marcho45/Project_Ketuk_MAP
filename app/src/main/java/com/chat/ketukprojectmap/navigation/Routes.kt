@@ -22,6 +22,12 @@ object Routes {
     const val detailAlertPattern = "detail_alert/{itemId}"
     fun detailAlert(itemId: String) = "detail_alert/${Uri.encode(itemId)}"
 
+    // Route Oma/Opa (03. Initial Phase oma & Flowchart M4-M5)
+    const val scanQr = "scan_qr"
+    const val loadingPairingOma = "loading_pairing_oma"
+    const val omaPermissions = "oma_permissions"
+    const val omaPassive = "oma_passive"
+
     // Pola untuk NavHost; email bersifat opsional
     const val verificationPattern = "verification?email={email}"
 
@@ -32,12 +38,14 @@ object Routes {
     // Helper terpusat untuk menentukan route beranda berdasarkan peran
     fun homeRouteForRole(role: String?): String = when (role) {
         "wali" -> home
+        "oma_opa" -> omaPassive
         else -> home
     }
 
     // Helper terpusat untuk menentukan route setelah memilih peran di RoleSelectScreen
     fun setupRouteForRole(role: String?): String = when (role) {
         "wali" -> detailOmaOpa
+        "oma_opa" -> scanQr
         else -> homeRouteForRole(role)
     }
 }
