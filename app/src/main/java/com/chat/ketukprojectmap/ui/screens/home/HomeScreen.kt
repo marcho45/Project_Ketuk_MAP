@@ -1,5 +1,7 @@
 package com.chat.ketukprojectmap.ui.screens.home
 
+import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -17,15 +19,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -37,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.chat.ketukprojectmap.BuildConfig
 import com.chat.ketukprojectmap.R
 import com.chat.ketukprojectmap.data.model.*
 import com.chat.ketukprojectmap.ui.screens.riwayat.RiwayatScreen
@@ -44,17 +48,28 @@ import com.chat.ketukprojectmap.ui.screens.lokasi.LokasiScreen
 import com.chat.ketukprojectmap.ui.screens.profile.ProfileScreen
 import com.chat.ketukprojectmap.ui.theme.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = viewModel(),
     onOpenNotifications: () -> Unit = {},
+    onOpenDetailAlert: (String) -> Unit = {},
+    onNavigateBackToRole: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
     val homeData by viewModel.homeData.collectAsState()
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     var contentVisible by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val colors = KetukTheme.colors
+
+    // TODO(tim): tombol khusus demo, tidak ada di Figma
+    BackHandler(enabled = BuildConfig.DEMO_MODE && selectedTab == 0) {
+        onNavigateBackToRole()
+    }
 
     LaunchedEffect(Unit) {
         delay(100.milliseconds)
@@ -64,19 +79,35 @@ fun HomeScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(KremBackground)
+            .background(colors.screenBackground)
     ) {
         when (selectedTab) {
             0 -> HomeContent(
                 homeData = homeData,
                 contentVisible = contentVisible,
                 onOpenNotifications = onOpenNotifications,
+                onOpenDetailAlert = onOpenDetailAlert,
+                onNavigateBackToRole = onNavigateBackToRole,
+                onQuickActionClick = { action ->
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Simulasi Mockup: Aksi cepat ${action.title}")
+                    }
+                },
                 onSwitchToTab = { tab -> selectedTab = tab }
             )
-            1 -> RiwayatScreen()
+            1 -> RiwayatScreen(
+                onItemClick = onOpenDetailAlert
+            )
             2 -> LokasiScreen()
             3 -> ProfileScreen(onLogout = onLogout)
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 80.dp)
+        )
 
         BoxWithConstraints(
             modifier = Modifier
@@ -96,6 +127,9 @@ fun HomeContent(
     homeData: HomeData,
     contentVisible: Boolean,
     onOpenNotifications: () -> Unit,
+    onOpenDetailAlert: (String) -> Unit = {},
+    onNavigateBackToRole: () -> Unit = {},
+    onQuickActionClick: (QuickAction) -> Unit = {},
     onSwitchToTab: (Int) -> Unit
 ) {
     // Ruang bawah = tinggi bottom bar (64dp) + inset navigation bar + jarak 24dp
@@ -114,7 +148,8 @@ fun HomeContent(
         FadeSlideIn(visible = contentVisible, delayMillis = 0) {
             HeaderSection(
                 userName = homeData.userName,
-                onOpenNotifications = onOpenNotifications
+                onOpenNotifications = onOpenNotifications,
+                onNavigateBackToRole = onNavigateBackToRole
             )
         }
 
@@ -159,13 +194,19 @@ fun HomeContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         FadeSlideIn(visible = contentVisible, delayMillis = 240) {
-            StatusSection(statusItems = homeData.statusItems)
+            StatusSection(
+                statusItems = homeData.statusItems,
+                onViewDetail = { onOpenDetailAlert("act_2") }
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         FadeSlideIn(visible = contentVisible, delayMillis = 320) {
-            QuickActionsSection(quickActions = homeData.quickActions)
+            QuickActionsSection(
+                quickActions = homeData.quickActions,
+                onQuickActionClick = onQuickActionClick
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -173,6 +214,7 @@ fun HomeContent(
         FadeSlideIn(visible = contentVisible, delayMillis = 400) {
             RecentActivitiesSection(
                 recentActivities = homeData.recentActivities,
+                onActivityClick = onOpenDetailAlert,
                 onViewAll = { onSwitchToTab(1) }
             )
         }
@@ -221,20 +263,45 @@ fun FadeSlideIn(
 @Composable
 fun HeaderSection(
     userName: String,
-    onOpenNotifications: () -> Unit
+    onOpenNotifications: () -> Unit,
+    onNavigateBackToRole: () -> Unit = {}
 ) {
+    val colors = KetukTheme.colors
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "Halo, $userName",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            // TODO(tim): tombol khusus demo, tidak ada di Figma
+            if (BuildConfig.DEMO_MODE) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = onNavigateBackToRole,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = Terakota
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Halo, $userName",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            } else {
+                Text(
+                    text = "Halo, $userName",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Oma kamu hari ini bagaimana?",
@@ -250,7 +317,7 @@ fun HeaderSection(
                 onClick = onOpenNotifications,
                 modifier = Modifier.size(48.dp),
                 shape = RoundedCornerShape(12.dp),
-                color = CardHome
+                color = colors.cardHighlight
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Image(
@@ -277,11 +344,12 @@ fun ElderCard(
     elderActivity: String,
     elderStatus: String
 ) {
+    val colors = KetukTheme.colors
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = CardPutih),
-        border = BorderStroke(1.dp, ActivePill),
+        colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
+        border = BorderStroke(1.dp, colors.cardBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -320,14 +388,14 @@ fun ElderCard(
 
             Surface(
                 shape = RoundedCornerShape(50),
-                color = ChipSehat
+                color = colors.chipSehat
             ) {
                 Text(
                     text = elderStatus,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium,
-                    color = HijauDaun
+                    color = colors.accentGreen
                 )
             }
         }
@@ -335,7 +403,11 @@ fun ElderCard(
 }
 
 @Composable
-fun StatusSection(statusItems: List<StatusItem>) {
+fun StatusSection(
+    statusItems: List<StatusItem>,
+    onViewDetail: () -> Unit = {}
+) {
+    val colors = KetukTheme.colors
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -351,10 +423,10 @@ fun StatusSection(statusItems: List<StatusItem>) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.clickable(
-                    onClick = { /* TODO: Navigate to detail */ },
+                    onClick = onViewDetail,
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
-                    )
+                )
             ) {
                 Text(
                     text = "Lihat detail",
@@ -375,8 +447,8 @@ fun StatusSection(statusItems: List<StatusItem>) {
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = CardPutih),
-            border = BorderStroke(1.dp, ActivePill),
+            colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
+            border = BorderStroke(1.dp, colors.cardBorder),
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -386,7 +458,7 @@ fun StatusSection(statusItems: List<StatusItem>) {
                         HorizontalDivider(
                             modifier = Modifier.padding(vertical = 12.dp),
                             thickness = 1.dp,
-                            color = ActivePill
+                            color = colors.cardBorder
                         )
                     }
                 }
@@ -397,6 +469,7 @@ fun StatusSection(statusItems: List<StatusItem>) {
 
 @Composable
 fun StatusItemRow(item: StatusItem) {
+    val colors = KetukTheme.colors
     val icon = when (item.type) {
         StatusType.AKTIVITAS -> Icons.Rounded.MonitorHeart
         StatusType.HP -> Icons.Rounded.PhoneAndroid
@@ -404,8 +477,8 @@ fun StatusItemRow(item: StatusItem) {
     }
 
     val statusColor = when (item.statusColor) {
-        "HijauDaun" -> HijauDaun
-        "KuningMadu" -> KuningMadu
+        "HijauDaun" -> colors.accentGreen
+        "KuningMadu" -> colors.accentAmber
         else -> MaterialTheme.colorScheme.onSurface
     }
 
@@ -416,8 +489,8 @@ fun StatusItemRow(item: StatusItem) {
         Surface(
             modifier = Modifier.size(36.dp),
             shape = CircleShape,
-            color = CardHome,
-            border = BorderStroke(1.dp, ActivePill)
+            color = colors.cardHighlight,
+            border = BorderStroke(1.dp, colors.cardBorder)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
@@ -448,7 +521,10 @@ fun StatusItemRow(item: StatusItem) {
 }
 
 @Composable
-fun QuickActionsSection(quickActions: List<QuickAction>) {
+fun QuickActionsSection(
+    quickActions: List<QuickAction>,
+    onQuickActionClick: (QuickAction) -> Unit = {}
+) {
     Column {
         Text(
             text = "Aksi cepat",
@@ -466,6 +542,7 @@ fun QuickActionsSection(quickActions: List<QuickAction>) {
             quickActions.forEach { action ->
                 QuickActionCard(
                     action = action,
+                    onClick = { onQuickActionClick(action) },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -474,20 +551,25 @@ fun QuickActionsSection(quickActions: List<QuickAction>) {
 }
 
 @Composable
-fun QuickActionCard(action: QuickAction, modifier: Modifier = Modifier) {
+fun QuickActionCard(
+    action: QuickAction,
+    onClick: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    val colors = KetukTheme.colors
     val (backgroundColor, iconColor, icon) = when (action.type) {
         QuickActionType.AKTIVITAS -> Triple(
-            AksiAktivitas,
+            colors.aksiAktivitas,
             MaterialTheme.colorScheme.primary,
             Icons.Rounded.CalendarMonth
         )
         QuickActionType.SAPA -> Triple(
-            AksiSapa,
+            colors.aksiSapa,
             KuningMadu,
             Icons.Rounded.ChatBubble
         )
         QuickActionType.HP -> Triple(
-            AksiHp,
+            colors.aksiHp,
             HijauDaun,
             Icons.Rounded.Call
         )
@@ -497,9 +579,9 @@ fun QuickActionCard(action: QuickAction, modifier: Modifier = Modifier) {
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        border = BorderStroke(1.dp, ActivePill),
+        border = BorderStroke(1.dp, colors.cardBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        onClick = { /* TODO: Handle action */ }
+        onClick = onClick
     ) {
         Column(
             modifier = Modifier
@@ -516,7 +598,7 @@ fun QuickActionCard(action: QuickAction, modifier: Modifier = Modifier) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = colors.onAccent,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -547,6 +629,7 @@ fun QuickActionCard(action: QuickAction, modifier: Modifier = Modifier) {
 @Composable
 fun RecentActivitiesSection(
     recentActivities: List<RecentActivity>,
+    onActivityClick: (String) -> Unit = {},
     onViewAll: () -> Unit
 ) {
     Column {
@@ -587,9 +670,15 @@ fun RecentActivitiesSection(
 
         Column {
             recentActivities.forEachIndexed { index, activity ->
+                val itemId = when (index) {
+                    0 -> "act_1"
+                    1 -> "act_2"
+                    else -> "act_7"
+                }
                 TimelineItem(
                     activity = activity,
-                    showLine = index < recentActivities.lastIndex
+                    showLine = index < recentActivities.lastIndex,
+                    onClick = { onActivityClick(itemId) }
                 )
             }
         }
@@ -597,8 +686,17 @@ fun RecentActivitiesSection(
 }
 
 @Composable
-fun TimelineItem(activity: RecentActivity, showLine: Boolean) {
-    Row {
+fun TimelineItem(
+    activity: RecentActivity,
+    showLine: Boolean,
+    onClick: () -> Unit = {}
+) {
+    val colors = KetukTheme.colors
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.width(40.dp)
@@ -618,7 +716,7 @@ fun TimelineItem(activity: RecentActivity, showLine: Boolean) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = colors.onAccent,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -631,7 +729,7 @@ fun TimelineItem(activity: RecentActivity, showLine: Boolean) {
                         .height(56.dp)
                 ) {
                     drawLine(
-                        color = ActivePill,
+                        color = colors.cardBorder,
                         start = Offset(size.width / 2, 0f),
                         end = Offset(size.width / 2, size.height),
                         strokeWidth = 2.dp.toPx(),
@@ -680,6 +778,7 @@ fun BoxWithConstraintsScope.BottomNavBar(
     selectedTab: Int,
     onTabSelected: (Int) -> Unit
 ) {
+    val colors = KetukTheme.colors
     val tabs = listOf(
         BottomNavItem(0, "Home", R.drawable.nav_home),
         BottomNavItem(1, "Riwayat", R.drawable.nav_riwayat),
@@ -706,7 +805,7 @@ fun BoxWithConstraintsScope.BottomNavBar(
         modifier = Modifier
             .align(Alignment.BottomCenter)
             .fillMaxWidth(),
-        color = BarBackground,
+        color = colors.barBackground,
         shadowElevation = 8.dp
     ) {
         // navigationBarsPadding di dalam Surface, supaya warna bar menutup sampai dasar layar
@@ -722,7 +821,7 @@ fun BoxWithConstraintsScope.BottomNavBar(
                     .width(slotWidth - pillInset * 2)
                     .height(44.dp)
                     .align(Alignment.CenterStart)
-                    .background(ActivePill, RoundedCornerShape(50))
+                    .background(colors.activePill, RoundedCornerShape(50))
             )
 
             Row(
@@ -776,3 +875,11 @@ fun HomeScreenPreviewSmall() {
         HomeScreen()
     }
 }
+
+@Preview(name = "Mode Gelap", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun HomeScreenDarkPreview() {
+    KetukTheme(darkTheme = true) {
+        HomeScreen()
+    }
+}

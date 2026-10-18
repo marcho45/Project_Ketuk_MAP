@@ -30,7 +30,22 @@ android {
 
         buildConfigField("String", "SUPABASE_URL", "\"${localProp("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProp("SUPABASE_ANON_KEY")}\"")
+        buildConfigField("String", "SUPABASE_KEY", "\"${localProp("SUPABASE_KEY").ifEmpty { localProp("SUPABASE_ANON_KEY") }}\"")
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${localProp("GOOGLE_WEB_CLIENT_ID")}\"")
+    }
+
+    flavorDimensions += "mode"
+    productFlavors {
+        create("demo") {
+            dimension = "mode"
+            applicationIdSuffix = ".demo"
+            versionNameSuffix = "-demo"
+            buildConfigField("boolean", "DEMO_MODE", "true")
+        }
+        create("full") {
+            dimension = "mode"
+            buildConfigField("boolean", "DEMO_MODE", "false")
+        }
     }
 
     buildTypes {

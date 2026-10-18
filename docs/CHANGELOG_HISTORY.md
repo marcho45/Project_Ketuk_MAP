@@ -1,3 +1,140 @@
+## [2026-10-19 04:08] Tugas Khusus: Tombol Tema Manual (SharedPreferences) & Pembersihan Dark Mode Semantik di Seluruh Layar
+
+- **Tujuan:** Mengganti tema otomatis sistem HP (`isSystemInDarkTheme()`) menjadi tombol manual (`Switch` `"Mode gelap"`) yang disimpan di `SharedPreferences` (`"dark_theme"`, default `false` = terang), serta merapikan tampilan Dark Mode di seluruh 16 layar dan komponen bersama tanpa mengubah tampilan mode terang sedikit pun.
+- **Referensi desain:** Seluruh file `docs/figma/01` s/d `04` (mode terang dijaga 100% identik dengan nilai warna asli; mode gelap memakai sistem warna semantik hangat `KetukExtendedColors`).
+- **Ringkasan perubahan:**
+  - Menghapus nilai default `isSystemInDarkTheme()` dari `KetukTheme(darkTheme: Boolean, ...)` di `Theme.kt`.
+  - Membuat satu sumber state `isDarkTheme` di `MainActivity.kt` yang membaca nilai awal dari `SharedPreferences("ketuk_prefs", MODE_PRIVATE)` kunci `"dark_theme"` (default `false` = terang), menyimpannya setiap kali berubah, meneruskannya ke `KetukTheme` di level paling atas, dan menyesuaikan ikon status bar & navigation bar secara reaktif lewat `enableEdgeToEdge`.
+  - Menambahkan baris kartu `"Mode gelap"` dengan ikon `Icons.Rounded.LightMode` / `Icons.Rounded.DarkMode` dan `Switch` (warna aktif `Terakota`) di `ProfileScreen.kt` Wali (di bawah kartu info akun dan di atas tombol `"Keluar"`), ditandai `// TODO(tim): tidak ada di Figma`.
+  - Mendefinisikan palet warna gelap hangat di `Color.kt` dan sistem warna semantik `KetukExtendedColors` (`CompositionLocal` via `KetukTheme.colors`) di `Theme.kt` (mencakup latar layar, permukaan kartu, teks utama/sekunder, garis pemisah, latar/border field input, kartu peran/aksi/status, serta permukaan QR tetap putih `qrSurface = CardPutih` agar tetap dapat dipindai).
+  - Mengganti seluruh warna tetap (hardcoded) di 18 file di dalam `ui/` (`SplashScreen`, `OnboardingScreen`, `LoginScreen`, `RegisterScreen`, `VerificationScreen`, `RoleSelectScreen`, `DetailOmaOpaScreen`, `CircleKeluargaScreen`, `QrWaliScreen`, `PilihPenjagaScreen`, `HomeScreen`, `RiwayatScreen`, `DetailAlertScreen`, `LokasiScreen`, `NotifikasiScreen`, `ProfileScreen`, `AuthComponents`, `KetukButton`, `KetukSecondaryButton`) dengan `KetukTheme.colors`.
+  - Menambahkan `@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)` dengan `KetukTheme(darkTheme = true)` pada layar-layar utama.
+- **File dibuat:** Tidak ada
+- **File diubah:**
+  1. `app/src/main/java/com/chat/ketukprojectmap/MainActivity.kt` — State `isDarkTheme` dari `SharedPreferences` (`"dark_theme"`, default `false`) + update `enableEdgeToEdge` reaktif.
+  2. `app/src/main/java/com/chat/ketukprojectmap/ui/theme/Color.kt` — Tambah konstanta palet warna gelap hangat.
+  3. `app/src/main/java/com/chat/ketukprojectmap/ui/theme/Theme.kt` — Hapus `isSystemInDarkTheme()`, tambah `KetukExtendedColors`, `LocalKetukColors`, `LocalDarkThemeToggle`, dan `KetukTheme.colors`.
+  4. `app/src/main/java/com/chat/ketukprojectmap/ui/components/AuthComponents.kt` — Gunakan warna semantik `KetukTheme.colors` pada `AuthField` & `AuthCloud`.
+  5. `app/src/main/java/com/chat/ketukprojectmap/ui/components/KetukButton.kt` — Gunakan `KetukTheme.colors.onAccent` dan tambah preview dark.
+  6. `app/src/main/java/com/chat/ketukprojectmap/ui/components/KetukSecondaryButton.kt` — Gunakan `KetukTheme.colors.textPrimary` dan tambah preview dark.
+  7. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/splash/SplashScreen.kt` — Tambah `.background(KetukTheme.colors.screenBackground)` dan preview dark.
+  8. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/onboarding/OnboardingScreen.kt` — Ganti warna tetap panel bawah, teks, indikator, dan tombol ke `KetukTheme.colors` + tambah preview dark.
+  9. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/login/LoginScreen.kt` — Ganti warna tetap latar, field, divider, tombol Google, dan kartu hint demo ke `KetukTheme.colors` + tambah preview dark.
+  10. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/register/RegisterScreen.kt` — Ganti warna tetap ke `KetukTheme.colors` + tambah preview dark.
+  11. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/verification/VerificationScreen.kt` — Ganti warna tetap panel bawah, kotak OTP, banner error/info, dan teks resend ke `KetukTheme.colors` + tambah preview dark.
+  12. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/role/RoleSelectScreen.kt` — Ganti warna tetap kartu peran & teks ke `KetukTheme.colors` + tambah preview dark.
+  13. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/walisetup/WaliSetupScreens.kt` — Ganti 69 pemakaian warna tetap di 4 layar setup Wali ke `KetukTheme.colors` (QR tetap berlatar putih `qrSurface`) + tambah preview dark.
+  14. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/home/HomeScreen.kt` — Ganti warna tetap kartu, chip, aksi cepat, dan bottom bar ke `KetukTheme.colors` + tambah preview dark.
+  15. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/riwayat/RiwayatScreen.kt` — Ganti warna tetap filter chip dan kartu aktivitas ke `KetukTheme.colors` + tambah preview dark.
+  16. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/detail/DetailAlertScreen.kt` — Ganti warna tetap kartu, chip eskalasi, dan tombol ke `KetukTheme.colors` + tambah preview dark.
+  17. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/lokasi/LokasiScreen.kt` — Ganti warna tetap bottom sheet dan kartu penjaga ke `KetukTheme.colors` + tambah preview dark.
+  18. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/notifikasi/NotifikasiScreen.kt` — Ganti warna tetap kartu notifikasi ke `KetukTheme.colors` + tambah preview dark.
+  19. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/profile/ProfileScreen.kt` — Tambah baris Switch `"Mode gelap"` (`// TODO(tim): tidak ada di Figma`), ganti warna tetap kartu & dialog ke `KetukTheme.colors`, dan tambah preview dark.
+  20. `docs/SCREENS.md`, `docs/CHANGELOG_HISTORY.md` — Dokumentasi tombol tema manual dan dark mode semantik.
+- **File dihapus:** Tidak ada
+- **Error/masalah:** Tidak ada
+- **Solusi yang berhasil:**
+  - Menyediakan `KetukExtendedColors` lewat `CompositionLocalProvider` di `KetukTheme` menjaga nilai mode terang 100% identik dengan konstanta warna asli sekaligus membuat seluruh layar reaktif saat Switch `"Mode gelap"` diubah.
+- **Yang GAGAL/jangan diulang:**
+  - Jangan menggelapkan latar belakang kontainer QR code karena kamera pemindai membutuhkan kontras margin terang (`qrSurface = CardPutih`) di sekeliling QR.
+- **Perbedaan figma vs SCREENS.md:**
+  - Baris pengaturan `"Mode gelap"` di `ProfileScreen` Wali tidak ada di Figma dan ditandai `// TODO(tim): tidak ada di Figma`. Untuk profil Oma/Opa dan Penjaga akan dipasang pada tahap masing-masing.
+- **Asumsi dan TODO:**
+  - Aset gambar ilustrasi (`bg_desa`, `peta_lokasi`, `qr_pairing_blur`, ikon navigasi PNG) tidak diedit sesuai aturan tugas.
+- **Status build:** `./gradlew assembleDemoDebug assembleFullDebug` **BUILD SUCCESSFUL**
+- **Belum selesai:** Tahap 3 (Alur Oma/Opa M4 & M5), Tahap 4 (Alur Penjaga M10 + Riwayat Lokasi 7 Hari), Tahap 5 (`README.txt` & Finalisasi UTS).
+
+---
+
+## [2026-10-19 03:15] Tahap 2: Alur Setup & Core Wali, DetailAlertScreen(itemId), Shape.kt & Dark Mode, serta Tombol Kembali Khusus Demo
+
+- **Tujuan:** Mengimplementasikan seluruh alur Setup Wali (`02. Initial Phase Wali.png`) dan Core Wali (`04. Core Phase Wali.png`), membuat layar `DetailAlertScreen(itemId)` (M8) dengan pengiriman argumen navigasi, melengkapi `NotifikasiScreen` dan `ProfileScreen` Wali, menambahkan `Shape.kt` + dukungan Dark Mode di `Theme.kt`, memperbaiki penyimpanan tab di `HomeScreen` dengan `rememberSaveable`, serta menambahkan tombol panah kembali khusus `BuildConfig.DEMO_MODE` di tab Beranda Wali agar dosen penguji dapat menengok layar Pilih Peran.
+- **Referensi desain:** `docs/figma/02. Initial Phase Wali.png`, `docs/figma/04. Core Phase Wali.png`, `docs/figma/flowchart.png`, dan `docs/SCREENS.md`.
+- **Ringkasan perubahan:**
+  - Membuat `Shape.kt` (`KetukShapes`) dan menambahkan `KetukDarkColorScheme` serta parameter `darkTheme: Boolean = isSystemInDarkTheme()` di `Theme.kt`.
+  - Membuat `WaliSetupScreens.kt` yang berisi 4 layar Setup Wali sesuai `02. Initial Phase Wali.png`:
+    1. `DetailOmaOpaScreen`: Input nama Wali (`"Nanda Valeri"`), toggle pill `"Opa"` / `"Oma"`, input nama lansia (`"Sri Diyas Anjarwati"`), dan input umur (`"67"`, `KeyboardType.Number`, rentang 50–120) dengan badge terakota `"Tahun"`, `isError = true`, `supportingText`, dan blokir submit saat tidak valid.
+    2. `CircleKeluargaScreen`: Header `"3 Anggota"`, daftar anggota Circle (`Nanda (Wali)` Ketua + mahkota, `Papa`, `Mama`), dialog `+ Tambah Anggota` in-memory, kartu `"Undang Keluarga Lain"` dengan QR (`R.drawable.qr_pairing`), serta tombol `"Bagikan QR"`, `"Salin Tautan"`, dan `"Lanjutkan"`.
+    3. `QrWaliScreen`: Tampilan kartu QR besar (`R.drawable.qr_pairing`) untuk dipindai HP Oma/Opa + tombol simulasi yang menampilkan state `LoadingPairingWaliContent` (`R.drawable.qr_pairing_blur` + `R.drawable.ic_spinner` berputar + teks `"Loading Pairing..."`) selama 2 detik sebelum lanjut ke Pilih Penjaga.
+    4. `PilihPenjagaScreen`: Search bar real-time `"Cari nama atau nomor..."`, daftar 4 calon penjaga (`Pak Andy`, `Ibu Imas`, `Adik Adam`, `Pak RT`) dengan **Radio Button** (single selection sesuai Figma `02`), dan tombol `"Pilih sebagai Penjaga"`.
+  - Membuat `DetailAlertScreen.kt` (M8) yang menerima argumen `itemId` dari NavHost (`detail_alert/{itemId}`), mencari item di `DummyData.findActivityById(itemId)`, menampilkan badge level eskalasi (`NORMAL` / `L1` / `L2` / `L3`), status reaktif, deskripsi lengkap, lokasi Oma Diyas, dan 3 tombol aksi (`"Telepon Oma"`, `"Konfirmasi Oma Aman"`, `"Minta Penjaga Mengecek"`) dengan feedback `SnackbarHost`.
+  - Memperbarui `HomeScreen.kt`: mengganti `selectedTab` ke `rememberSaveable`, menambahkan tombol panah kembali (`Icons.AutoMirrored.Rounded.ArrowBack`, tint `Terakota`) + `BackHandler` **hanya saat `BuildConfig.DEMO_MODE == true` dan `selectedTab == 0`** (ditandai `// TODO(tim): tombol khusus demo, tidak ada di Figma`), menambahkan `SnackbarHost` untuk Aksi cepat, dan menghubungkan `"Lihat detail >"` serta item aktivitas terbaru ke `DetailAlertScreen(itemId)`.
+  - Memperbarui `RiwayatViewModel.kt` dan `RiwayatScreen.kt` agar memakai 8 item `DummyData.initialActivities` dan membuka `DetailAlertScreen(item.id)` saat item diklik.
+  - Memperbarui `LokasiScreen.kt` untuk menampilkan foto `R.drawable.penjaga_lintang`, menyamakan umur Oma ke `67` tahun (`DummyData.defaultElder.age`), dan menampilkan Snackbar simulasi pada tombol `"Lihat Rute"`, `"Hubungi Oma"`, dan kartu Penjaga.
+  - Melengkapi `NotifikasiScreen.kt` (5 item `DummyData.initialNotifications` dengan `LazyColumn`, tombol `"Tandai dibaca"`, dan klik ke `DetailAlertScreen`) serta `ProfileScreen.kt` Wali (kartu akun Wali, kartu lansia yang dipantau, dan tombol `"Keluar"` + dialog konfirmasi).
+- **File dibuat:**
+  1. `app/src/main/java/com/chat/ketukprojectmap/ui/theme/Shape.kt`
+  2. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/walisetup/WaliSetupScreens.kt`
+  3. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/detail/DetailAlertScreen.kt`
+- **File diubah:**
+  1. `app/src/main/java/com/chat/ketukprojectmap/ui/theme/Theme.kt` — Tambah `KetukDarkColorScheme`, `darkTheme`, dan `shapes = KetukShapes`.
+  2. `app/src/main/java/com/chat/ketukprojectmap/navigation/Routes.kt` — Tambah route `detailOmaOpa`, `circleKeluarga`, `qrWali`, `pilihPenjaga`, `detailAlertPattern` (`detail_alert/{itemId}`), `detailAlert(itemId)`, serta helper `homeRouteForRole` & `setupRouteForRole`.
+  3. `app/src/main/java/com/chat/ketukprojectmap/navigation/KetukNavHost.kt` — Daftarkan composable Setup Wali, `DetailAlertScreen(itemId)`, dan navigasi kembali khusus demo dari `HomeScreen` ke `Routes.role` dengan `popUpTo(Routes.home) { inclusive = true }`.
+  4. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/home/HomeScreen.kt` — Ubah `selectedTab` ke `rememberSaveable`, tambah panah kembali & `BackHandler` khusus `DEMO_MODE` di tab Beranda, tambah `SnackbarHost`, dan sambungkan klik detail ke `DetailAlertScreen`.
+  5. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/riwayat/RiwayatViewModel.kt` — Gunakan `DummyData.initialActivities` (8 item `ActivityItem`).
+  6. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/riwayat/RiwayatScreen.kt` — Render `ActivityItem` dan tambahkan callback `onItemClick(item.id)`.
+  7. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/lokasi/LokasiScreen.kt` — Pasang `R.drawable.penjaga_lintang`, umur `67` dari `DummyData`, dan `SnackbarHost` untuk aksi mockup.
+  8. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/notifikasi/NotifikasiScreen.kt` — Render `DummyData.initialNotifications` dengan `LazyColumn` dan navigasi ke `DetailAlertScreen`.
+  9. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/profile/ProfileScreen.kt` — Lengkapi dengan kartu informasi akun Wali, lansia yang dipantau, penjaga terdekat, serta tombol `"Keluar"` + dialog.
+  10. `docs/SCREENS.md`, `docs/ASSETS.md`, `docs/PROJECT_SUMMARY.md` — Sinkronisasi dokumentasi Tahap 2.
+- **File dihapus:** Tidak ada
+- **Error/masalah:**
+  - Percobaan kompilasi pertama pada `KetukNavHost.kt` gagal karena perbedaan nama parameter callback pemanggil (`onNext` dan `onConfirm`) dengan definisi fungsi di `WaliSetupScreens.kt` (`onContinue`, `onPairingComplete`, dan `onGuardianConfirmed`).
+- **Solusi yang berhasil:**
+  - Menyesuaikan nama argumen di `KetukNavHost.kt` menjadi `onContinue`, `onPairingComplete`, dan `onGuardianConfirmed` sesuai tanda tangan fungsi di `WaliSetupScreens.kt`.
+- **Yang GAGAL/jangan diulang:**
+  - Pastikan selalu memeriksa nama parameter callback di fungsi `@Composable` tujuan sebelum memanggilnya dengan *named arguments* di `KetukNavHost.kt`.
+- **Perbedaan figma vs SCREENS.md:**
+  - **Tombol Panah Kembali Khusus Mode Demo di Beranda Wali (`HomeScreen`):** Selisih dari Figma yang disengaja (`// TODO(tim): tombol khusus demo, tidak ada di Figma`). Ditampilkan hanya jika `BuildConfig.DEMO_MODE == true` dan `selectedTab == 0` (tab Beranda), sejajar dengan sapaan `"Halo, Nandaa"` tanpa menggeser ikon lonceng notifikasi, dengan aksi eksplisit `navController.navigate(Routes.role) { popUpTo(Routes.home) { inclusive = true } }`. Pada varian `full`, tampilan Beranda tidak berubah sama sekali.
+  - Layar `DetailAlertScreen` (M8), `NotifikasiScreen`, dan `ProfileScreen` Wali tidak memiliki frame khusus di Figma 01–05 sehingga dirancang selaras dengan palet warna (`KremBackground`, `CardPutih`, `Terakota`, `HijauDaun`) dan tipografi `PlusJakartaSans` Ketuk serta ditandai `// TODO(tim)`.
+- **Asumsi dan TODO:**
+  - Saat Tahap 3 (Beranda Oma/Opa) dan Tahap 4 (Beranda Penjaga) dikerjakan, tombol panah kembali khusus `BuildConfig.DEMO_MODE` yang sama akan diingatkan kepada pengguna untuk ditambahkan di sana.
+- **Status build:** `./gradlew assembleDemoDebug assembleFullDebug` **BUILD SUCCESSFUL**
+- **Belum selesai:** Tahap 3 (Alur Oma/Opa M4 & M5), Tahap 4 (Alur Penjaga M10 + Riwayat Lokasi 7 Hari), Tahap 5 (`README.txt` & Finalisasi UTS).
+
+---
+
+## [2026-10-19 01:23] Tahap 1: Fondasi Build Variants (demo vs full), Pembungkusan AuthRepository, dan Paket DummyData Terpusat
+
+- **Tujuan:** Membagi konfigurasi build menjadi 2 Product Flavors (`demo` untuk UTS dan `full` untuk UAS), membungkus kode autentikasi Supabase yang sudah ada ke dalam `SupabaseAuthRepository` tanpa menghapus/merusaknya, menyediakan `FakeAuthRepository` in-memory untuk akun demo offline, menjaga pemanggilan Google Sign-In agar tidak menginisialisasi `SupabaseProvider.client` pada mode `demo`, serta membuat paket `DummyData` terpusat sesuai Figma 01–05.
+- **Referensi desain:** `docs/figma/01. Initial Phase (2).png`, `02. Initial Phase Wali.png`, `03. Initial Phase oma.png`, `04. Core Phase Wali.png`, `05. Core Phase Penjaga.png`, `flowchart.png`, dan `docs/SCREENS.md`.
+- **Ringkasan perubahan:**
+  - Menambahkan `flavorDimensions += "mode"` dengan 2 product flavors (`demo` dan `full`) beserta flag `BuildConfig.DEMO_MODE` di `app/build.gradle.kts`.
+  - Memindahkan kode class `AuthRepository` asli secara utuh ke `SupabaseAuthRepository.kt`, membuat `FakeAuthRepository.kt` (in-memory dengan delay 800 ms, 3 akun demo `wali@ketuk.app`, `oma@ketuk.app`, `penjaga@ketuk.app` sandi `Ketuk123`, serta dukungan Register/OTP/Google demo), dan menjadikan `AuthRepository.kt` sebagai interface + factory tunggal berdasarkan `BuildConfig.DEMO_MODE`.
+  - Membungkus `SupabaseProvider.client.composeAuth.rememberSignInWithGoogle(...)` di `LoginScreen.kt` dan `RegisterScreen.kt` dengan `if (!BuildConfig.DEMO_MODE)` sehingga pada variant `demo` client Supabase tidak pernah diinisialisasi.
+  - Menambahkan validasi `isError = true` + `supportingText` per field dan kartu hint 3 akun demo (khusus `DEMO_MODE`) di `LoginScreen.kt`, serta menyesuaikan panjang OTP (`CODE_LENGTH`) menjadi 4 digit di mode `demo` (sesuai Figma `01`) dan 6 digit di mode `full`.
+  - Membuat paket `data/dummy/` (`DummyModels.kt` dan `DummyData.kt`) berisi data class dan data terpusat (`Elder` umur 67 tahun, 3 `CircleMember`, 4 calon `Guardian` termasuk `Ibu Imas` + `Markolintang`, 8 `ActivityItem`, 5 `NotificationItem`, dan 7 `LocationHistoryItem`).
+- **File dibuat:**
+  1. `app/src/main/java/com/chat/ketukprojectmap/data/dummy/DummyModels.kt`
+  2. `app/src/main/java/com/chat/ketukprojectmap/data/dummy/DummyData.kt`
+  3. `app/src/main/java/com/chat/ketukprojectmap/data/repository/SupabaseAuthRepository.kt`
+  4. `app/src/main/java/com/chat/ketukprojectmap/data/repository/FakeAuthRepository.kt`
+- **File diubah:**
+  1. `app/build.gradle.kts` — Tambah `SUPABASE_KEY` fallback dan `productFlavors` (`demo` & `full`) dengan `DEMO_MODE`.
+  2. `app/src/main/java/com/chat/ketukprojectmap/data/repository/AuthRepository.kt` — Ubah menjadi `interface AuthRepository` dan fungsi factory tunggal `fun AuthRepository(): AuthRepository`.
+  3. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/login/LoginViewModel.kt` — Tambah validasi format email & password (`emailError`, `passwordError`), fungsi `signInWithGoogleDemo`, dan pesan error `"Email/Nomor HP atau password salah"`.
+  4. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/login/LoginScreen.kt` — Jaga `rememberSignInWithGoogle` dengan `!BuildConfig.DEMO_MODE`, tambah `isError` & `supportingText` di `LoginField`, dan tambah `DemoAccountsHintCard` saat `BuildConfig.DEMO_MODE == true`.
+  5. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/register/RegisterViewModel.kt` — Tambah fungsi `signInWithGoogleDemo`.
+  6. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/register/RegisterScreen.kt` — Jaga `rememberSignInWithGoogle` dengan `!BuildConfig.DEMO_MODE`.
+  7. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/verification/VerificationViewModel.kt` — Ubah `CODE_LENGTH` menjadi `if (BuildConfig.DEMO_MODE) 4 else 6`.
+  8. `.clinerules`, `docs/SCREENS.md`, `docs/ASSETS.md`, `docs/PROJECT_SUMMARY.md` — Sinkronisasi keputusan tim dan dokumentasi Tahap 1.
+- **File dihapus:** Tidak ada
+- **Error/masalah:**
+  - Percobaan build pertama gagal pada `LoginScreen.kt:63` dan `RegisterScreen.kt:58` dengan pesan: `Initializer type mismatch: expected 'Function0<Unit>', actual 'Any'` dan `Expression is treated as a trailing lambda argument; consider separating it from the call with semicolon`.
+  - Penyebab: Menulis blok `{ googleAuth.startFlow() }` langsung di baris setelah `val googleAuth = SupabaseProvider.client.composeAuth.rememberSignInWithGoogle(...)` di dalam cabang `else` membuat compiler Kotlin menganggap `{ googleAuth.startFlow() }` sebagai *trailing lambda* tambahan untuk fungsi `rememberSignInWithGoogle`.
+- **Solusi yang berhasil:**
+  - Memisahkan deklarasi `val googleAuth = if (!BuildConfig.DEMO_MODE) { ... } else null` terlebih dahulu, baru membuat `val onGoogleClick: () -> Unit = { if (BuildConfig.DEMO_MODE) ... else googleAuth?.startFlow() }`.
+- **Yang GAGAL/jangan diulang:**
+  - Jangan menaruh ekspresi lambda `{ ... }` langsung di baris setelah pemanggilan fungsi tanpa titik koma di dalam blok `if/else`, karena Kotlin akan membacanya sebagai *trailing lambda* dari fungsi di atasnya.
+- **Perbedaan figma vs SCREENS.md:**
+  - Disepakati bersama tim: Login tetap memakai field Email (bukan Nomor HP) demi kompatibilitas akun demo & Supabase; nama calon penjaga ke-2 mengikuti Figma `02` yaitu `"Ibu Imas"` dengan pilihan Radio Button; umur Oma Diyas diseragamkan menjadi `67` tahun di `DummyData.kt`; kotak OTP berjumlah 4 di mode `demo` (sesuai Figma `01`) dan 6 di mode `full`.
+- **Asumsi dan TODO:**
+  - Pada akhir Tahap 1, login dengan ke-3 akun demo masih mengarah ke `Routes.home` (Home Wali) karena route dan layar khusus Oma/Opa serta Penjaga baru dibuat pada Tahap 2–4.
+- **Status build:** `./gradlew assembleDemoDebug assembleFullDebug` **BUILD SUCCESSFUL in 4m 4s**
+- **Belum selesai:** Tahap 2 (Alur Setup & Core Wali + `DetailAlertScreen(itemId)` + `Shape.kt` & Dark Mode), Tahap 3 (Alur Oma/Opa), Tahap 4 (Alur Penjaga), Tahap 5 (`README.txt` & Finalisasi UTS).
+
+---
+
 ## [2026-10-17 16:40] Perbaikan fitur Logout di ProfileScreen dan integrasi ke HomeScreen
 
 - **Tujuan:** Melengkapi dan memperbaiki fitur logout yang sudah ada agar berfungsi penuh. Pengguna dapat keluar dari akun di tab Profil, dengan konfirmasi dialog, dan kembali ke layar Login dengan back stack bersih.

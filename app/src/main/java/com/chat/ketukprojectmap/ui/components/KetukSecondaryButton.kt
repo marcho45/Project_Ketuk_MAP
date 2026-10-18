@@ -1,5 +1,6 @@
 package com.chat.ketukprojectmap.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.chat.ketukprojectmap.ui.theme.Arang
 import com.chat.ketukprojectmap.ui.theme.KetukTheme
 
 @Composable
@@ -28,7 +28,7 @@ fun KetukSecondaryButton(
         shape = RoundedCornerShape(50),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = Arang
+            contentColor = KetukTheme.colors.textPrimary
         )
     ) {
         Text(
@@ -48,3 +48,15 @@ fun KetukSecondaryButtonPreview() {
         )
     }
 }
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun KetukSecondaryButtonDarkPreview() {
+    KetukTheme(darkTheme = true) {
+        KetukSecondaryButton(
+            text = "Kembali",
+            onClick = {}
+        )
+    }
+}
+

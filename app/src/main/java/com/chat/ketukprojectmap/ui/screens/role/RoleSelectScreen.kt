@@ -1,5 +1,6 @@
 package com.chat.ketukprojectmap.ui.screens.role
 
+import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -39,7 +40,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chat.ketukprojectmap.R
 import com.chat.ketukprojectmap.ui.components.KetukButton
-import com.chat.ketukprojectmap.ui.theme.Arang
 import com.chat.ketukprojectmap.ui.theme.KetukTheme
 import com.chat.ketukprojectmap.ui.theme.Terakota
 
@@ -52,6 +52,7 @@ fun RoleSelectScreen(
     val selectedRole by viewModel.selectedRole.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
+    val colors = KetukTheme.colors
 
     BackHandler(onBack = onNavigateBack)
 
@@ -61,6 +62,7 @@ fun RoleSelectScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(colors.screenBackground)
             .systemBarsPadding()
     ) {
         Spacer(modifier = Modifier.height(8.dp))
@@ -75,7 +77,7 @@ fun RoleSelectScreen(
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = "Kembali",
-                tint = Arang
+                tint = colors.textPrimary
             )
         }
 
@@ -86,13 +88,13 @@ fun RoleSelectScreen(
                 text = "Siapa kamu?",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Arang
+                color = colors.textPrimary
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = "Pilih peranmu untuk melanjutkan",
                 fontSize = 12.sp,
-                color = Arang
+                color = colors.textPrimary
             )
         }
 
@@ -175,12 +177,13 @@ fun RoleCard(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    // Terpilih: peach (terakota 15% di atas putih). Tidak terpilih: putih
+    val colors = KetukTheme.colors
+    // Terpilih: peach (terakota 15% di atas permukaan kartu). Tidak terpilih: permukaan kartu
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) {
-            Terakota.copy(alpha = 0.15f).compositeOver(Color.White)
+            Terakota.copy(alpha = 0.15f).compositeOver(colors.cardSurface)
         } else {
-            Color.White
+            colors.cardSurface
         },
         animationSpec = tween(250),
         label = "containerColor"
@@ -227,14 +230,14 @@ fun RoleCard(
                         fontSize = 14.sp,
                         lineHeight = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Arang
+                        color = colors.textPrimary
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = description,
                         fontSize = 10.sp,
                         lineHeight = 14.sp,
-                        color = Arang
+                        color = colors.textPrimary
                     )
                 }
             }
@@ -252,7 +255,7 @@ fun RoleCard(
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = colors.onAccent,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -275,3 +278,11 @@ fun RoleSelectScreenSmallPreview() {
         RoleSelectScreen(onNavigateBack = {}, onNavigateToHome = {})
     }
 }
+
+@Preview(name = "Mode Gelap", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun RoleSelectScreenDarkPreview() {
+    KetukTheme(darkTheme = true) {
+        RoleSelectScreen(onNavigateBack = {}, onNavigateToHome = {})
+    }
+}

@@ -57,6 +57,22 @@ class RegisterViewModel(
         _uiState.update { it.copy(error = message, isLoading = false) }
     }
 
+    fun signInWithGoogleDemo(onSuccess: () -> Unit) {
+        if (_uiState.value.isLoading) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = "") }
+            try {
+                repository.signInWithGoogle()
+                _uiState.update { it.copy(isLoading = false) }
+                onSuccess()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = "Login Google gagal") }
+            }
+        }
+    }
+
     fun register(
         onSuccess: () -> Unit,
         onNeedVerification: () -> Unit = onSuccess

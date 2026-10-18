@@ -1,5 +1,6 @@
 package com.chat.ketukprojectmap.ui.screens.register
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,7 +20,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.chat.ketukprojectmap.BuildConfig
 import com.chat.ketukprojectmap.R
 import com.chat.ketukprojectmap.data.remote.SupabaseProvider
 import com.chat.ketukprojectmap.ui.components.AuthCloud
@@ -47,29 +48,42 @@ import io.github.jan.supabase.compose.auth.composeAuth
 fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
     onRegisterSuccess: () -> Unit,
-    onNeedVerification: () -> Unit = onRegisterSuccess,
+    // DIUBAH: sekarang membawa email supaya layar verifikasi tahu ke mana kode dikirim
+    onNeedVerification: (String) -> Unit = { onRegisterSuccess() },
     viewModel: RegisterViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val colors = KetukTheme.colors
 
-    // Login Google native (memunculkan daftar akun Google di HP)
-    val googleSignIn = SupabaseProvider.client.composeAuth.rememberSignInWithGoogle(
-        onResult = { result ->
-            when (result) {
-                is NativeSignInResult.Success -> onRegisterSuccess()
-                is NativeSignInResult.ClosedByUser -> Unit
-                is NativeSignInResult.NetworkError ->
-                    viewModel.onGoogleError("Tidak ada koneksi internet")
-                is NativeSignInResult.Error ->
-                    viewModel.onGoogleError(result.message)
+    // Login Google: di mode demo langsung via FakeAuthRepository (800ms), di mode full pakai Supabase
+    val googleSignIn = if (!BuildConfig.DEMO_MODE) {
+        SupabaseProvider.client.composeAuth.rememberSignInWithGoogle(
+            onResult = { result ->
+                when (result) {
+                    is NativeSignInResult.Success -> onRegisterSuccess()
+                    is NativeSignInResult.ClosedByUser -> Unit
+                    is NativeSignInResult.NetworkError ->
+                        viewModel.onGoogleError("Tidak ada koneksi internet")
+                    is NativeSignInResult.Error ->
+                        viewModel.onGoogleError(result.message)
+                }
             }
+        )
+    } else {
+        null
+    }
+    val onGoogleClick: () -> Unit = {
+        if (BuildConfig.DEMO_MODE) {
+            viewModel.signInWithGoogleDemo(onRegisterSuccess)
+        } else {
+            googleSignIn?.startFlow()
         }
-    )
+    }
 
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(KremBackground)
+            .background(colors.screenBackground)
     ) {
         // Dihitung di sini (di luar Column) supaya maxWidth bisa diakses
         val mascotSize = (maxWidth * 0.5f).coerceIn(140.dp, 220.dp)
@@ -120,9 +134,10 @@ fun RegisterScreen(
                 uiState = uiState,
                 viewModel = viewModel,
                 onRegisterSuccess = onRegisterSuccess,
-                onNeedVerification = onNeedVerification,
+                // DIUBAH: bungkus supaya email dari form ikut dikirim
+                onNeedVerification = { onNeedVerification(uiState.email.trim()) },
                 onNavigateToLogin = onNavigateToLogin,
-                onGoogleClick = { googleSignIn.startFlow() }
+                onGoogleClick = onGoogleClick
             )
         }
     }
@@ -130,6 +145,7 @@ fun RegisterScreen(
 
 @Composable
 private fun RegisterHeader(mascotSize: Dp) {
+    val colors = KetukTheme.colors
     Spacer(modifier = Modifier.height(48.dp))
 
     // Maskot + bayangan + daun (sama seperti Login)
@@ -145,7 +161,7 @@ private fun RegisterHeader(mascotSize: Dp) {
                 .padding(bottom = 2.dp)
                 .size(width = mascotSize * 0.67f, height = 12.dp)
                 .clip(CircleShape)
-                .background(Terakota.copy(alpha = 0.12f))
+                .background(colors.authFieldBackground)
         )
         Image(
             painter = painterResource(R.drawable.tok_memeriksa),
@@ -202,7 +218,7 @@ private fun RegisterHeader(mascotSize: Dp) {
     Text(
         text = "Yuk, buat akun barumu",
         fontSize = 12.sp,
-        color = Arang,
+        color = colors.textPrimary,
         textAlign = TextAlign.Center
     )
 }
@@ -315,8 +331,9 @@ private fun RegisterFormButtons(
             uiState.password.isNotBlank() &&
             uiState.confirmPassword.isNotBlank()
 
-    val fieldBg = Terakota.copy(alpha = 0.12f)
-    val fieldBorder = Terakota.copy(alpha = 0.35f)
+    val colors = KetukTheme.colors
+    val fieldBg = colors.authFieldBackground
+    val fieldBorder = colors.authFieldBorder
 
     // ===== Tombol Daftar =====
     Button(
@@ -334,7 +351,7 @@ private fun RegisterFormButtons(
         if (uiState.isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(20.dp),
-                color = Color.White,
+                color = colors.onAccent,
                 strokeWidth = 2.dp
             )
         } else {
@@ -342,7 +359,7 @@ private fun RegisterFormButtons(
                 text = "Daftar",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = colors.onAccent
             )
         }
     }
@@ -356,17 +373,17 @@ private fun RegisterFormButtons(
     ) {
         HorizontalDivider(
             modifier = Modifier.weight(1f),
-            color = Arang.copy(alpha = 0.6f)
+            color = colors.textPrimary.copy(alpha = 0.6f)
         )
         Text(
             text = "atau",
             fontSize = 10.sp,
-            color = Arang,
+            color = colors.textPrimary,
             modifier = Modifier.padding(horizontal = 12.dp)
         )
         HorizontalDivider(
             modifier = Modifier.weight(1f),
-            color = Arang.copy(alpha = 0.6f)
+            color = colors.textPrimary.copy(alpha = 0.6f)
         )
     }
 
@@ -382,7 +399,7 @@ private fun RegisterFormButtons(
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = fieldBg,
-            contentColor = Arang
+            contentColor = colors.textPrimary
         ),
         border = BorderStroke(1.dp, fieldBorder)
     ) {
@@ -409,7 +426,7 @@ private fun RegisterFormButtons(
         Text(
             text = "Sudah punya akun? ",
             fontSize = 12.sp,
-            color = Arang
+            color = colors.textPrimary
         )
         Text(
             text = "Masuk",
@@ -435,3 +452,20 @@ private fun RegisterScreenPreview() {
         )
     }
 }
+
+@Preview(
+    name = "Mode Gelap",
+    widthDp = 360,
+    heightDp = 800,
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+private fun RegisterScreenDarkPreview() {
+    KetukTheme(darkTheme = true) {
+        RegisterScreen(
+            onNavigateToLogin = {},
+            onRegisterSuccess = {}
+        )
+    }
+}
