@@ -1,3 +1,38 @@
+## [2026-10-19 06:15] Tahap 4: Alur Penjaga M10 (Beranda, Lokasi, Riwayat Lokasi 7 Hari, dan Profil Penjaga)
+
+- **Tujuan:** Mengimplementasikan seluruh alur Penjaga (M10) sesuai `05. Core Phase Penjaga.png` dan `flowchart.png`, mengoreksi sapaan Beranda Wali menjadi `"Halo, Nanda"`, memperbarui dokumentasi aset/proyek, dan menambahkan layar Riwayat Lokasi 7 Hari serta Profil Penjaga dengan mode gelap manual dan tombol keluar yang membersihkan back stack.
+- **Referensi desain:** `docs/figma/05. Core Phase Penjaga.png`, `docs/figma/flowchart.png`, `docs/SCREENS.md`, `docs/ASSETS.md`, dan `docs/PROJECT_SUMMARY.md`.
+- **Ringkasan perubahan:**
+  - Koreksi Pra-Tahap 4: Mengembalikan sapaan Beranda Wali dari `"Halo, Nandaa"` menjadi `"Halo, Nanda"` di `HomeSampleData.kt` dan `DummyData.kt` (typo Figma). Memperbarui `ASSETS.md`, `PROJECT_SUMMARY.md`, dan `SCREENS.md`.
+  - Arsitektur State Penjaga (`GuardianViewModel.kt`): Menyediakan `GuardianHomeUiState`, state reaktif banner (`GuardianCheckStatus.PENDING`, `CHECKED_SAFE`, `NEEDS_HELP`), dan daftar riwayat aktivitas penjaga yang dinamis.
+  - Beranda Penjaga (`GuardianHomeScreen.kt` - Tab 0): Header `"Halo, Markolintang"` (`"Penjaga terdekat - Oma Diyas"`), tombol panah kembali khusus `DEMO_MODE` (`// TODO(tim)`) dengan `BackHandler` menuju `Routes.role`, ikon lonceng notifikasi dengan red dot membuka `NotifikasiScreen`, banner komposit `"Tolong ketuk pintu Oma Diyas"` dengan dua tombol terpasang (`"Oma aman"` sage green & `"Butuh bantuan"` merah muda) yang mengubah banner secara reaktif + mencatat riwayat baru + feedback Snackbar, kartu mini peta `peta_lokasi` (`"Rumah Oma Diyas"`), kartu Aksi Cepat (`Lacak` & `Hubungi` dengan Snackbar simulasi), kartu Riwayat, dan 3-tab BottomNavBar beranimasi pill.
+  - Lokasi Penjaga (`GuardianLokasiScreen.kt` - Tab 1): Header `"Lokasi Oma Diyas"`, kartu atas melayang dengan foto `oma_avatar`, jarak 170 m, status `"Di rumah"` dan badge `"Aman - Aktivitas Normal"`, peta statis `peta_lokasi` dengan kontrol melayang (kompas, zoom in, zoom out) dan pill timestamp, serta kartu `"Riwayat Lokasi"` menuju layar 7 hari.
+  - Riwayat Lokasi 7 Hari (`GuardianLocationHistoryScreen.kt`): Layar daftar pergerakan 7 hari terakhir dari `DummyData.locationHistory7Days` dengan top bar, tombol kembali, detail status, dan feedback Snackbar klik titik.
+  - Profil Penjaga (`GuardianProfileScreen.kt` - Tab 2): Info profil Markolintang, badge kesiapan radius 200 m, kartu lansia yang dipantau (Oma Diyas), switch `"Mode gelap"` (`KetukDarkModeCard`), dan tombol `"Keluar"` (`KetukLogoutButton`) yang memanggil `profileViewModel.logout()` lalu navigasi bersih `popUpTo(0)` ke `Routes.login`.
+  - Routing & Navigasi: Menambahkan `Routes.guardianHome` dan `Routes.guardianLocationHistory`, memetakan role `"penjaga"` ke `Routes.guardianHome` di `homeRouteForRole` dan `setupRouteForRole`, serta mendaftarkan composable di `KetukNavHost.kt`.
+- **File dibuat:**
+  1. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianViewModel.kt`
+  2. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianHomeScreen.kt`
+  3. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianLokasiScreen.kt`
+  4. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianLocationHistoryScreen.kt`
+  5. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianProfileScreen.kt`
+- **File diubah:**
+  1. `app/src/main/java/com/chat/ketukprojectmap/data/dummy/DummyData.kt`
+  2. `app/src/main/java/com/chat/ketukprojectmap/data/model/HomeSampleData.kt`
+  3. `app/src/main/java/com/chat/ketukprojectmap/navigation/Routes.kt`
+  4. `app/src/main/java/com/chat/ketukprojectmap/navigation/KetukNavHost.kt`
+  5. `docs/ASSETS.md`
+  6. `docs/PROJECT_SUMMARY.md`
+  7. `docs/SCREENS.md`
+  8. `docs/CHANGELOG_HISTORY.md`
+- **File dihapus:** Tidak ada
+- **Error/masalah:** Tidak ada
+- **Solusi yang berhasil:** Penerapan `GuardianViewModel` dan pemanfaatan `KetukTheme.colors`, `KetukLogoutButton`, dan `KetukDarkModeCard` menghasilkan alur Penjaga yang bersih, konsisten, dan reaktif.
+- **Status build:** `./gradlew assembleDemoDebug assembleFullDebug` **BUILD SUCCESSFUL**
+- **Belum selesai:** Tahap 5 (`README.txt` & Finalisasi UTS).
+
+---
+
 ## [2026-10-19 05:50] Tugas Khusus: Perapian Tampilan OmaPassiveScreen & Ekstraksi Komponen Bersama (KetukLogoutButton & KetukDarkModeCard)
 
 - **Tujuan:** Merapikan tampilan `OmaPassiveScreen` sesuai arahan tanpa mengubah logika bisnis (dialog sapa, signOut, navigasi) atau tampilan mode terang, dengan mengekstrak komponen bersama `KetukLogoutButton` dan `KetukDarkModeCard` ke `ui/components/` serta memastikan keterbacaan pada mode terang/gelap, lebar 360dp, dan fontScale 1.3.

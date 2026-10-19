@@ -28,6 +28,10 @@ object Routes {
     const val omaPermissions = "oma_permissions"
     const val omaPassive = "oma_passive"
 
+    // Route Penjaga (05. Core Phase Penjaga & Flowchart M10)
+    const val guardianHome = "guardian_home"
+    const val guardianLocationHistory = "guardian_location_history"
+
     // Pola untuk NavHost; email bersifat opsional
     const val verificationPattern = "verification?email={email}"
 
@@ -39,6 +43,7 @@ object Routes {
     fun homeRouteForRole(role: String?): String = when (role) {
         "wali" -> home
         "oma_opa" -> omaPassive
+        "penjaga" -> guardianHome
         else -> home
     }
 
@@ -46,6 +51,7 @@ object Routes {
     fun setupRouteForRole(role: String?): String = when (role) {
         "wali" -> detailOmaOpa
         "oma_opa" -> scanQr
+        "penjaga" -> guardianHome
         else -> homeRouteForRole(role)
     }
 }

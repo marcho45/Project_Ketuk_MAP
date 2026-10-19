@@ -36,7 +36,7 @@ object DummyData {
 
     // ===== 2. Profil Wali & Oma/Opa (Sesuai Figma 02, 04, 05) =====
     const val defaultWaliName: String = "Nanda Valeri"
-    const val defaultWaliGreetingName: String = "Nandaa"
+    const val defaultWaliGreetingName: String = "Nanda"
 
     val defaultElder: Elder = Elder(
         id = "elder_oma_diyas",

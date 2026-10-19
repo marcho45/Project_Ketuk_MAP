@@ -45,5 +45,5 @@ Nama file di Android sudah final dan mengikuti konvensi snake_case.
 3. **Ikon mahkota ketua Circle** di `02. Initial Phase Wali.png`. Diimplementasikan di `CircleKeluargaScreen` menggunakan ikon bintang/mahkota (`Icons.Rounded.Star`) berwarna kuning madu.
 
 ---
-**Terakhir diperbarui:** 2026-10-19 (Tahap 2 - Pemasangan `penjaga_lintang`, `qr_pairing`, `qr_pairing_blur`, dan `ic_spinner` di alur Wali).
+**Terakhir diperbarui:** 2026-10-19 (Tahap 4 - Pemasangan aset `peta_lokasi`, `oma_avatar`, `nav_home`, `nav_lokasi`, `nav_profil` pada alur Penjaga).
 

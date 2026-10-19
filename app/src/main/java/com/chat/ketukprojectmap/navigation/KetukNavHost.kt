@@ -26,6 +26,8 @@ import com.chat.ketukprojectmap.ui.screens.oma.LoadingPairingOmaScreen
 import com.chat.ketukprojectmap.ui.screens.oma.OmaPermissionsScreen
 import com.chat.ketukprojectmap.ui.screens.oma.OmaPassiveScreen
 import com.chat.ketukprojectmap.ui.screens.oma.ScanQrScreen
+import com.chat.ketukprojectmap.ui.screens.guardian.GuardianHomeScreen
+import com.chat.ketukprojectmap.ui.screens.guardian.GuardianLocationHistoryScreen
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -327,6 +329,31 @@ fun KetukNavHost() {
                         popUpTo(0) { inclusive = true }
                     }
                 }
+            )
+        }
+
+        // ===== Alur Penjaga (05. Core Phase Penjaga & Flowchart M10) =====
+        composable(Routes.guardianHome) {
+            GuardianHomeScreen(
+                onOpenNotifications = { navController.navigate(Routes.notifikasi) },
+                onOpenLocationHistory = { navController.navigate(Routes.guardianLocationHistory) },
+                // TODO(tim): tombol khusus demo, tidak ada di Figma
+                onNavigateBackToRole = {
+                    navController.navigate(Routes.role) {
+                        popUpTo(Routes.guardianHome) { inclusive = true }
+                    }
+                },
+                onLogout = {
+                    navController.navigate(Routes.login) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.guardianLocationHistory) {
+            GuardianLocationHistoryScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }
