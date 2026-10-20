@@ -1,5 +1,6 @@
 package com.chat.ketukprojectmap.ui.screens.lokasi
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,7 +19,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,10 +28,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chat.ketukprojectmap.R
+import com.chat.ketukprojectmap.data.dummy.DummyData
 import com.chat.ketukprojectmap.data.model.LokasiData
-import com.chat.ketukprojectmap.ui.screens.home.FadeSlideIn
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.theme.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -40,6 +42,15 @@ fun LokasiScreen(
 ) {
     val lokasiData by viewModel.lokasiData.collectAsState()
     var contentVisible by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val colors = KetukTheme.colors
+
+    val showMockupMessage: (String) -> Unit = { msg ->
+        scope.launch {
+            snackbarHostState.showSnackbar(msg)
+        }
+    }
 
     LaunchedEffect(Unit) {
         delay(100.milliseconds)
@@ -51,7 +62,7 @@ fun LokasiScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(KremBackground)
+            .background(colors.screenBackground)
             .statusBarsPadding()
     ) {
         // Urutan penting: widthIn dulu, baru fillMaxSize, supaya lebar benar-benar dibatasi 600dp di tablet
@@ -93,19 +104,43 @@ fun LokasiScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             FadeSlideIn(visible = contentVisible, delayMillis = 160) {
-                LokasiBottomSheet(lokasiData)
+                LokasiBottomSheet(
+                    lokasiData = lokasiData,
+                    onShowRoute = {
+                        showMockupMessage("Simulasi Mockup: Membuka rute ke ${DummyData.defaultElder.address}")
+                    },
+                    onCallElder = {
+                        showMockupMessage("Simulasi Mockup: Menghubungi ${lokasiData.elderName}")
+                    },
+                    onGuardianClick = {
+                        showMockupMessage("Simulasi Mockup: Detail penjaga terdekat ${lokasiData.guardianName} (${lokasiData.guardianDistance})")
+                    }
+                )
             }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 80.dp)
+        )
     }
 }
 
 @Composable
-fun LokasiBottomSheet(lokasiData: LokasiData) {
+fun LokasiBottomSheet(
+    lokasiData: LokasiData,
+    onShowRoute: () -> Unit = {},
+    onCallElder: () -> Unit = {},
+    onGuardianClick: () -> Unit = {}
+) {
+    val colors = KetukTheme.colors
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-        color = SheetBackground,
-        border = BorderStroke(1.dp, ActivePill)
+        color = colors.sheetBackground,
+        border = BorderStroke(1.dp, colors.cardBorder)
     ) {
         Column(
             modifier = Modifier
@@ -127,22 +162,30 @@ fun LokasiBottomSheet(lokasiData: LokasiData) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            ActionButtons()
+            ActionButtons(
+                onShowRoute = onShowRoute,
+                onCallElder = onCallElder
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            GuardianCard(lokasiData)
+            GuardianCard(
+                lokasiData = lokasiData,
+                onClick = onGuardianClick
+            )
         }
     }
 }
 
 @Composable
 fun ElderInfoCard(lokasiData: LokasiData) {
+    val colors = KetukTheme.colors
+    val unifiedAge = DummyData.defaultElder.age
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardNetral),
-        border = BorderStroke(1.dp, ActivePill),
+        colors = CardDefaults.cardColors(containerColor = colors.cardNeutral),
+        border = BorderStroke(1.dp, colors.cardBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -165,7 +208,7 @@ fun ElderInfoCard(lokasiData: LokasiData) {
             Column(modifier = Modifier.weight(1f)) {
                 Surface(
                     shape = RoundedCornerShape(50),
-                    color = ChipAman,
+                    color = colors.chipAman,
                     modifier = Modifier.heightIn(min = 24.dp)
                 ) {
                     Row(
@@ -177,12 +220,12 @@ fun ElderInfoCard(lokasiData: LokasiData) {
                             modifier = Modifier
                                 .size(8.dp)
                                 .clip(CircleShape)
-                                .background(HijauDaun)
+                                .background(colors.accentGreen)
                         )
                         Text(
                             text = lokasiData.status,
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                            color = HijauDaun,
+                            color = colors.accentGreen,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -200,7 +243,7 @@ fun ElderInfoCard(lokasiData: LokasiData) {
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "${lokasiData.elderAge} tahun - ${lokasiData.elderLocation}",
+                    text = "$unifiedAge tahun - ${lokasiData.elderLocation}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
@@ -210,13 +253,17 @@ fun ElderInfoCard(lokasiData: LokasiData) {
 }
 
 @Composable
-fun ActionButtons() {
+fun ActionButtons(
+    onShowRoute: () -> Unit = {},
+    onCallElder: () -> Unit = {}
+) {
+    val colors = KetukTheme.colors
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Button(
-            onClick = { /* TODO: nanti Intent peta - Lihat Rute */ },
+            onClick = onShowRoute,
             modifier = Modifier
                 .weight(1f)
                 .heightIn(min = 52.dp),
@@ -228,39 +275,39 @@ fun ActionButtons() {
             Icon(
                 imageVector = Icons.Rounded.Navigation,
                 contentDescription = null,
-                tint = Color.White,
+                tint = colors.onAccent,
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Lihat Rute",
-                color = Color.White,
+                color = colors.onAccent,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
 
         OutlinedButton(
-            onClick = { /* TODO: nanti Intent telepon - Hubungi Oma */ },
+            onClick = onCallElder,
             modifier = Modifier
                 .weight(1f)
                 .heightIn(min = 52.dp),
             shape = RoundedCornerShape(50),
             colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = CardNetral
+                containerColor = colors.cardNeutral
             ),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         ) {
             Icon(
                 imageVector = Icons.Rounded.Call,
                 contentDescription = null,
-                tint = Arang,
+                tint = colors.textPrimary,
                 modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = "Hubungi Oma",
-                color = Arang,
+                color = colors.textPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -269,12 +316,17 @@ fun ActionButtons() {
 }
 
 @Composable
-fun GuardianCard(lokasiData: LokasiData) {
+fun GuardianCard(
+    lokasiData: LokasiData,
+    onClick: () -> Unit = {}
+) {
+    val colors = KetukTheme.colors
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardNetral),
-        border = BorderStroke(1.dp, ActivePill),
+        colors = CardDefaults.cardColors(containerColor = colors.cardNeutral),
+        border = BorderStroke(1.dp, colors.cardBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -283,21 +335,14 @@ fun GuardianCard(lokasiData: LokasiData) {
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // TODO: ganti dengan R.drawable.penjaga_lintang saat file tersedia
-            Surface(
-                modifier = Modifier.size(48.dp),
-                shape = CircleShape,
-                color = Sage
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = "L",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
-            }
+            Image(
+                painter = painterResource(R.drawable.penjaga_lintang),
+                contentDescription = lokasiData.guardianName,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -323,7 +368,7 @@ fun GuardianCard(lokasiData: LokasiData) {
                 Icon(
                     imageVector = Icons.Rounded.LocationOn,
                     contentDescription = null,
-                    tint = HijauDaun,
+                    tint = colors.accentGreen,
                     modifier = Modifier.size(16.dp)
                 )
                 Text(
@@ -373,3 +418,11 @@ fun LokasiScreenPreviewTablet() {
         LokasiScreen()
     }
 }
+
+@Preview(name = "Mode Gelap", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun LokasiScreenDarkPreview() {
+    KetukTheme(darkTheme = true) {
+        LokasiScreen()
+    }
+}

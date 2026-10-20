@@ -1,9 +1,11 @@
 package com.chat.ketukprojectmap.ui.screens.splash
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -77,7 +79,11 @@ fun SplashScreen(
         }
     }
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(KetukTheme.colors.screenBackground)
+    ) {
 
         // ===== Semua ukuran dihitung dari ukuran layar =====
         val rumahWidth = maxWidth * 0.65f
@@ -178,3 +184,15 @@ fun SplashScreenPreview() {
         SplashScreen(onNavigateToOnboarding = {})
     }
 }
+
+@androidx.compose.ui.tooling.preview.Preview(
+    name = "Mode Gelap",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+fun SplashScreenDarkPreview() {
+    KetukTheme(darkTheme = true) {
+        SplashScreen(onNavigateToOnboarding = {})
+    }
+}

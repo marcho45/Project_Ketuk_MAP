@@ -1,5 +1,6 @@
 package com.chat.ketukprojectmap.ui.screens.onboarding
 
+import android.content.res.Configuration
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -21,12 +22,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
@@ -54,6 +51,7 @@ fun OnboardingScreen(
     val scope = rememberCoroutineScope()
     val currentPage = pagerState.currentPage
     val isLastPage = currentPage == OnboardingViewModel.TOTAL_PAGES - 1
+    val colors = KetukTheme.colors
 
     LaunchedEffect(currentPage) {
         viewModel.updatePage(currentPage)
@@ -64,7 +62,7 @@ fun OnboardingScreen(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(KremBackground)
+            .background(colors.screenBackground)
     ) {
         // ===== Proporsi dari Figma (atur di sini) =====
         val cornerRadius = 32.dp
@@ -94,7 +92,7 @@ fun OnboardingScreen(
                 .fillMaxSize()
                 .padding(top = panelTop)
                 .clip(RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius))
-                .background(KremBackground)
+                .background(colors.screenBackground)
         ) {
             HorizontalPager(
                 state = pagerState,
@@ -138,7 +136,7 @@ fun OnboardingScreen(
                         ),
                         fontSize = 11.sp,
                         lineHeight = 15.sp,
-                        color = Arang.copy(alpha = 0.7f),
+                        color = colors.textPrimary.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -171,7 +169,7 @@ fun OnboardingScreen(
                                 text = "Mulai",
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = Color.White
+                                color = colors.onAccent
                             )
                         }
                     } else {
@@ -184,7 +182,7 @@ fun OnboardingScreen(
                                 Text(
                                     text = "Skip",
                                     fontSize = 14.sp,
-                                    color = Arang.copy(alpha = 0.5f),
+                                    color = colors.textPrimary.copy(alpha = 0.5f),
                                     fontWeight = FontWeight.Normal
                                 )
                             }
@@ -202,7 +200,7 @@ fun OnboardingScreen(
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Rounded.ArrowForward,
                                     contentDescription = "Selanjutnya",
-                                    tint = Color.White,
+                                    tint = colors.onAccent,
                                     modifier = Modifier.size(24.dp)
                                 )
                             }
@@ -271,6 +269,7 @@ fun underlineKetuk(text: String, brand: String = "Ketuk"): AnnotatedString =
 
 @Composable
 private fun OnboardingTextPage(title: String, body: String) {
+    val textPrimary = KetukTheme.colors.textPrimary
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
@@ -279,7 +278,7 @@ private fun OnboardingTextPage(title: String, body: String) {
             text = title,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = Arang,
+            color = textPrimary,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -287,7 +286,7 @@ private fun OnboardingTextPage(title: String, body: String) {
             text = underlineKetuk(body),
             fontSize = 13.sp,
             lineHeight = 19.sp,
-            color = Arang.copy(alpha = 0.7f),
+            color = textPrimary.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
         )
     }
@@ -311,6 +310,7 @@ fun OnboardingContent2() {
 
 @Composable
 fun OnboardingContent3() {
+    val textPrimary = KetukTheme.colors.textPrimary
     Column(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxWidth()
@@ -319,7 +319,7 @@ fun OnboardingContent3() {
             text = "Sapa dulu, baru ketuk",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = Arang,
+            color = textPrimary,
             textAlign = TextAlign.Start,
             modifier = Modifier.fillMaxWidth()
         )
@@ -355,7 +355,8 @@ fun StepItem(
     text: String,
     isLast: Boolean = false
 ) {
-    val bodyColor = Arang.copy(alpha = 0.7f)
+    val colors = KetukTheme.colors
+    val bodyColor = colors.textPrimary.copy(alpha = 0.7f)
     val lineColor = Terakota.copy(alpha = 0.55f)
 
     Row(
@@ -375,7 +376,7 @@ fun StepItem(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(CircleShape)
-                    .background(KremGelap)
+                    .background(colors.divider)
                     .border(1.dp, Terakota.copy(alpha = 0.3f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
@@ -383,7 +384,7 @@ fun StepItem(
                     text = number.toString(),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Arang
+                    color = colors.textPrimary
                 )
             }
 
@@ -456,3 +457,11 @@ fun OnboardingScreenSmallPreview() {
         OnboardingScreen(onNavigateToLogin = {})
     }
 }
+
+@Preview(name = "Mode Gelap", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun OnboardingScreenDarkPreview() {
+    KetukTheme(darkTheme = true) {
+        OnboardingScreen(onNavigateToLogin = {})
+    }
+}

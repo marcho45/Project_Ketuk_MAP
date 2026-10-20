@@ -1,5 +1,6 @@
 package com.chat.ketukprojectmap.ui.screens.role
 
+import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -38,8 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chat.ketukprojectmap.R
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.components.KetukButton
-import com.chat.ketukprojectmap.ui.theme.Arang
 import com.chat.ketukprojectmap.ui.theme.KetukTheme
 import com.chat.ketukprojectmap.ui.theme.Terakota
 
@@ -52,6 +53,7 @@ fun RoleSelectScreen(
     val selectedRole by viewModel.selectedRole.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
+    val colors = KetukTheme.colors
 
     BackHandler(onBack = onNavigateBack)
 
@@ -61,6 +63,7 @@ fun RoleSelectScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(colors.screenBackground)
             .systemBarsPadding()
     ) {
         Spacer(modifier = Modifier.height(8.dp))
@@ -75,25 +78,27 @@ fun RoleSelectScreen(
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = "Kembali",
-                tint = Arang
+                tint = colors.textPrimary
             )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Column(modifier = Modifier.padding(horizontal = 32.dp)) {
-            Text(
-                text = "Siapa kamu?",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Arang
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = "Pilih peranmu untuk melanjutkan",
-                fontSize = 12.sp,
-                color = Arang
-            )
+        FadeSlideIn(delayMillis = 0) {
+            Column(modifier = Modifier.padding(horizontal = 32.dp)) {
+                Text(
+                    text = "Siapa kamu?",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textPrimary
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Pilih peranmu untuk melanjutkan",
+                    fontSize = 12.sp,
+                    color = colors.textPrimary
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -106,60 +111,70 @@ fun RoleSelectScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 32.dp, vertical = 4.dp)
         ) {
-            RoleCard(
-                illustration = R.drawable.role_wali,
-                illustrationSize = illustrationSize,
-                title = "Saya wali Oma dan Opa",
-                description = "Saya adalah anak, cucu, atau keluarga yang merawat Oma dan Opa.",
-                isSelected = selectedRole == UserRole.WALI,
-                onClick = { viewModel.selectRole(UserRole.WALI) }
-            )
+            FadeSlideIn(delayMillis = 80) {
+                RoleCard(
+                    illustration = R.drawable.role_wali,
+                    illustrationSize = illustrationSize,
+                    title = "Saya wali Oma dan Opa",
+                    description = "Saya adalah anak, cucu, atau keluarga yang merawat Oma dan Opa.",
+                    isSelected = selectedRole == UserRole.WALI,
+                    onClick = { viewModel.selectRole(UserRole.WALI) }
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            RoleCard(
-                illustration = R.drawable.role_penjaga,
-                illustrationSize = illustrationSize,
-                title = "Saya penjaga Oma dan Opa",
-                description = "Saya adalah tetangga atau orang yang paling dekat dari rumah Oma dan Opa.",
-                isSelected = selectedRole == UserRole.PENJAGA,
-                onClick = { viewModel.selectRole(UserRole.PENJAGA) }
-            )
+            FadeSlideIn(delayMillis = 160) {
+                RoleCard(
+                    illustration = R.drawable.role_penjaga,
+                    illustrationSize = illustrationSize,
+                    title = "Saya penjaga Oma dan Opa",
+                    description = "Saya adalah tetangga atau orang yang paling dekat dari rumah Oma dan Opa.",
+                    isSelected = selectedRole == UserRole.PENJAGA,
+                    onClick = { viewModel.selectRole(UserRole.PENJAGA) }
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            RoleCard(
-                illustration = R.drawable.role_opa,
-                illustrationSize = illustrationSize,
-                title = "Saya adalah Oma/Opa",
-                description = "Saya ingin memantau kesehatan dan aktivitas saya sendiri.",
-                isSelected = selectedRole == UserRole.OMA_OPA,
-                onClick = { viewModel.selectRole(UserRole.OMA_OPA) }
-            )
+            FadeSlideIn(delayMillis = 240) {
+                RoleCard(
+                    illustration = R.drawable.role_opa,
+                    illustrationSize = illustrationSize,
+                    title = "Saya adalah Oma/Opa",
+                    description = "Saya ingin memantau kesehatan dan aktivitas saya sendiri.",
+                    isSelected = selectedRole == UserRole.OMA_OPA,
+                    onClick = { viewModel.selectRole(UserRole.OMA_OPA) }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Pesan error simpan role
-        if (state.error != null) {
-            Text(
-                text = state.error.orEmpty(),
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(horizontal = 36.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+        FadeSlideIn(delayMillis = 320) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Pesan error simpan role
+                if (state.error != null) {
+                    Text(
+                        text = state.error.orEmpty(),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(horizontal = 36.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
-        Box(modifier = Modifier.padding(horizontal = 32.dp)) {
-            KetukButton(
-                text = if (state.isSaving) "Menyimpan..." else "Lanjutkan",
-                onClick = {
-                    // TODO: peran penjaga dan oma/opa sementara juga menuju home
-                    viewModel.confirm(onSuccess = onNavigateToHome)
-                },
-                enabled = selectedRole != null && !state.isSaving
-            )
+                Box(modifier = Modifier.padding(horizontal = 32.dp)) {
+                    KetukButton(
+                        text = if (state.isSaving) "Menyimpan..." else "Lanjutkan",
+                        onClick = {
+                            // TODO: peran penjaga dan oma/opa sementara juga menuju home
+                            viewModel.confirm(onSuccess = onNavigateToHome)
+                        },
+                        enabled = selectedRole != null && !state.isSaving
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -175,12 +190,13 @@ fun RoleCard(
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    // Terpilih: peach (terakota 15% di atas putih). Tidak terpilih: putih
+    val colors = KetukTheme.colors
+    // Terpilih: peach (terakota 15% di atas permukaan kartu). Tidak terpilih: permukaan kartu
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) {
-            Terakota.copy(alpha = 0.15f).compositeOver(Color.White)
+            Terakota.copy(alpha = 0.15f).compositeOver(colors.cardSurface)
         } else {
-            Color.White
+            colors.cardSurface
         },
         animationSpec = tween(250),
         label = "containerColor"
@@ -227,14 +243,14 @@ fun RoleCard(
                         fontSize = 14.sp,
                         lineHeight = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Arang
+                        color = colors.textPrimary
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = description,
                         fontSize = 10.sp,
                         lineHeight = 14.sp,
-                        color = Arang
+                        color = colors.textPrimary
                     )
                 }
             }
@@ -252,7 +268,7 @@ fun RoleCard(
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = colors.onAccent,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -275,3 +291,11 @@ fun RoleSelectScreenSmallPreview() {
         RoleSelectScreen(onNavigateBack = {}, onNavigateToHome = {})
     }
 }
+
+@Preview(name = "Mode Gelap", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun RoleSelectScreenDarkPreview() {
+    KetukTheme(darkTheme = true) {
+        RoleSelectScreen(onNavigateBack = {}, onNavigateToHome = {})
+    }
+}

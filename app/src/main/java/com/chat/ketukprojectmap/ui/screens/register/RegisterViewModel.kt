@@ -32,29 +32,85 @@ class RegisterViewModel(
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
 
     fun onFullNameChange(value: String) {
-        _uiState.update { it.copy(fullName = value, fullNameError = "", error = "") }
+        val capped = value.take(60)
+        val err = if (capped.isNotEmpty() && capped.isBlank()) "Nama lengkap tidak boleh kosong" else ""
+        _uiState.update { it.copy(fullName = capped, fullNameError = err, error = "") }
     }
 
     fun onEmailChange(value: String) {
-        _uiState.update { it.copy(email = value, emailError = "", error = "") }
+        val capped = value.take(100)
+        val trimmed = capped.trim()
+        val err = when {
+            capped.isEmpty() -> ""
+            trimmed.isEmpty() || !isValidEmail(trimmed) -> "Format email tidak valid"
+            else -> ""
+        }
+        _uiState.update { it.copy(email = capped, emailError = err, error = "") }
     }
 
     fun onPhoneNumberChange(value: String) {
-        val filtered = value.filter { it.isDigit() }
-        _uiState.update { it.copy(phoneNumber = filtered, phoneNumberError = "", error = "") }
+        val filtered = value.filter { it.isDigit() }.take(13)
+        val err = if (filtered.isNotEmpty() && filtered.length < 9) {
+            "Nomor HP harus 9-13 digit"
+        } else {
+            ""
+        }
+        _uiState.update { it.copy(phoneNumber = filtered, phoneNumberError = err, error = "") }
     }
 
     fun onPasswordChange(value: String) {
-        _uiState.update { it.copy(password = value, passwordError = "", error = "") }
+        val capped = value.take(64)
+        _uiState.update { current ->
+            val passErr = if (capped.isNotEmpty() && capped.length < 8) {
+                "Password minimal 8 karakter"
+            } else {
+                ""
+            }
+            val confirmErr = if (current.confirmPassword.isNotEmpty() && capped != current.confirmPassword) {
+                "Password tidak sama"
+            } else {
+                ""
+            }
+            current.copy(
+                password = capped,
+                passwordError = passErr,
+                confirmPasswordError = confirmErr,
+                error = ""
+            )
+        }
     }
 
     fun onConfirmPasswordChange(value: String) {
-        _uiState.update { it.copy(confirmPassword = value, confirmPasswordError = "", error = "") }
+        val capped = value.take(64)
+        _uiState.update { current ->
+            val confirmErr = if (capped.isNotEmpty() && current.password != capped) {
+                "Password tidak sama"
+            } else {
+                ""
+            }
+            current.copy(confirmPassword = capped, confirmPasswordError = confirmErr, error = "")
+        }
     }
 
     // Dipanggil saat login Google gagal; pesannya tampil di bawah form
     fun onGoogleError(message: String) {
         _uiState.update { it.copy(error = message, isLoading = false) }
+    }
+
+    fun signInWithGoogleDemo(onSuccess: () -> Unit) {
+        if (_uiState.value.isLoading) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, error = "") }
+            try {
+                repository.signInWithGoogle()
+                _uiState.update { it.copy(isLoading = false) }
+                onSuccess()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = "Login Google gagal") }
+            }
+        }
     }
 
     fun register(
@@ -147,8 +203,9 @@ class RegisterViewModel(
         val state = _uiState.value
         return state.fullName.isNotBlank() &&
                 state.email.isNotBlank() &&
-                state.phoneNumber.isNotBlank() &&
-                state.password.isNotBlank() &&
-                state.confirmPassword.isNotBlank()
+                isValidEmail(state.email.trim()) &&
+                state.phoneNumber.length in 9..13 &&
+                state.password.length >= 8 &&
+                state.confirmPassword == state.password
     }
 }

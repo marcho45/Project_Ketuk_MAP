@@ -1,5 +1,6 @@
 package com.chat.ketukprojectmap.ui.screens.login
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,8 +42,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chat.ketukprojectmap.R
+import com.chat.ketukprojectmap.data.dummy.DummyData
 import com.chat.ketukprojectmap.data.remote.SupabaseProvider
-import com.chat.ketukprojectmap.ui.theme.Arang
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.theme.KetukTheme
 import com.chat.ketukprojectmap.ui.theme.Terakota
 import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
@@ -58,18 +61,31 @@ fun LoginScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    val googleAuth = SupabaseProvider.client.composeAuth.rememberSignInWithGoogle(
-        onResult = { result -> viewModel.onGoogleResult(result, onNavigateToRole) },
-        fallback = { /* login native tidak tersedia di perangkat ini */ }
-    )
+    val googleAuth = if (!com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) {
+        SupabaseProvider.client.composeAuth.rememberSignInWithGoogle(
+            onResult = { result -> viewModel.onGoogleResult(result, onNavigateToRole) },
+            fallback = { /* login native tidak tersedia di perangkat ini */ }
+        )
+    } else {
+        null
+    }
+    val onGoogleClick: () -> Unit = {
+        if (com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) {
+            viewModel.signInWithGoogleDemo(onNavigateToRole)
+        } else {
+            googleAuth?.startFlow()
+        }
+    }
 
     LoginContent(
         isLoading = state.isLoading,
+        emailError = state.emailError,
+        passwordError = state.passwordError,
         error = state.error,
         onLogin = { email, password ->
             viewModel.login(email, password, onNavigateToRole, onNavigateToVerification)
         },
-        onGoogleClick = { googleAuth.startFlow() },
+        onGoogleClick = onGoogleClick,
         onNavigateToRegister = onNavigateToRegister,
         onNavigateBack = onNavigateBack,
         onClearError = viewModel::clearError
@@ -85,21 +101,40 @@ fun LoginContent(
     onGoogleClick: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateBack: () -> Unit = {},
-    onClearError: () -> Unit = {}
+    onClearError: () -> Unit = {},
+    emailError: String? = null,
+    passwordError: String? = null
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+
+    val emailRegex = remember { "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex() }
+    val liveEmailError = when {
+        emailError != null -> emailError
+        email.isNotEmpty() && !emailRegex.matches(email.trim()) -> "Format email tidak valid"
+        else -> null
+    }
+    val livePasswordError = when {
+        passwordError != null -> passwordError
+        password.isNotEmpty() && password.length < 6 -> "Password minimal 6 karakter"
+        else -> null
+    }
 
     // Handle tombol back fisik HP
     BackHandler(onBack = onNavigateBack)
 
+    val colors = KetukTheme.colors
     // Warna sesuai Figma: latar field peach + border terakota
-    val fieldBg = Terakota.copy(alpha = 0.12f)
-    val fieldBorder = Terakota.copy(alpha = 0.35f)
+    val fieldBg = colors.authFieldBackground
+    val fieldBorder = colors.authFieldBorder
     val fieldShape = RoundedCornerShape(12.dp)
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(colors.screenBackground)
+    ) {
 
         // ===== Ukuran maskot ikut lebar layar =====
         val mascotSize = (maxWidth * 0.5f).coerceIn(140.dp, 220.dp)
@@ -140,245 +175,284 @@ fun LoginContent(
         ) {
             Spacer(modifier = Modifier.height(48.dp))
 
-            // ===== Maskot + bayangan + daun =====
-            Box(
-                modifier = Modifier.size(
-                    width = mascotSize * 1.22f,
-                    height = mascotSize * 1.05f
-                ),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                // Bayangan oval di bawah kaki
-                Box(
-                    modifier = Modifier
-                        .padding(bottom = 2.dp)
-                        .size(width = mascotSize * 0.67f, height = 12.dp)
-                        .clip(CircleShape)
-                        .background(Terakota.copy(alpha = 0.12f))
-                )
-                // Maskot
-                Image(
-                    painter = painterResource(R.drawable.tok_memeriksa),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .size(mascotSize)
-                        .padding(bottom = 4.dp),
-                    contentScale = ContentScale.Fit
-                )
-                // Daun di kanan bawah kaki maskot
-                Image(
-                    painter = painterResource(R.drawable.asset_ketuk_daun),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(end = mascotSize * 0.11f, bottom = 2.dp)
-                        .size(mascotSize * 0.29f),
-                    contentScale = ContentScale.Fit
-                )
-            }
-
-            Spacer(modifier = Modifier.height(36.dp))
-
-            // ===== Logo + teks Ketuk =====
-            val logoOffsetY = (-2).dp   // positif = logo turun, negatif = logo naik
-            val textOffsetY = 3.dp      // positif = teks turun, negatif = teks naik
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.logo_ketuk),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(34.dp)
-                        .offset(y = logoOffsetY),
-                    contentScale = ContentScale.Fit
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "Ketuk",
-                    modifier = Modifier.offset(y = textOffsetY),
-                    style = TextStyle(
-                        fontSize = 30.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Terakota,
-                        platformStyle = PlatformTextStyle(includeFontPadding = false),
-                        lineHeightStyle = LineHeightStyle(
-                            alignment = LineHeightStyle.Alignment.Center,
-                            trim = LineHeightStyle.Trim.Both
+            FadeSlideIn(delayMillis = 0) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // ===== Maskot + bayangan + daun =====
+                    Box(
+                        modifier = Modifier.size(
+                            width = mascotSize * 1.22f,
+                            height = mascotSize * 1.05f
+                        ),
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        // Bayangan oval di bawah kaki
+                        Box(
+                            modifier = Modifier
+                                .padding(bottom = 2.dp)
+                                .size(width = mascotSize * 0.67f, height = 12.dp)
+                                .clip(CircleShape)
+                                .background(colors.authFieldBackground)
                         )
-                    )
-                )
-            }
+                        // Maskot
+                        Image(
+                            painter = painterResource(R.drawable.tok_memeriksa),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .size(mascotSize)
+                                .padding(bottom = 4.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                        // Daun di kanan bawah kaki maskot
+                        Image(
+                            painter = painterResource(R.drawable.asset_ketuk_daun),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(end = mascotSize * 0.11f, bottom = 2.dp)
+                                .size(mascotSize * 0.29f),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
 
-            Text(
-                text = "Halo! Senang melihatmu kembali",
-                fontSize = 12.sp,
-                color = Arang,
-                textAlign = TextAlign.Center
-            )
+                    Spacer(modifier = Modifier.height(36.dp))
+
+                    // ===== Logo + teks Ketuk =====
+                    val logoOffsetY = (-2).dp   // positif = logo turun, negatif = logo naik
+                    val textOffsetY = 3.dp      // positif = teks turun, negatif = teks naik
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.logo_ketuk),
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(34.dp)
+                                .offset(y = logoOffsetY),
+                            contentScale = ContentScale.Fit
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Ketuk",
+                            modifier = Modifier.offset(y = textOffsetY),
+                            style = TextStyle(
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Terakota,
+                                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                                lineHeightStyle = LineHeightStyle(
+                                    alignment = LineHeightStyle.Alignment.Center,
+                                    trim = LineHeightStyle.Trim.Both
+                                )
+                            )
+                        )
+                    }
+
+                    Text(
+                        text = "Halo! Senang melihatmu kembali",
+                        fontSize = 12.sp,
+                        color = colors.textPrimary,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // ===== Field Email =====
-            LoginField(
-                value = email,
-                onValueChange = {
-                    email = it
-                    onClearError()
-                },
-                label = "Email",
-                hint = "Contoh: nama@email.com",
-                leadingIcon = Icons.Rounded.Email,
-                keyboardType = KeyboardType.Email,
-                background = fieldBg,
-                shape = fieldShape
-            )
+            // ===== Field Email & Password =====
+            FadeSlideIn(delayMillis = 80) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    LoginField(
+                        value = email,
+                        onValueChange = {
+                            email = it.take(100)
+                            onClearError()
+                        },
+                        label = "Email",
+                        hint = "Contoh: nama@email.com",
+                        leadingIcon = Icons.Rounded.Email,
+                        keyboardType = KeyboardType.Email,
+                        background = fieldBg,
+                        shape = fieldShape,
+                        isError = liveEmailError != null,
+                        errorMessage = liveEmailError
+                    )
 
-            Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-            // ===== Field Password =====
-            LoginField(
-                value = password,
-                onValueChange = {
-                    password = it
-                    onClearError()
-                },
-                label = "Password",
-                hint = "Masukkan password",
-                leadingIcon = Icons.Rounded.Lock,
-                keyboardType = KeyboardType.Password,
-                visualTransformation = if (passwordVisible) {
-                    VisualTransformation.None
-                } else {
-                    PasswordVisualTransformation()
-                },
-                trailing = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            imageVector = if (passwordVisible) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff,
-                            contentDescription = if (passwordVisible) "Sembunyikan password" else "Tampilkan password",
-                            tint = Terakota
-                        )
-                    }
-                },
-                background = fieldBg,
-                shape = fieldShape
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // ===== Pesan error =====
-            if (error != null) {
-                Text(
-                    text = error,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 4.dp, bottom = 8.dp)
-                )
+                    LoginField(
+                        value = password,
+                        onValueChange = {
+                            password = it.take(64)
+                            onClearError()
+                        },
+                        label = "Password",
+                        hint = "Masukkan password",
+                        leadingIcon = Icons.Rounded.Lock,
+                        keyboardType = KeyboardType.Password,
+                        visualTransformation = if (passwordVisible) {
+                            VisualTransformation.None
+                        } else {
+                            PasswordVisualTransformation()
+                        },
+                        trailing = {
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(
+                                    imageVector = if (passwordVisible) Icons.Rounded.Visibility else Icons.Rounded.VisibilityOff,
+                                    contentDescription = if (passwordVisible) "Sembunyikan password" else "Tampilkan password",
+                                    tint = Terakota
+                                )
+                            }
+                        },
+                        background = fieldBg,
+                        shape = fieldShape,
+                        isError = livePasswordError != null,
+                        errorMessage = livePasswordError
+                    )
+                }
             }
 
-            // ===== Tombol Masuk =====
-            Button(
-                onClick = { onLogin(email, password) },
-                enabled = !isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(44.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Terakota,
-                    disabledContainerColor = Terakota.copy(alpha = 0.5f)
-                )
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(
-                        text = "Masuk",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // ===== Pesan error & Tombol Masuk =====
+            FadeSlideIn(delayMillis = 160) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    if (error != null) {
+                        Text(
+                            text = error,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(start = 4.dp, bottom = 8.dp)
+                        )
+                    }
+
+                    val isFormValid = email.trim().isNotEmpty() &&
+                            emailRegex.matches(email.trim()) &&
+                            password.length >= 6
+                    Button(
+                        onClick = { onLogin(email, password) },
+                        enabled = !isLoading && isFormValid,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Terakota,
+                            disabledContainerColor = Terakota.copy(alpha = 0.5f)
+                        )
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = colors.onAccent,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Masuk",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.onAccent
+                            )
+                        }
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // ===== Pemisah "atau" =====
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = Arang.copy(alpha = 0.6f)
-                )
-                Text(
-                    text = "atau",
-                    fontSize = 10.sp,
-                    color = Arang,
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
-                HorizontalDivider(
-                    modifier = Modifier.weight(1f),
-                    color = Arang.copy(alpha = 0.6f)
-                )
+            // ===== Pemisah "atau" & Tombol Google & Tautan Daftar =====
+            FadeSlideIn(delayMillis = 240) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        HorizontalDivider(
+                            modifier = Modifier.weight(1f),
+                            color = colors.textPrimary.copy(alpha = 0.6f)
+                        )
+                        Text(
+                            text = "atau",
+                            fontSize = 10.sp,
+                            color = colors.textPrimary,
+                            modifier = Modifier.padding(horizontal = 12.dp)
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.weight(1f),
+                            color = colors.textPrimary.copy(alpha = 0.6f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedButton(
+                        onClick = onGoogleClick,
+                        enabled = !isLoading,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = fieldBg,
+                            contentColor = colors.textPrimary
+                        ),
+                        border = BorderStroke(1.dp, fieldBorder)
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.logo_google),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Lanjut dengan Google",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Row(horizontalArrangement = Arrangement.Center) {
+                        Text(
+                            text = "Belum punya akun? ",
+                            fontSize = 12.sp,
+                            color = colors.textPrimary
+                        )
+                        Text(
+                            text = "Daftar disini",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.tertiary, // hijau
+                            textDecoration = TextDecoration.Underline,
+                            modifier = Modifier.clickable { onNavigateToRegister() }
+                        )
+                    }
+                }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ===== Tombol Google =====
-            OutlinedButton(
-                onClick = onGoogleClick,
-                enabled = !isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(44.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = fieldBg,
-                    contentColor = Arang
-                ),
-                border = BorderStroke(1.dp, fieldBorder)
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.logo_google),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Lanjut dengan Google",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // ===== Tautan Daftar =====
-            Row(horizontalArrangement = Arrangement.Center) {
-                Text(
-                    text = "Belum punya akun? ",
-                    fontSize = 12.sp,
-                    color = Arang
-                )
-                Text(
-                    text = "Daftar disini",
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.tertiary, // hijau
-                    textDecoration = TextDecoration.Underline,
-                    modifier = Modifier.clickable { onNavigateToRegister() }
-                )
+            // ===== Hint Akun Demo (HANYA tampil pada variant `demo`) =====
+            if (com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) {
+                Spacer(modifier = Modifier.height(20.dp))
+                FadeSlideIn(delayMillis = 320) {
+                    DemoAccountsHintCard(
+                        onSelectAccount = { demoEmail, demoPassword ->
+                            email = demoEmail
+                            password = demoPassword
+                            onClearError()
+                        }
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -402,6 +476,76 @@ fun LoginContent(
     }
 }
 
+@Composable
+private fun DemoAccountsHintCard(
+    onSelectAccount: (email: String, password: String) -> Unit
+) {
+    val colors = KetukTheme.colors
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = colors.authFieldBackground,
+        border = BorderStroke(1.dp, colors.authFieldBorder)
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp)
+        ) {
+            Text(
+                text = "Akun Demo UTS",
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = Terakota
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = "Ketuk baris untuk isi otomatis. Sandi: Ketuk123",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Normal,
+                color = colors.textSecondary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            DummyData.demoAccounts.forEachIndexed { index, acc ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable { onSelectAccount(acc.email, acc.password) }
+                        .padding(vertical = 5.dp, horizontal = 4.dp)
+                ) {
+                    Text(
+                        text = "${acc.roleLabel}: ${acc.email}",
+                        fontSize = 11.sp,
+                        color = colors.textPrimary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(modifier = Modifier.height(1.dp))
+                    Text(
+                        text = acc.fullName,
+                        fontSize = 10.5.sp,
+                        color = colors.textSecondary,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
+                if (index < DummyData.demoAccounts.size - 1) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                        color = colors.cardBorder.copy(alpha = 0.5f)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider(color = colors.cardBorder.copy(alpha = 0.7f))
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Tombol 'Lanjut dengan Google' (simulasi) langsung membuka halaman Pilih Peran.",
+                fontSize = 10.5.sp,
+                color = colors.textSecondary,
+                lineHeight = 15.sp
+            )
+        }
+    }
+}
+
 /** Field outlined oren: label berupa Text di atas, ikon di kiri. */
 @Composable
 private fun LoginField(
@@ -415,8 +559,11 @@ private fun LoginField(
     shape: RoundedCornerShape,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
-    trailing: (@Composable () -> Unit)? = null
+    trailing: (@Composable () -> Unit)? = null,
+    isError: Boolean = false,
+    errorMessage: String? = null
 ) {
+    val textPrimary = KetukTheme.colors.textPrimary
     Column(modifier = modifier.fillMaxWidth()) {
         // Label: tulisan saja, tanpa kotak
         Text(
@@ -432,6 +579,16 @@ private fun LoginField(
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            isError = isError,
+            supportingText = if (isError && !errorMessage.isNullOrBlank()) {
+                {
+                    Text(
+                        text = errorMessage,
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            } else null,
             shape = shape,
             placeholder = { Text(hint, fontSize = 14.sp) },
             leadingIcon = {
@@ -444,20 +601,25 @@ private fun LoginField(
             trailingIcon = trailing,
             visualTransformation = visualTransformation,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            textStyle = TextStyle(fontSize = 14.sp, color = Arang),
+            textStyle = TextStyle(fontSize = 14.sp, color = textPrimary),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Terakota,
                 unfocusedBorderColor = Terakota,
+                errorBorderColor = MaterialTheme.colorScheme.error,
                 focusedLeadingIconColor = Terakota,
                 unfocusedLeadingIconColor = Terakota,
+                errorLeadingIconColor = MaterialTheme.colorScheme.error,
                 focusedTrailingIconColor = Terakota,
                 unfocusedTrailingIconColor = Terakota,
+                errorTrailingIconColor = MaterialTheme.colorScheme.error,
                 focusedContainerColor = background,
                 unfocusedContainerColor = background,
-                focusedTextColor = Arang,
-                unfocusedTextColor = Arang,
-                focusedPlaceholderColor = Arang.copy(alpha = 0.55f),
-                unfocusedPlaceholderColor = Arang.copy(alpha = 0.55f),
+                errorContainerColor = background,
+                focusedTextColor = textPrimary,
+                unfocusedTextColor = textPrimary,
+                errorTextColor = textPrimary,
+                focusedPlaceholderColor = textPrimary.copy(alpha = 0.55f),
+                unfocusedPlaceholderColor = textPrimary.copy(alpha = 0.55f),
                 cursorColor = Terakota
             )
         )
@@ -499,6 +661,46 @@ fun LoginScreenErrorPreview() {
         LoginContent(
             isLoading = false,
             error = "Email atau password salah",
+            onLogin = { _, _ -> },
+            onGoogleClick = {},
+            onNavigateToRegister = {}
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(
+    name = "Mode Gelap",
+    widthDp = 360,
+    heightDp = 800,
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
+@Composable
+fun LoginScreenDarkPreview() {
+    KetukTheme(darkTheme = true) {
+        LoginContent(
+            isLoading = false,
+            error = null,
+            onLogin = { _, _ -> },
+            onGoogleClick = {},
+            onNavigateToRegister = {}
+        )
+    }
+}
+
+@androidx.compose.ui.tooling.preview.Preview(
+    name = "Aksesibilitas (360dp fontScale 1.3)",
+    widthDp = 360,
+    heightDp = 800,
+    fontScale = 1.3f,
+    showBackground = true
+)
+@Composable
+fun LoginScreenAccessibilityPreview() {
+    KetukTheme {
+        LoginContent(
+            isLoading = false,
+            error = null,
             onLogin = { _, _ -> },
             onGoogleClick = {},
             onNavigateToRegister = {}

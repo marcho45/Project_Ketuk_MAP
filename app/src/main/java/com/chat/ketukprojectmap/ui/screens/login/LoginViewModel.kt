@@ -15,6 +15,8 @@ import kotlinx.coroutines.launch
 
 data class LoginState(
     val isLoading: Boolean = false,
+    val emailError: String? = null,
+    val passwordError: String? = null,
     val error: String? = null
 )
 
@@ -26,7 +28,9 @@ class LoginViewModel(
     val state: StateFlow<LoginState> = _state.asStateFlow()
 
     fun clearError() {
-        if (_state.value.error != null) _state.update { it.copy(error = null) }
+        if (_state.value.error != null || _state.value.emailError != null || _state.value.passwordError != null) {
+            _state.update { it.copy(error = null, emailError = null, passwordError = null) }
+        }
     }
 
     fun login(
@@ -35,14 +39,32 @@ class LoginViewModel(
         onSuccess: () -> Unit,
         onNeedVerification: () -> Unit
     ) {
-        if (email.isBlank() || password.isBlank()) {
-            _state.update { it.copy(error = "Email dan password wajib diisi") }
+        val trimmedEmail = email.trim()
+        val emailErr = when {
+            trimmedEmail.isBlank() -> "Email tidak boleh kosong"
+            !isValidEmail(trimmedEmail) -> "Format email tidak valid"
+            else -> null
+        }
+        val passErr = when {
+            password.isBlank() -> "Password tidak boleh kosong"
+            password.length < 6 -> "Password minimal 6 karakter"
+            else -> null
+        }
+        if (emailErr != null || passErr != null) {
+            _state.update {
+                it.copy(
+                    emailError = emailErr,
+                    passwordError = passErr,
+                    error = null
+                )
+            }
             return
         }
+
         viewModelScope.launch {
             _state.update { LoginState(isLoading = true) }
             try {
-                repository.login(email, password)
+                repository.login(trimmedEmail, password)
                 _state.update { LoginState() }
                 onSuccess()
             } catch (e: CancellationException) {
@@ -59,6 +81,22 @@ class LoginViewModel(
         }
     }
 
+    fun signInWithGoogleDemo(onSuccess: () -> Unit) {
+        if (_state.value.isLoading) return
+        viewModelScope.launch {
+            _state.update { LoginState(isLoading = true) }
+            try {
+                repository.signInWithGoogle()
+                _state.update { LoginState() }
+                onSuccess()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _state.update { LoginState(error = "Login Google gagal") }
+            }
+        }
+    }
+
     fun onGoogleResult(result: NativeSignInResult, onSuccess: () -> Unit) {
         when (result) {
             is NativeSignInResult.Success -> onSuccess()
@@ -70,9 +108,14 @@ class LoginViewModel(
         }
     }
 
+    private fun isValidEmail(email: String): Boolean {
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
+        return emailRegex.matches(email)
+    }
+
     private fun mapError(msg: String): String = when {
         "invalid login credentials" in msg || "invalid_credentials" in msg ->
-            "Email atau password salah"
+            "Email/Nomor HP atau password salah"
         "network" in msg || "unable to resolve" in msg || "timeout" in msg ->
             "Tidak ada koneksi internet"
         else -> "Gagal masuk, coba lagi"

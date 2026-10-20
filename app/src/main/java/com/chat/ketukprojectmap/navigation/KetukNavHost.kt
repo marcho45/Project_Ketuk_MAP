@@ -3,10 +3,13 @@ package com.chat.ketukprojectmap.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.chat.ketukprojectmap.data.repository.AuthRepository
+import com.chat.ketukprojectmap.ui.screens.detail.DetailAlertScreen
 import com.chat.ketukprojectmap.ui.screens.home.HomeScreen
 import com.chat.ketukprojectmap.ui.screens.login.LoginScreen
 import com.chat.ketukprojectmap.ui.screens.notifikasi.NotifikasiScreen
@@ -15,6 +18,16 @@ import com.chat.ketukprojectmap.ui.screens.register.RegisterScreen
 import com.chat.ketukprojectmap.ui.screens.role.RoleSelectScreen
 import com.chat.ketukprojectmap.ui.screens.splash.SplashScreen
 import com.chat.ketukprojectmap.ui.screens.verification.VerificationScreen
+import com.chat.ketukprojectmap.ui.screens.walisetup.CircleKeluargaScreen
+import com.chat.ketukprojectmap.ui.screens.walisetup.DetailOmaOpaScreen
+import com.chat.ketukprojectmap.ui.screens.walisetup.PilihPenjagaScreen
+import com.chat.ketukprojectmap.ui.screens.walisetup.QrWaliScreen
+import com.chat.ketukprojectmap.ui.screens.oma.LoadingPairingOmaScreen
+import com.chat.ketukprojectmap.ui.screens.oma.OmaPermissionsScreen
+import com.chat.ketukprojectmap.ui.screens.oma.OmaPassiveScreen
+import com.chat.ketukprojectmap.ui.screens.oma.ScanQrScreen
+import com.chat.ketukprojectmap.ui.screens.guardian.GuardianHomeScreen
+import com.chat.ketukprojectmap.ui.screens.guardian.GuardianLocationHistoryScreen
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
@@ -41,8 +54,17 @@ fun KetukNavHost() {
                     }
                 },
                 onNavigateToHome = {
-                    navController.navigate(Routes.home) {
-                        popUpTo(Routes.splash) { inclusive = true }
+                    scope.launch {
+                        val role = try {
+                            authRepository.getRole()
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (_: Exception) {
+                            null
+                        }
+                        navController.navigate(Routes.homeRouteForRole(role)) {
+                            popUpTo(Routes.splash) { inclusive = true }
+                        }
                     }
                 }
             )
@@ -61,17 +83,18 @@ fun KetukNavHost() {
         composable(Routes.login) {
             LoginScreen(
                 // Dipanggil setelah login (email atau Google) sukses.
-                // Sudah punya role -> Home, belum -> pilih role.
+                // Sudah punya role -> Home sesuai role, belum -> pilih role.
                 onNavigateToRole = {
                     scope.launch {
-                        val hasRole = try {
-                            authRepository.getRole() != null
+                        val role = try {
+                            authRepository.getRole()
                         } catch (e: CancellationException) {
                             throw e
                         } catch (_: Exception) {
-                            false
+                            null
                         }
-                        navController.navigate(if (hasRole) Routes.home else Routes.role) {
+                        val targetRoute = if (role != null) Routes.homeRouteForRole(role) else Routes.role
+                        navController.navigate(targetRoute) {
                             popUpTo(Routes.login) { inclusive = true }
                         }
                     }
@@ -97,26 +120,34 @@ fun KetukNavHost() {
                         popUpTo(Routes.login) { inclusive = true }
                     }
                 },
-                // Confirm email hidup: harus verifikasi dulu
-                onNeedVerification = {
-                    navController.navigate(Routes.verification) {
-                        popUpTo(Routes.register) { inclusive = true }
-                    }
+                // DIUBAH: Confirm email hidup, kirim email ke layar verifikasi.
+                // Register tidak di-pop, jadi user bisa kembali kalau salah ketik email.
+                onNeedVerification = { email ->
+                    navController.navigate(Routes.verificationWithEmail(email))
                 }
             )
         }
 
-        composable(Routes.verification) {
+        // DIUBAH: route membawa argumen email
+        composable(
+            route = Routes.verificationPattern,
+            arguments = listOf(
+                navArgument("email") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                }
+            )
+        ) { entry ->
+            val email = entry.arguments?.getString("email").orEmpty()
             VerificationScreen(
+                email = email,
                 onConfirm = {
                     navController.navigate(Routes.role) {
-                        // Hapus Login dan Verifikasi dari back stack
+                        // Hapus Login, Register, dan Verifikasi dari back stack
                         popUpTo(Routes.login) { inclusive = true }
                     }
-                },
-                onResend = {
-                    // TODO: kirim ulang kode verifikasi
                 }
+                // onResend dihapus: kirim ulang kode sudah ditangani VerificationViewModel
             )
         }
 
@@ -128,8 +159,66 @@ fun KetukNavHost() {
                     }
                 },
                 onNavigateToHome = {
+                    scope.launch {
+                        val role = try {
+                            authRepository.getRole()
+                        } catch (e: CancellationException) {
+                            throw e
+                        } catch (_: Exception) {
+                            null
+                        }
+                        navController.navigate(Routes.setupRouteForRole(role)) {
+                            popUpTo(Routes.role) { inclusive = true }
+                        }
+                    }
+                }
+            )
+        }
+
+        // ===== Setup Wali (02. Initial Phase Wali) =====
+        composable(Routes.detailOmaOpa) {
+            DetailOmaOpaScreen(
+                onNavigateBack = {
+                    navController.navigate(Routes.role) {
+                        popUpTo(Routes.detailOmaOpa) { inclusive = true }
+                    }
+                },
+                onContinue = {
+                    navController.navigate(Routes.circleKeluarga)
+                }
+            )
+        }
+
+        composable(Routes.circleKeluarga) {
+            CircleKeluargaScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onContinue = {
+                    navController.navigate(Routes.qrWali)
+                }
+            )
+        }
+
+        composable(Routes.qrWali) {
+            QrWaliScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onPairingComplete = {
+                    navController.navigate(Routes.pilihPenjaga)
+                }
+            )
+        }
+
+        composable(Routes.pilihPenjaga) {
+            PilihPenjagaScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onGuardianConfirmed = {
                     navController.navigate(Routes.home) {
-                        popUpTo(Routes.role) { inclusive = true }
+                        popUpTo(Routes.detailOmaOpa) { inclusive = true }
                     }
                 }
             )
@@ -139,6 +228,15 @@ fun KetukNavHost() {
             HomeScreen(
                 onOpenNotifications = {
                     navController.navigate(Routes.notifikasi)
+                },
+                onOpenDetailAlert = { itemId ->
+                    navController.navigate(Routes.detailAlert(itemId))
+                },
+                // TODO(tim): tombol khusus demo, tidak ada di Figma
+                onNavigateBackToRole = {
+                    navController.navigate(Routes.role) {
+                        popUpTo(Routes.home) { inclusive = true }
+                    }
                 },
                 onLogout = {
                     navController.navigate(Routes.login) {
@@ -152,7 +250,110 @@ fun KetukNavHost() {
             NotifikasiScreen(
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onOpenDetailAlert = { itemId ->
+                    navController.navigate(Routes.detailAlert(itemId))
                 }
+            )
+        }
+
+        composable(
+            route = Routes.detailAlertPattern,
+            arguments = listOf(
+                navArgument("itemId") {
+                    type = NavType.StringType
+                    defaultValue = "act_1"
+                }
+            )
+        ) { entry ->
+            val itemId = entry.arguments?.getString("itemId").orEmpty().ifBlank { "act_1" }
+            DetailAlertScreen(
+                itemId = itemId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // ===== Setup & Core Oma/Opa (03. Initial Phase oma & Flowchart M4-M5) =====
+        composable(Routes.scanQr) {
+            ScanQrScreen(
+                onNavigateBack = {
+                    navController.navigate(Routes.role) {
+                        popUpTo(Routes.scanQr) { inclusive = true }
+                    }
+                },
+                onScanSuccess = {
+                    navController.navigate(Routes.omaPermissions) {
+                        popUpTo(Routes.scanQr) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.loadingPairingOma) {
+            LoadingPairingOmaScreen(
+                onPairingComplete = {
+                    navController.navigate(Routes.omaPermissions) {
+                        popUpTo(Routes.loadingPairingOma) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.omaPermissions) {
+            OmaPermissionsScreen(
+                onNavigateBack = {
+                    navController.navigate(Routes.scanQr) {
+                        popUpTo(Routes.omaPermissions) { inclusive = true }
+                    }
+                },
+                onAgree = {
+                    navController.navigate(Routes.omaPassive) {
+                        popUpTo(Routes.role) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.omaPassive) {
+            OmaPassiveScreen(
+                // TODO(tim): tombol khusus demo, tidak ada di Figma
+                onNavigateBackToRole = {
+                    navController.navigate(Routes.role) {
+                        popUpTo(Routes.omaPassive) { inclusive = true }
+                    }
+                },
+                onLogout = {
+                    navController.navigate(Routes.login) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // ===== Alur Penjaga (05. Core Phase Penjaga & Flowchart M10) =====
+        composable(Routes.guardianHome) {
+            GuardianHomeScreen(
+                onOpenNotifications = { navController.navigate(Routes.notifikasi) },
+                onOpenLocationHistory = { navController.navigate(Routes.guardianLocationHistory) },
+                // TODO(tim): tombol khusus demo, tidak ada di Figma
+                onNavigateBackToRole = {
+                    navController.navigate(Routes.role) {
+                        popUpTo(Routes.guardianHome) { inclusive = true }
+                    }
+                },
+                onLogout = {
+                    navController.navigate(Routes.login) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.guardianLocationHistory) {
+            GuardianLocationHistoryScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

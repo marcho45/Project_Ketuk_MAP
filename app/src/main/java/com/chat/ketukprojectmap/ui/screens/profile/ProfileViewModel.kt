@@ -3,6 +3,7 @@ package com.chat.ketukprojectmap.ui.screens.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chat.ketukprojectmap.data.repository.AuthRepository
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -20,6 +21,8 @@ class ProfileViewModel : ViewModel() {
             _isLoggingOut.value = true
             try {
                 authRepository.signOut()
+            } catch (e: CancellationException) {
+                throw e
             } catch (_: Exception) {
                 // Tetap lanjut logout walau gagal
             } finally {

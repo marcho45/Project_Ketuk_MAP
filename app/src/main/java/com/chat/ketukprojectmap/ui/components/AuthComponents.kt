@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -35,7 +36,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.chat.ketukprojectmap.ui.theme.Arang
+import com.chat.ketukprojectmap.ui.theme.KetukTheme
 import com.chat.ketukprojectmap.ui.theme.Terakota
 
 /**
@@ -56,8 +57,10 @@ fun AuthField(
     isError: Boolean = false,
     errorMessage: String = ""
 ) {
-    var passwordVisible by remember { mutableStateOf(false) }
-    val fieldBg = Terakota.copy(alpha = 0.12f)
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    val fieldBg = KetukTheme.colors.authFieldBackground
+    val textPrimary = KetukTheme.colors.textPrimary
+    val placeholderColor = textPrimary.copy(alpha = 0.55f)
     val errorColor = MaterialTheme.colorScheme.error
 
     Column(modifier = modifier.fillMaxWidth()) {
@@ -110,7 +113,7 @@ fun AuthField(
             keyboardOptions = KeyboardOptions(
                 keyboardType = if (isPassword) KeyboardType.Password else keyboardType
             ),
-            textStyle = TextStyle(fontSize = 14.sp, color = Arang),
+            textStyle = TextStyle(fontSize = 14.sp, color = textPrimary),
             colors = OutlinedTextFieldDefaults.colors(
                 // Border
                 focusedBorderColor = Terakota,
@@ -128,12 +131,12 @@ fun AuthField(
                 unfocusedTrailingIconColor = Terakota,
                 errorTrailingIconColor = errorColor,
                 // Teks
-                focusedTextColor = Arang,
-                unfocusedTextColor = Arang,
-                errorTextColor = Arang,
-                focusedPlaceholderColor = Arang.copy(alpha = 0.55f),
-                unfocusedPlaceholderColor = Arang.copy(alpha = 0.55f),
-                errorPlaceholderColor = Arang.copy(alpha = 0.55f),
+                focusedTextColor = textPrimary,
+                unfocusedTextColor = textPrimary,
+                errorTextColor = textPrimary,
+                focusedPlaceholderColor = placeholderColor,
+                unfocusedPlaceholderColor = placeholderColor,
+                errorPlaceholderColor = placeholderColor,
                 cursorColor = Terakota,
                 errorCursorColor = errorColor
             )

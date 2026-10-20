@@ -1,163 +1,108 @@
-# Spesifikasi layar (dari Figma)
+# Spesifikasi Layar & Pemetaan Rubrik UTS (dari Figma)
 
-Terakhir diperbarui: 2026-10-17
+**Terakhir diperbarui:** 2026-10-21 (Tahap 4, Perbaikan Audit UTS & Unifikasi Animasi Selesai)
 
-Gambar acuan ada di docs/figma/. Kerjakan sesuai gambar. Teks di bawah disalin dari Figma.
-Kalau teks di file ini bertentangan dengan gambar, IKUTI GAMBAR lalu catat perbedaannya di bagian "Perbedaan dengan Figma".
-Layar yang belum didesain (Pairing, Alarm Aktif, Tugas Penjaga, Riwayat, Sinkron, dst) JANGAN dibuat dulu.
+Gambar acuan utama ada di `docs/figma/` dan alur navigasi mengacu pada `docs/figma/flowchart.png`.
+Jika teks spesifikasi berbeda dengan gambar Figma, **ikuti gambar Figma** dan catat di bagian "Perbedaan dengan Figma".
 
-## Pemetaan file Figma (nama asli di docs/figma/)
+---
 
-Nama file lama di versi sebelumnya sudah tidak dipakai. Gunakan nama asli berikut:
+## 1. Pemetaan File Figma (`docs/figma/`)
 
-| File Figma asli | Isi | Fase | Catatan |
+| File Figma Asli | Isi Layar | Fase | Peran |
 |---|---|---|---|
-| 01. Initial Phase (2).png | Loading, Onboarding 1-4, Login, Pilih Peran (alur utama) | Initial Phase | Menggantikan `initial_phase.png` dan `select_role_page.png` |
-| 02. Initial Phase Wali.png | Varian/lanjutan Initial Phase untuk peran Wali | Initial Phase | TODO: isi belum dipetakan, verifikasi dengan membuka gambar |
-| 03. Initial Phase oma.png | Varian/lanjutan Initial Phase untuk peran Oma | Initial Phase | TODO: isi belum dipetakan, verifikasi dengan membuka gambar |
-| 04. Core Phase Wali.png | Home Wali (dan layar inti Wali) | Core Phase | Menggantikan `home_page_wali.png`. Belum dikerjakan |
-| 05. Core Phase Penjaga.png | Layar inti Penjaga | Core Phase | Belum dikerjakan |
+| `01. Initial Phase (2).png` | Splash (M1), Onboarding 1-4 (M1), Login (M2), OTP 4 digit (M2), Pilih Peran (M3) | Initial Phase | Umum |
+| `02. Initial Phase Wali.png` | Pilih Peran (Wali terpilih), Detail Oma/Opa, Circle Keluarga, QR Wali Oma Diyas, Loading Pairing, Pilih Penjaga Terdekat | Initial Phase | Wali |
+| `03. Initial Phase oma.png` | Pilih Peran (Oma/Opa terpilih), Pindai QR (M4), Loading Pairing (M4), Persetujuan & Izin (M4) | Initial Phase | Oma/Opa |
+| `04. Core Phase Wali.png` | Beranda Wali (M6), Riwayat Aktivitas (M7), Lokasi Oma Diyas (M9), Tab Profil Wali | Core Phase | Wali |
+| `05. Core Phase Penjaga.png` | Beranda Penjaga (M10), Lokasi Oma Diyas - Penjaga (M10) | Core Phase | Penjaga |
+| `flowchart.png` | Diagram alur M1–M10 untuk Sistem, Oma/Opa, Wali, dan Penjaga | Semua Fase | Semua Peran |
 
-Aturan baca: saat mengerjakan Initial Phase, file 04 dan 05 BOLEH dibaca hanya untuk konsistensi design system (warna, tipografi, komponen). Jangan dikerjakan.
+---
 
-## Status layar
+## 2. Tabel Status Seluruh Layar & Kategori Rubrik UTS
 
-| # | Layar | Sumber Figma | Fase | Status |
-|---|---|---|---|---|
-| 1 | Loading | 01 | Initial | Perlu perbaikan (pagar bawah tidak penuh) |
-| 2-5 | Onboarding (4 halaman) | 01 | Initial | Audit dulu |
-| 6 | Login | 01 | Initial | Audit dulu |
-| 7 | Pilih Peran | 01 | Initial | Audit dulu (kartu peran horizontal belum cocok) |
-| 6b | Register (Daftar) | - | Initial | **SELESAI** (2026-10-17) |
+| Kode | Layar | Peran | File Figma | File Kotlin | Route | Jenis Layar UTS | Status Saat Ini |
+|---|---|---|---|---|---|---|---|
+| M1 | Splash Screen | Umum | `01. Initial Phase (2).png` | `SplashScreen.kt` | `splash` | Free Choice | ✅ Sesuai Figma (Light & Dark Mode) |
+| M1 | Onboarding (4 hal.) | Umum | `01. Initial Phase (2).png` | `OnboardingScreen.kt` | `onboarding` | Free Choice | ✅ Sesuai Figma (Light & Dark Mode) |
+| M2 | Login | Umum | `01. Initial Phase (2).png` | `LoginScreen.kt`, `LoginViewModel.kt` | `login` | **Form/Input** | ✅ Sesuai Figma (+ Hint Demo, `isError`/`supportingText`, Light & Dark Mode) |
+| M2 | Register (Daftar) | Umum | Gaya `01. Initial Phase (2).png` | `RegisterScreen.kt`, `RegisterViewModel.kt` | `register` | **Form/Input** | ✅ Sesuai Spesifikasi (Light & Dark Mode) |
+| M2 | Verifikasi OTP | Umum | `01. Initial Phase (2).png` | `VerificationScreen.kt`, `VerificationViewModel.kt` | `verification?email={email}` | **Form/Input** | ✅ Sesuai Figma (4 digit di `demo`, 6 digit di `full`, Light & Dark Mode) |
+| M3 | Pilih Peran ("Siapa kamu?") | Umum | `01` / `02` / `03` | `RoleSelectScreen.kt`, `RoleSelectViewModel.kt` | `role` | Free Choice | ✅ Wali terhubung ke `detail_oma_opa` (Light & Dark Mode) |
+| Setup 1 | Detail Oma/Opa | Wali | `02. Initial Phase Wali.png` | `WaliSetupScreens.kt` (`DetailOmaOpaScreen`) | `detail_oma_opa` | **Form/Input** | ✅ Sesuai Figma (Validasi nama & umur 40–120 + badge `"Tahun"`, Light & Dark Mode) |
+| Setup 2 | Circle Keluarga | Wali | `02. Initial Phase Wali.png` | `WaliSetupScreens.kt` (`CircleKeluargaScreen`) | `circle_keluarga` | Free Choice | ✅ Sesuai Figma (3 anggota, tambah anggota, QR tetap putih agar bisa dipindai, Light & Dark Mode) |
+| Setup 3 | QR Wali Oma Diyas | Wali | `02. Initial Phase Wali.png` | `WaliSetupScreens.kt` (`QrWaliScreen`) | `qr_wali` | **Native Mockup** | ✅ Sesuai Figma (`qr_pairing` tetap berlatar putih + tombol simulasi pairing, Light & Dark Mode) |
+| Setup 3b | Loading Pairing (Wali) | Wali | `02. Initial Phase Wali.png` | `WaliSetupScreens.kt` (`LoadingPairingWaliContent`) | *(state di `qr_wali`)* | **Native Mockup** | ✅ Sesuai Figma (`qr_pairing_blur` + `ic_spinner` 2 detik) |
+| Setup 4 | Pilih Penjaga Terdekat | Wali | `02. Initial Phase Wali.png` | `WaliSetupScreens.kt` (`PilihPenjagaScreen`) | `pilih_penjaga` | Free Choice | ✅ Sesuai Figma (Search bar + Radio Button + `"Ibu Imas"`, Light & Dark Mode) |
+| M6 | Beranda Wali | Wali | `04. Core Phase Wali.png` | `HomeScreen.kt` (Tab 0) | `home` | Free Choice | ✅ Sesuai Figma (+ Tombol panah kembali khusus `DEMO_MODE`, Light & Dark Mode) |
+| M7 | Riwayat Aktivitas | Wali | `04. Core Phase Wali.png` | `RiwayatScreen.kt`, `RiwayatViewModel.kt` (Tab 1) | `home` (Tab 1) | **List Screen** | ✅ Sesuai Figma (`LazyColumn` 8 item + 4 filter chip + klik ke M8, Light & Dark Mode) |
+| M8 | Detail Alert / Aktivitas | Wali | `flowchart.png` *(tanpa frame khusus)* | `DetailAlertScreen.kt` | `detail_alert/{itemId}` | **Detail Screen** | ✅ Selesai (Menerima `itemId`, status reaktif, 3 tombol aksi, Light & Dark Mode) |
+| M9 | Lokasi Oma Diyas (Wali) | Wali | `04. Core Phase Wali.png` | `LokasiScreen.kt` (Tab 2) | `home` (Tab 2) | **Native Mockup** | ✅ Sesuai Figma (Umur `67`, `penjaga_lintang`, Snackbar aksi, Light & Dark Mode) |
+| - | Notifikasi | Wali/Penjaga | *(Ikon lonceng M6/M10)* | `NotifikasiScreen.kt` | `notifikasi` | Free Choice | ✅ Selesai (`LazyColumn` 5 item `NotificationItem` + klik ke M8, Light & Dark Mode) |
+| - | Tab Profil Wali | Wali | `04. Core Phase Wali.png` | `ProfileScreen.kt` (Tab 3) | `home` (Tab 3) | Free Choice | ✅ Selesai (Kartu akun Wali, kartu lansia, Switch `"Mode gelap"`, & tombol Keluar) |
+| M4 | Pindai QR | Oma/Opa | `03. Initial Phase oma.png` | `OmaScreens.kt` (`ScanQrScreen`) | `scan_qr` | **Native Mockup** | ✅ Sesuai Figma (Mockup kamera + reticle + laser animasi + Flash, Light & Dark Mode) |
+| M4 | Loading Pairing (Oma) | Oma/Opa | `03. Initial Phase oma.png` | `OmaScreens.kt` (`LoadingPairingOmaScreen`) | `loading_pairing_oma` | **Native Mockup** | ✅ Sesuai Figma (`qr_pairing_blur` + `ic_spinner` 2 detik) |
+| M4 | Persetujuan & Izin | Oma/Opa | `03. Initial Phase oma.png` | `OmaScreens.kt` (`OmaPermissionsScreen`) | `oma_permissions` | **Native Mockup** | ✅ Sesuai Figma (2 kartu: Yang dipantau & Izin yang diperlukan + komitmen privasi, Light & Dark Mode) |
+| M5 | Mode Pasif Oma/Opa | Oma/Opa | `flowchart.png` *(tanpa frame khusus)* | `OmaScreens.kt` (`OmaPassiveScreen`) | `oma_passive` | Free Choice | ✅ Sesuai Flowchart (Hero Oma, dialog Sapa L1 interaktif, Switch mode gelap, panah demo, & tombol Keluar) |
+| M10 | Beranda Penjaga | Penjaga | `05. Core Phase Penjaga.png` | `GuardianHomeScreen.kt` (Tab 0) | `guardian_home` | Free Choice | ✅ Sesuai Figma (Banner komposit ketuk pintu + 2 tombol reaktif, peta mini, aksi cepat, riwayat, panah demo, Light & Dark Mode) |
+| M10 | Lokasi Oma Diyas (Penjaga) | Penjaga | `05. Core Phase Penjaga.png` | `GuardianLokasiScreen.kt` (Tab 1) | `guardian_home` (Tab 1) | **Native Mockup** | ✅ Sesuai Figma (Kartu Oma melayang, peta statis + kontrol kompas & zoom, waktu pembaruan, Light & Dark Mode) |
+| - | Riwayat Lokasi (7 Hari) | Penjaga | *(Dari kartu Riwayat Lokasi M10)* | `GuardianLocationHistoryScreen.kt` | `guardian_location_history` | **List Screen** | ✅ Selesai (`LazyColumn` 7 item `DummyData.locationHistory7Days`, Light & Dark Mode) |
+| - | Tab Profil Penjaga | Penjaga | `05. Core Phase Penjaga.png` | `GuardianProfileScreen.kt` (Tab 2) | `guardian_home` (Tab 2) | Free Choice | ✅ Selesai (Info Markolintang, status kesediaan, lansia dijaga, `KetukDarkModeCard`, `KetukLogoutButton`) |
 
-| - | OTP | 02 / 03 (TODO: pastikan) | Initial | Belum ada |
-| 8 | Home Wali | 04 | Core | Ditunda. Pakai placeholder sederhana dulu |
-| - | Layar Penjaga | 05 | Core | Ditunda |
+---
 
-Isi kolom Status dengan: belum ada / sebagian / sesuai figma. Perbarui setiap selesai tugas.
+## 3. Rincian Spesifikasi Visual per Layar
 
-## Alur
-Loading -> Onboarding (4 halaman) -> Login -> Pilih Peran -> (Wali) Home Wali dengan bottom bar.
+### A. Layar Umum (`01. Initial Phase (2).png`)
+1. **Splash (`SplashScreen.kt`):** Latar semantik (`KetukTheme.colors.screenBackground`), `logo_ketuk`, judul `"Ketuk"`, tagline `"Kalau HP orang tersayang hening, ada yang mengetuk pintu."`, `rumah_besar` & `pagar_bunga` berulang di bawah. Mengecek `authRepository.hasSession()` & `getRole()`.
+2. **Onboarding (`OnboardingScreen.kt`):** 4 halaman `HorizontalPager` dengan `bg_desa` + `tok_melambai`, indikator pil animasi, tombol `"Skip"` & panah, serta tombol `"Mulai"` di halaman ke-4.
+3. **Login (`LoginScreen.kt`):**
+   - Maskot `tok_memeriksa` + `asset_ketuk_daun`, `logo_ketuk` + `"Ketuk"`, subjudul `"Halo! Senang melihatmu kembali"`.
+   - Field Email (`KeyboardType.Email`) & Password (`KeyboardType.Password`) dengan validasi `isError = true` dan `supportingText` merah.
+   - Tombol `"Masuk"`, pemisah `"atau"`, tombol `"Lanjut dengan Google"`, tautan `"Belum punya akun? Daftar disini"`.
+   - Khusus `BuildConfig.DEMO_MODE == true`: Kartu hint 3 akun demo (`wali@ketuk.app`, `oma@ketuk.app`, `penjaga@ketuk.app`, sandi `Ketuk123`) yang dapat diketuk untuk mengisi otomatis.
+4. **Register (`RegisterScreen.kt`):** 5 field (Nama Lengkap, Email, Nomor HP hanya angka 9-13 digit, Password min 8 karakter, Konfirmasi Password) dengan validasi lengkap.
+5. **Verifikasi OTP (`VerificationScreen.kt`):** `bg_desa` + `maskot_hp`, 4 kotak digit di mode `demo` (6 kotak di mode `full`), tombol `"Confirm"`, dan `"Didn't receive the code? Resend"`.
+6. **Pilih Peran (`RoleSelectScreen.kt`):** Judul `"Siapa kamu?"`, subjudul `"Pilih peranmu untuk melanjutkan"`, 3 kartu horizontal (`Saya wali Oma dan Opa`, `Saya penjaga Oma dan Opa`, `Saya adalah Oma/Opa`), tombol `"Lanjutkan"`.
 
-Tahap Initial Phase: Pilih Peran -> placeholder sederhana untuk semua peran. Home Wali yang sebenarnya dikerjakan di Core Phase.
+### B. Alur Setup & Core Wali (`02. Initial Phase Wali.png` & `04. Core Phase Wali.png`)
+- **Detail Oma/Opa (`DetailOmaOpaScreen`):** Input nama Wali (`"Nanda Valeri"`), toggle pill `"Opa"` / `"Oma"`, input nama lansia (`"Sri Diyas Anjarwati"`), input umur (`"67"`) dengan badge terakota `"Tahun"`, serta validasi lengkap (`isError = true`, `supportingText`, blokir submit).
+- **Circle Keluarga (`CircleKeluargaScreen`):** Header `"3 Anggota"`, list `Nanda (Wali)` (Ketua + mahkota), `Papa` (Anggota), `Mama` (Anggota), tombol `+ Tambah Anggota` (membuka dialog tambah anggota in-memory), kartu `"Undang Keluarga Lain"` dengan QR (`qr_pairing` di atas `qrSurface` putih agar tetap dapat dipindai di mode gelap), tombol `"Bagikan QR"`, `"Salin Tautan"`, dan `"Lanjutkan"`.
+- **QR Wali Oma Diyas & Loading Pairing (`QrWaliScreen`):** Kartu QR besar (berlatar `qrCardWali`/`qrSurface` terang agar QR tetap bisa dipindai) + simulasi pindah ke layar blur `qr_pairing_blur` + `ic_spinner` `"Loading Pairing..."` (2 detik) -> lanjut ke Pilih Penjaga.
+- **Pilih Penjaga Terdekat (`PilihPenjagaScreen`):** Search bar `"Cari nama atau nomor..."`, daftar kontak dengan Radio Button (`Pak Andy`, `Ibu Imas`, `Adik Adam`, `Pak RT`), tombol `"Pilih sebagai Penjaga"` -> masuk ke `HomeScreen` dengan membersihkan stack setup.
+- **Core Wali (`HomeScreen` - 4 Tab Bottom Bar dengan `rememberSaveable`):**
+  - **Tab 0 (Beranda - M6):** Header `"Halo, Nanda"` (dilengkapi tombol panah kembali khusus `BuildConfig.DEMO_MODE == true` untuk menengok layar Pilih Peran), kartu Oma Diyas, Status hari ini (`"Lihat detail >"` membuka `DetailAlertScreen("act_2")`), 3 kartu Aksi cepat dengan Snackbar mockup, dan Timeline Aktivitas terbaru yang bisa diklik ke `DetailAlertScreen`.
+  - **Tab 1 (Riwayat Aktivitas - M7):** `LazyColumn` 8 item dari `DummyData.initialActivities` + 4 filter chip (`Semua`, `Aktivitas`, `HP`, `Sapa`). Klik item membuka `DetailAlertScreen(item.id)`.
+  - **Tab 2 (Lokasi Oma Diyas - M9):** Peta statis `peta_lokasi`, bottom sheet info Oma Diyas (`67 tahun`), tombol `"Lihat Rute"` & `"Hubungi Oma"` (menampilkan Snackbar simulasi), serta kartu Penjaga terdekat (`Markolintang`, `170 m`) dengan foto `penjaga_lintang`.
+  - **Tab 3 (Profil Wali):** Kartu akun Wali (`Nanda Valeri`, `wali@ketuk.app`), kartu Lansia yang dipantau (`Oma Diyas`, `67 Tahun`), kartu switch `"Mode gelap"` (`KetukDarkModeCard`), dan tombol outline `"Keluar"` (`KetukLogoutButton`) + dialog konfirmasi.
+- **Detail Alert / Aktivitas (`DetailAlertScreen` - M8):** Menerima argumen `itemId` dari NavHost (`detail_alert/{itemId}`), menampilkan level eskalasi (`NORMAL` / `L1` / `L2` / `L3`), waktu, status reaktif, deskripsi lengkap, lokasi Oma Diyas, dan 3 tombol aksi (`"Telepon Oma"`, `"Konfirmasi Oma Aman"`, `"Minta Penjaga Mengecek"`).
 
-## 1. Loading (docs/figma/01. Initial Phase (2).png, layar 1)
-- Latar krem. Logo (logo_ketuk) di tengah, teks "Ketuk" besar warna terakota di bawah logo,
-  tagline kecil terakota: "Kalau HP orang tersayang hening, ada yang mengetuk pintu."
-- Pojok kiri bawah: rumah_besar. Pojok kanan bawah: pagar_bunga.
-- Animasi: logo muncul perlahan (fade + scale kecil), lalu otomatis lanjut ke Onboarding setelah sekitar 2 detik.
+### C. Alur Oma/Opa (`03. Initial Phase oma.png` & Flowchart M4–M5)
+- **Pindai QR (M4):** Judul `"Pindai QR"`, mockup kamera dengan bingkai scan + kartu petunjuk `"Arahkan ke QR code di HP wali"` + tombol `"Simulasikan Pindai"`.
+- **Loading Pairing (M4):** Latar blur `qr_pairing_blur` + spinner biru + `"Loading Pairing..."` (delay otomatis 2 detik).
+- **Persetujuan & Izin (M4):** Kartu `"Yang dipantau"` (3 item), kartu `"Izin yang diperlukan"` (4 poin bernomor), persetujuan privasi yang mengaktifkan tombol `"Saya Setuju"`.
+- **Mode Pasif Oma/Opa (M5):** Tampilan ramah lansia huruf besar + kartu simulasi satu baris `"Simulasi Sapaan L1"` dengan tombol satu baris `"Munculkan Sapaan"` -> dialog Sapa L1 `"Oma baik-baik saja?"` (`"Saya baik-baik saja"` / `"Butuh bantuan"`) + switch mode gelap (`KetukDarkModeCard`) + tombol outline `"Keluar"` (`KetukLogoutButton`) yang konsisten dengan ProfileScreen.
 
-### Perbaikan yang diminta (pagar bawah)
-- Masalah: area bawah tidak penuh. pagar_bunga (96x63) hanya satu potong sehingga ada ruang kosong antara rumah_besar dan tepi kanan layar.
-- Target: pagar mengisi lebar layar dari ujung rumah_besar sampai tepi kanan, di semua ukuran layar.
-- Solusi yang dipilih: tile/repeat pagar_bunga secara horizontal dengan jumlah dihitung dari lebar layar, bukan menambah satu segmen manual. Pastikan potongan terakhir tidak terpotong jelek.
-- Kalau pagar_bunga tidak seamless saat disambung, catat persis asset apa yang perlu diekspor ulang dari Figma (nama, ukuran, format).
+### D. Alur Penjaga (`05. Core Phase Penjaga.png` & Flowchart M10)
+- **Core Penjaga (3 Tab Bottom Bar: Beranda, Lokasi, Profil):**
+  - **Beranda (M10 - `GuardianHomeScreen.kt` Tab 0):** Header `"Halo, Markolintang"` (`"Penjaga terdekat - Oma Diyas"`), tombol panah kembali khusus `DEMO_MODE` (// TODO(tim)), ikon lonceng notifikasi dengan titik merah, banner merah muda `"Tolong ketuk pintu Oma Diyas"` dengan 2 tombol interaktif `"Oma aman"` & `"Butuh bantuan"` yang menempel di bawah banner dan mengubah banner secara reaktif + menambah item ke Riwayat, kartu peta mini `"Rumah Oma Diyas - Jl. Syeckh Nawawi Albantani 13"` dengan panah, 2 kartu Aksi cepat (`Lacak`, `Hubungi`) dengan feedback Snackbar, serta kartu Riwayat.
+  - **Lokasi (M10 - `GuardianLokasiScreen.kt` Tab 1):** Header `"Lokasi Oma Diyas"`, kartu atas melayang `"Oma Diyas 170 m darimu"` (`"Di rumah"`, badge `"Aman - Aktivitas Normal"`), peta statis `peta_lokasi` dengan tombol kontrol melayang di kanan bawah (kompas, plus, minus), badge `"Lokasi terakhir diperbarui Hari ini, 18.55"`, kartu `"Riwayat Lokasi"` -> membuka layar Riwayat Lokasi 7 hari.
+  - **Riwayat Lokasi 7 Hari (`GuardianLocationHistoryScreen.kt`):** // TODO(tim) Layar daftar pergerakan 7 hari terakhir dari `DummyData.locationHistory7Days` dengan tombol kembali dan feedback koordinat.
+  - **Profil Penjaga (`GuardianProfileScreen.kt` Tab 2):** // TODO(tim) Info akun Markolintang, status kesediaan penjaga terdekat (radius 200 m), info lansia yang dipantau (Oma Diyas), switch `"Mode gelap"` (`KetukDarkModeCard`), dan tombol outline `"Keluar"` (`KetukLogoutButton`) yang membersihkan back stack.
 
-## 2-5. Onboarding (4 halaman, HorizontalPager)
-- Bagian atas: bg_desa penuh lebar, dengan tok_melambai di tengah. Bagian bawah: panel krem dengan sudut atas membulat
-  yang menimpa gambar sedikit.
-- Di panel: judul (tebal), isi teks, indikator 4 pil (pil aktif lebih gelap/terakota, lainnya terakota muda; dibuat di kode,
-  animasikan lebar/warna), lalu baris bawah: "Skip" di kiri dan tombol pill terakota berisi panah di kanan.
-- Halaman terakhir: tombol "Mulai" (pill terakota) menggantikan Skip + panah, di tengah.
-- "Skip" melompat ke Login.
+---
 
-Teks:
-1. Judul "Ada yang mengetuk". Isi: "Ketuk menjaga dari jauh, tanpa Anda harus menelepon setiap jam."
-2. Judul "HP yang memberi kabar". Isi: "Ketuk membaca langkah, gerak, dan buka layar di HP secara diam-diam. Tidak ada yang perlu dipencet."
-3. Judul "Sapa dulu, baru ketuk". Daftar bernomor (lingkaran angka krem gelap, garis putus-putus penghubung):
-    1. Hening: HP tidak menunjukkan aktivitas lebih lama dari biasanya.
-    2. Sapa: Layar menyala: "Oma, sehat?" Cukup tekan hijau.
-    3. Wali: Kalau tidak dijawab, Anda mendapat kabar (lewat notifikasi atau SMS).
-    4. Ketuk: Kalau Anda minta atau tidak sempat merespons, tetangga terdekat yang Anda pilih datang mengecek.
-       Animasi: tiap langkah muncul bertahap saat halaman ini terlihat.
-4. Judul "Tanpa kuota, tetap jalan". Isi: "Tanpa internet, Ketuk mengirim SMS dari HP. Pastikan ada pulsa SMS."
-   Disclaimer kecil di dekat bawah: "Ketuk bukan alat medis dan belum mendeteksi jatuh. Ketuk hanya tahu kalau aktivitas berhenti. Tetap hubungi 112/119 untuk keadaan gawat."
-
-## 6. Login (docs/figma/01. Initial Phase (2).png, layar 6)
-- Atas: tok_memeriksa, lalu logo kecil + "Ketuk", lalu "Halo! Senang melihatmu kembali".
-- Field "Nomor HP" (ikon telepon, hint "Contoh: 0867 6767 6767"), field "Password" (ikon kunci, hint "Masukkan password", ikon mata untuk tampil/sembunyi).
-- Tombol "Masuk" (pill terakota, penuh lebar). Pemisah garis dengan teks "atau".
-- Tombol outline "Lanjut dengan Google". Bawah: "Belum punya akun? Daftar disini" (tautan hijau).
-- Tahap 1: tombol hanya lanjut ke Pilih Peran, belum ada autentikasi sungguhan.
-- CATATAN TIM: blueprint menulis Email + OTP, Figma memakai Nomor HP + Password. Ikuti Figma, tandai TODO.
-
-## 7. Pilih Peran (docs/figma/01. Initial Phase (2).png; TODO: konfirmasi apakah layar ini ada di 01, 02, atau 03)
-- Panah kembali kiri atas. Judul "Siapa kamu?", subjudul "Pilih peranmu untuk melanjutkan".
-- Tiga kartu bersudut membulat dengan warna latar berbeda (peach, kuning muda, hijau sage), masing-masing: ilustrasi di kiri atas,
-  judul tebal, deskripsi, dan tombol bulat berisi panah di kanan bawah.
-    1. wali_dengan_tok. "Saya wali Oma dan Opa". "Saya adalah anak, cucu, atau keluarga yang merawat Oma dan Opa."
-    2. rumah_desa. Judul di Figma tertulis "Saya wali Oma dan Opa" (kemungkinan salah salin; tanya tim, usulan: "Saya penjaga").
-       "Saya adalah tetangga atau orang yang paling dekat dari rumah Oma dan Opa."
-    3. oma_daun. "Saya adalah Oma/Opa". "Saya ingin memantau kesehatan dan aktivitas saya sendiri."
-- Memilih kartu menandai kartu itu (animasi border/skala), lalu tombol "Lanjutkan" (pill terakota, penuh lebar) di bawah.
-- Tahap 1: semua peran -> layar placeholder sederhana (Home Wali yang asli ada di Core Phase).
-- Catatan: kartu peran di desain terbaru ditata horizontal. Kode saat ini belum cocok. Cocokkan dengan gambar.
-- Sementara: judul kartu 2 pakai "Saya penjaga" dengan komentar TODO di kode. Jangan diubah diam-diam, catat di laporan.
-
-
-### 6b. Register (Daftar)
-
-**Tidak ada file Figma khusus. Mengikuti gaya visual LoginScreen.**
-
-- Layout: maskot tok_memeriksa (140dp) + asset_ketuk_daun (32dp) + logo Ketuk + teks "Yuk, buat akun barumu"
-- 5 field input dengan label di atas field (bukan floating label):
-  1. Nama Lengkap (icon Person, placeholder "Masukkan nama lengkap")
-  2. Email (icon Email, placeholder "Masukkan email", keyboard email)
-  3. Nomor HP (icon Phone, placeholder "Masukkan nomor HP", keyboard phone, hanya terima digit)
-  4. Password (icon Lock, placeholder "Masukkan password", toggle visibility)
-  5. Konfirmasi Password (icon Lock, placeholder "Masukkan ulang password", toggle visibility)
-- Validasi lokal (client-side):
-  - Nama tidak boleh kosong
-  - Email format valid (regex dengan @)
-  - Nomor HP 9-13 digit angka
-  - Password minimal 8 karakter
-  - Konfirmasi password harus sama dengan password
-  - Error message muncul di bawah field yang error
-- Tombol "Daftar" (terakota, disabled jika ada field kosong atau loading)
-- Pemisah "atau" dengan garis horizontal
-- Tombol "Lanjut dengan Google" (outline, logo Google di kiri)
-- Teks "Sudah punya akun? Masuk" (kata "Masuk" hijau underline, clickable)
-- Alur: tombol Daftar sukses → VerificationScreen; tombol "Masuk" → popBackStack ke Login
-- Warna: sama dengan Login (field bg peach 12%, border terakota, button terakota)
-- Animasi: loading indicator saat proses register (1.5 detik simulasi)
-
-
-## 8. Home Wali (docs/figma/04. Core Phase Wali.png) - DITUNDA (Core Phase)
-Spesifikasi disimpan untuk fase berikutnya. Jangan dikerjakan di tugas Initial Phase.
-
-- Header: "Halo, Nandaa" (judul tebal) + "Oma kamu hari ini bagaimana?"; kanan atas tombol lonceng dengan titik merah.
-  (Nama "Nandaa" kemungkinan salah ketik; ambil dari data contoh `userName`.)
-- Kartu Oma: oma_avatar (bulat), "Oma Diyas", "Aktivitas normal", chip hijau "Sehat" di kanan.
-- Judul "Status hari ini" lalu kartu besar dengan baris-baris kosong (placeholder dari desain). Isi dengan 3 baris data contoh:
-  Aktivitas, HP, Sapa (ikon + teks + status), tanpa membuat fitur sungguhan.
-- Bottom bar 4 tab: Home (nav_home), Riwayat (nav_riwayat), Notifikasi (nav_notifikasi), Profil (nav_profil).
-  Tab aktif diberi latar pil krem gelap. Tab selain Home cukup layar placeholder.
-- Animasi: pergantian tab halus (crossfade), pil tab aktif berpindah dengan animasi.
-
-## Asset per layar (rujuk ASSETS.md)
-
-| Layar | Asset |
-|---|---|
-| Loading | logo_ketuk, rumah_besar (269x189), pagar_bunga (96x63) |
-| Onboarding | bg_desa, tok_melambai (217x222) |
-| Login | tok_memeriksa (132x143), logo_ketuk, logo_google, asset_awan |
-| Register | tok_memeriksa (132x143), logo_ketuk, logo_google, asset_ketuk_daun, asset_awan |
-| Pilih Peran | wali_dengan_tok (142x84), rumah_desa (171x68), oma_daun |
-| Home Wali (ditunda) | oma_avatar, nav_home, nav_riwayat, nav_notifikasi, nav_profil |
-
-Kalau ada asset di gambar figma yang belum ada di ASSETS.md atau res/, jangan mengarang. Catat nama, ukuran, dan format yang perlu diekspor.
-
-## Perbedaan dengan Figma (isi saat audit)
-
-Tulis di sini setiap kali gambar figma berbeda dari spesifikasi di atas. Format:
-- [tanggal] Layar, apa bedanya, mana yang diikuti.
-
-Sudah diketahui:
-- [2026-10-12] Pilih Peran: kartu peran di figma terbaru horizontal, kode lama belum cocok. Ikuti figma.
-- [2026-10-12] Nama file figma di versi lama SCREENS.md (`initial_phase.png`, `select_role_page.png`, `home_page_wali.png`) sudah usang. Diganti dengan nama asli di tabel pemetaan.
-- [2026-10-12] Isi file 02 dan 03 belum dipetakan. Harus diverifikasi saat audit.
-
-## Catatan teknis
-
-- Folder drawable: ASSETS.md menulis `drawable-nodpi`. Pastikan ejaan folder aslinya di app/src/main/res/ benar (bukan salah eja). Kalau salah, laporkan dulu sebelum rename.
-- Nama resource memakai snake_case huruf kecil tanpa spasi atau kurung.
+## 4. Perbedaan dengan Figma yang Sudah Disepakati Tim
+- **[2026-10-19] Field Login:** Gambar Figma `01` menampilkan label `"Nomor HP"`, namun aplikasi menggunakan `"Email"` agar kompatibel dengan Supabase Auth (mode `full`) dan 3 akun demo (`wali@ketuk.app`, `oma@ketuk.app`, `penjaga@ketuk.app`).
+- **[2026-10-19] Nama Calon Penjaga ke-2:** Mengikuti gambar Figma `02. Initial Phase Wali.png` yaitu **`"Ibu Imas"`** (`+62 812 4987 1153`) dan komponen pemilihannya menggunakan **Radio Button** (pilih satu) sesuai visual Figma.
+- **[2026-10-19] Umur Oma Diyas:** Di Figma `02` tertulis `67` tahun sedangkan di Figma `04` tertulis `72 tahun`. Diseragamkan menjadi **`67` tahun** di `DummyData.kt` sebagai satu sumber data tunggal.
+- **[2026-10-19] Kotak OTP:** Menggunakan 4 kotak digit di mode `demo` (sesuai Figma `01`) dan 6 kotak digit di mode `full` (sesuai default OTP email Supabase).
+- **[2026-10-19] Tombol Panah Kembali Khusus Mode Demo di Beranda Wali (`HomeScreen`):** Selisih dari Figma yang disengaja (`// TODO(tim): tombol khusus demo, tidak ada di Figma`). Hanya muncul saat `BuildConfig.DEMO_MODE == true` dan tab Beranda (`selectedTab == 0`) aktif, sejajar di sebelah kiri sapaan `"Halo, Nanda"` tanpa menggeser ikon lonceng notifikasi, agar dosen penguji dapat kembali ke layar Pilih Peran (`Routes.role`) dengan bersih (`popUpTo(Routes.home) { inclusive = true }`). Pada varian `full`, tampilan Beranda tidak berubah sama sekali.
+- **[2026-10-19] Teks Sapaan Beranda Wali ("Halo, Nanda"):** Gambar Figma `04. Core Phase Wali.png` tertulis `"Halo, Nandaa"` (dengan dua huruf 'a'). Ini disepakati sebagai salah ketik (typo) pada desain Figma, sehingga aplikasi menggunakan nama yang benar yaitu **`"Halo, Nanda"`** (`userName = "Nanda"`, `defaultWaliGreetingName = "Nanda"`).
+- **[2026-10-19] Tombol Manual Mode Gelap (`ProfileScreen`, `OmaPassiveScreen`, `GuardianProfileScreen`) & Sistem Warna Semantik (`KetukTheme.colors`):** Selisih dari Figma yang disengaja (`// TODO(tim): tidak ada di Figma`). Tema aplikasi tidak lagi mengikuti tema sistem HP secara otomatis (`isSystemInDarkTheme()` dihapus dari parameter default `KetukTheme`), melainkan dikendalikan lewat Switch `"Mode gelap"` (`KetukDarkModeCard`) di bawah kartu info akun (disimpan ke `SharedPreferences` `"ketuk_prefs"` kunci `"dark_theme"`, default `false` = terang). Mode terang tetap 100% identik dengan desain asli, sedangkan mode gelap memakai palet hangat gelap (`KetukTheme.colors`) dengan permukaan QR tetap putih (`qrSurface`) agar tetap dapat dipindai.
+- **[2026-10-19] Kartu Akun Demo UTS & Responsivitas Tombol Penjaga (`LoginScreen`, `GuardianHomeScreen`):** Pada varian `demo`, kartu akun demo dipecah menjadi judul tebal dan sub-keterangan, setiap baris akun disusun vertikal 2 baris (peran: email di atas, nama lengkap di bawah) agar tidak terpotong pada layar 320dp/fontScale 1.3, serta dilengkapi catatan petunjuk tombol bypass Google. Pada `GuardianHomeScreen`, tombol `"Oma aman"` dan `"Butuh bantuan"` menggunakan `heightIn(min = 48.dp)` di dalam `BoxWithConstraints` yang secara otomatis menyusun vertikal saat ruang sempit (< 270dp kartu atau fontScale > 1.15f) agar teks tidak terpotong.
+- **[2026-10-19] Layar Tanpa Frame Figma Khusus (Ditandai `// TODO(tim)`):** `DetailAlertScreen` (M8), `NotifikasiScreen`, `ProfileScreen` Wali, `GuardianProfileScreen`, dan `GuardianLocationHistoryScreen` (Riwayat Lokasi 7 Hari) dirancang mengikuti sistem warna (`KetukTheme.colors`) dan tipografi `InterFont` aplikasi Ketuk.
+- **[2026-10-21] Validasi Form Live & Blokir Submit (Login, Register, Setup Wali):** Validasi email, batas digit nomor HP (`.take(13)`), dan sandi/konfirmasi sandi berjalan secara live saat mengetik serta tombol submit diblokir sampai seluruh form valid. State input form, anggota tambahan circle, dialog konfirmasi keluar, dan status dibaca notifikasi disimpan menggunakan `rememberSaveable` agar tidak hilang saat rotasi layar.
+- **[2026-10-21] Navigasi Item Beranda Wali ke Detail Alert Langsung via ID:** Pada Timeline Aktivitas Beranda Wali (`HomeScreen`), setiap item meneruskan `activity.id` langsung (`act_3`, `act_4`, `act_7`) ke `DetailAlertScreen(activity.id)` tanpa pemetaan hardcoded index.
+- **[2026-10-21] Unifikasi Animasi Masuk (FadeSlideIn Bertingkat):** Seluruh blok konten utama di semua layar (Auth, Setup Wali, Core Wali, Oma/Opa, dan Penjaga) menerapkan animasi masuk yang konsisten menggunakan komponen publik `FadeSlideIn` (`alpha` 400ms, translasi Y 16dp dari bawah) dengan jeda bertingkat (`staggerDelay`, kelipatan 80ms, maksimal 600ms). Pada `LazyColumn` (Riwayat, Notifikasi, Riwayat Lokasi), hanya 6 item pertama yang dianimasikan tanpa pengulangan saat scroll, serta dilengkapi perlindungan `rememberSaveable` agar tidak stuck transparan saat rotasi layar atau kembali dari back stack. Splash, Onboarding, dan Dialog dikecualikan sesuai aturan.

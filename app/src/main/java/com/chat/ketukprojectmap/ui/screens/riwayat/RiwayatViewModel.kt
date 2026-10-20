@@ -1,9 +1,9 @@
 package com.chat.ketukprojectmap.ui.screens.riwayat
 
 import androidx.lifecycle.ViewModel
-import com.chat.ketukprojectmap.data.model.RiwayatItem
-import com.chat.ketukprojectmap.data.model.RiwayatSampleData
-import com.chat.ketukprojectmap.data.model.RiwayatType
+import com.chat.ketukprojectmap.data.dummy.ActivityCategory
+import com.chat.ketukprojectmap.data.dummy.ActivityItem
+import com.chat.ketukprojectmap.data.dummy.DummyData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,11 +19,10 @@ class RiwayatViewModel : ViewModel() {
     private val _selectedFilter = MutableStateFlow(RiwayatFilter.SEMUA)
     val selectedFilter: StateFlow<RiwayatFilter> = _selectedFilter.asStateFlow()
 
-    private val _allItems = MutableStateFlow(RiwayatSampleData.items)
-    
-    val filteredItems: StateFlow<List<RiwayatItem>> = MutableStateFlow(
-        RiwayatSampleData.items
-    )
+    private val _allItems = MutableStateFlow(DummyData.initialActivities)
+
+    private val _filteredItems = MutableStateFlow(DummyData.initialActivities)
+    val filteredItems: StateFlow<List<ActivityItem>> = _filteredItems.asStateFlow()
 
     fun selectFilter(filter: RiwayatFilter) {
         _selectedFilter.value = filter
@@ -33,10 +32,11 @@ class RiwayatViewModel : ViewModel() {
     private fun updateFilteredItems() {
         val filtered = when (_selectedFilter.value) {
             RiwayatFilter.SEMUA -> _allItems.value
-            RiwayatFilter.AKTIVITAS -> _allItems.value.filter { it.type == RiwayatType.AKTIVITAS }
-            RiwayatFilter.HP -> _allItems.value.filter { it.type == RiwayatType.HP }
-            RiwayatFilter.SAPA -> _allItems.value.filter { it.type == RiwayatType.SAPA }
+            RiwayatFilter.AKTIVITAS -> _allItems.value.filter { it.type == ActivityCategory.AKTIVITAS }
+            RiwayatFilter.HP -> _allItems.value.filter { it.type == ActivityCategory.HP }
+            RiwayatFilter.SAPA -> _allItems.value.filter { it.type == ActivityCategory.SAPA }
         }
-        (filteredItems as MutableStateFlow).value = filtered
+        _filteredItems.value = filtered
     }
 }
+

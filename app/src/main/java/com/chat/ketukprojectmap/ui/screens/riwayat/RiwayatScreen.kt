@@ -1,5 +1,6 @@
 package com.chat.ketukprojectmap.ui.screens.riwayat
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -13,42 +14,50 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.ChatBubble
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.chat.ketukprojectmap.data.model.RiwayatIcon
-import com.chat.ketukprojectmap.data.model.RiwayatItem
+import com.chat.ketukprojectmap.data.dummy.ActivityCategory
+import com.chat.ketukprojectmap.data.dummy.ActivityItem
+import com.chat.ketukprojectmap.data.dummy.EscalationLevel
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
+import com.chat.ketukprojectmap.ui.components.staggerDelay
 import com.chat.ketukprojectmap.ui.theme.*
 
 @Composable
 fun RiwayatScreen(
-    viewModel: RiwayatViewModel = viewModel()
+    viewModel: RiwayatViewModel = viewModel(),
+    onItemClick: (String) -> Unit = {}
 ) {
     val selectedFilter by viewModel.selectedFilter.collectAsState()
     val filteredItems by viewModel.filteredItems.collectAsState()
+    val colors = KetukTheme.colors
 
     val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(KremBackground)
+            .background(colors.screenBackground)
             .statusBarsPadding()
     ) {
         Column(
@@ -60,43 +69,47 @@ fun RiwayatScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Riwayat aktivitas",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
+            FadeSlideIn(delayMillis = 0) {
+                Text(
+                    text = "Riwayat aktivitas",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    label = "Semua",
-                    isSelected = selectedFilter == RiwayatFilter.SEMUA,
-                    onClick = { viewModel.selectFilter(RiwayatFilter.SEMUA) }
-                )
-                FilterChip(
-                    label = "Aktivitas",
-                    isSelected = selectedFilter == RiwayatFilter.AKTIVITAS,
-                    onClick = { viewModel.selectFilter(RiwayatFilter.AKTIVITAS) }
-                )
-                FilterChip(
-                    label = "HP",
-                    isSelected = selectedFilter == RiwayatFilter.HP,
-                    onClick = { viewModel.selectFilter(RiwayatFilter.HP) }
-                )
-                FilterChip(
-                    label = "Sapa",
-                    isSelected = selectedFilter == RiwayatFilter.SAPA,
-                    onClick = { viewModel.selectFilter(RiwayatFilter.SAPA) }
-                )
+            FadeSlideIn(delayMillis = 80) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        label = "Semua",
+                        isSelected = selectedFilter == RiwayatFilter.SEMUA,
+                        onClick = { viewModel.selectFilter(RiwayatFilter.SEMUA) }
+                    )
+                    FilterChip(
+                        label = "Aktivitas",
+                        isSelected = selectedFilter == RiwayatFilter.AKTIVITAS,
+                        onClick = { viewModel.selectFilter(RiwayatFilter.AKTIVITAS) }
+                    )
+                    FilterChip(
+                        label = "HP",
+                        isSelected = selectedFilter == RiwayatFilter.HP,
+                        onClick = { viewModel.selectFilter(RiwayatFilter.HP) }
+                    )
+                    FilterChip(
+                        label = "Sapa",
+                        isSelected = selectedFilter == RiwayatFilter.SAPA,
+                        onClick = { viewModel.selectFilter(RiwayatFilter.SAPA) }
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -121,18 +134,30 @@ fun RiwayatScreen(
                         .padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(
+                    itemsIndexed(
                         items = filteredItems,
-                        key = { "${it.type}_${it.title}_${it.time}" }
-                    ) { item ->
+                        key = { _, item -> item.id }
+                    ) { index, item ->
                         AnimatedVisibility(
                             visible = true,
-                            enter = fadeIn(animationSpec = tween(300)) + 
+                            enter = fadeIn(animationSpec = tween(300)) +
                                     expandVertically(animationSpec = tween(300)),
-                            exit = fadeOut(animationSpec = tween(300)) + 
+                            exit = fadeOut(animationSpec = tween(300)) +
                                    shrinkVertically(animationSpec = tween(300))
                         ) {
-                            RiwayatItemCard(item)
+                            if (index < 6) {
+                                FadeSlideIn(delayMillis = staggerDelay(index, baseDelayMillis = 160)) {
+                                    RiwayatItemCard(
+                                        item = item,
+                                        onClick = { onItemClick(item.id) }
+                                    )
+                                }
+                            } else {
+                                RiwayatItemCard(
+                                    item = item,
+                                    onClick = { onItemClick(item.id) }
+                                )
+                            }
                         }
                     }
                 }
@@ -141,22 +166,21 @@ fun RiwayatScreen(
     }
 }
 
-
-
 @Composable
 fun FilterChip(
     label: String,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val colors = KetukTheme.colors
     val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else ChipFilter,
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else colors.chipFilter,
         animationSpec = tween(durationMillis = 300),
         label = "chipBackgroundColor"
     )
 
     val textColor by animateColorAsState(
-        targetValue = if (isSelected) Color.White else Arang,
+        targetValue = if (isSelected) colors.onAccent else colors.textPrimary,
         animationSpec = tween(durationMillis = 300),
         label = "chipTextColor"
     )
@@ -182,12 +206,17 @@ fun FilterChip(
 }
 
 @Composable
-fun RiwayatItemCard(item: RiwayatItem) {
+fun RiwayatItemCard(
+    item: ActivityItem,
+    onClick: () -> Unit = {}
+) {
+    val colors = KetukTheme.colors
     Card(
+        onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = CardPutih),
-        border = BorderStroke(1.dp, ActivePill),
+        colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
+        border = BorderStroke(1.dp, colors.cardBorder),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
@@ -196,10 +225,12 @@ fun RiwayatItemCard(item: RiwayatItem) {
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val (iconColor, icon) = when (item.icon) {
-                RiwayatIcon.CHECK -> IkonHijau to Icons.Rounded.Check
-                RiwayatIcon.CHAT -> IkonBiru to Icons.Rounded.ChatBubble
-                RiwayatIcon.BELL -> IkonOranye to Icons.Rounded.Notifications
+            val (iconColor, icon) = when {
+                item.level == EscalationLevel.L3 -> Terakota to Icons.Rounded.Notifications
+                item.level == EscalationLevel.L2 || item.level == EscalationLevel.L1 -> IkonOranye to Icons.Rounded.Notifications
+                item.type == ActivityCategory.SAPA -> IkonBiru to Icons.Rounded.ChatBubble
+                item.type == ActivityCategory.HP -> IkonHijau to Icons.Rounded.PhoneAndroid
+                else -> IkonHijau to Icons.Rounded.Check
             }
 
             Surface(
@@ -211,7 +242,7 @@ fun RiwayatItemCard(item: RiwayatItem) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = Color.White,
+                        tint = colors.onAccent,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -228,13 +259,29 @@ fun RiwayatItemCard(item: RiwayatItem) {
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                if (!item.quote.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "\"${item.quote}\"",
+                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                }
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = item.time,
+                    text = item.timestamp,
                     style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                contentDescription = "Lihat detail",
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
@@ -270,3 +317,12 @@ fun RiwayatScreenPreviewTablet() {
         RiwayatScreen()
     }
 }
+
+@Preview(name = "Mode Gelap", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun RiwayatScreenDarkPreview() {
+    KetukTheme(darkTheme = true) {
+        RiwayatScreen()
+    }
+}
+
