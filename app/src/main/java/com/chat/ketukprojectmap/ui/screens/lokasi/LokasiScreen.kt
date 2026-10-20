@@ -30,7 +30,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chat.ketukprojectmap.R
 import com.chat.ketukprojectmap.data.dummy.DummyData
 import com.chat.ketukprojectmap.data.model.LokasiData
-import com.chat.ketukprojectmap.ui.screens.home.FadeSlideIn
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

@@ -1,3 +1,106 @@
+### [2026-10-21 02:45] Unifikasi Animasi Masuk (FadeSlideIn Bertingkat) Seluruh Layar
+- Alasan/permintaan: Menyeragamkan animasi masuk (fade + slide-up bertingkat) di seluruh layar dan semua peran (Auth, Wali, Oma/Opa, Penjaga) mengikuti pola standar Home Wali (alpha 400ms, translasi Y 16dp dari bawah, stagger delay 80ms per blok hingga maks 600ms).
+- File diubah:
+  * Baru: `app/src/main/java/com/chat/ketukprojectmap/ui/components/KetukAnimations.kt` (komponen publik `FadeSlideIn`, `SlideDirection`, dan helper `staggerDelay` dengan perlindungan `rememberSaveable` agar tidak stuck transparan saat rotasi layar).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/home/HomeScreen.kt`: Menghapus deklarasi private `FadeSlideIn` dan mengimpor dari `KetukAnimations.kt`.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/lokasi/LokasiScreen.kt`: Mengimpor `FadeSlideIn` dari `KetukAnimations.kt` menggantikan import HomeScreen.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/login/LoginScreen.kt`: Menerapkan `FadeSlideIn` bertingkat pada Maskot/Logo (0ms), Form Input (80ms), Tombol Masuk (160ms), Opsi Google & Register (240ms), dan Kartu Demo (320ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/register/RegisterScreen.kt`: Menerapkan `FadeSlideIn` bertingkat pada Maskot/Header (0ms), Field Nama & Email (80ms), Field Nomor HP (160ms), Field Password & Konfirmasi (240ms), dan Tombol Daftar (320ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/verification/VerificationScreen.kt`: Menerapkan `FadeSlideIn` bertingkat pada Maskot HP (0ms), Kotak Kode OTP (80ms), Tombol Confirm (160ms), dan Link Kirim Ulang (240ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/role/RoleSelectScreen.kt`: Menerapkan `FadeSlideIn` bertingkat pada Header (0ms), Kartu Wali (80ms), Kartu Penjaga (160ms), Kartu Oma/Opa (240ms), dan Tombol Lanjutkan (320ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/riwayat/RiwayatScreen.kt`: Menerapkan `FadeSlideIn` bertingkat pada Judul Tab (0ms), Filter Chips (80ms), dan 6 item pertama `LazyColumn` (160ms - 560ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/profile/ProfileScreen.kt`: Menerapkan `FadeSlideIn` bertingkat pada Judul Tab (0ms), Kartu Akun Wali (80ms), Kartu Lansia (160ms), Kartu Mode Gelap (240ms), dan Tombol Keluar (320ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/notifikasi/NotifikasiScreen.kt`: Menerapkan `FadeSlideIn` bertingkat pada 6 item pertama `LazyColumn` notifikasi (40ms - 440ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/detail/DetailAlertScreen.kt`: Menerapkan `FadeSlideIn` bertingkat pada Kartu Ringkasan Alert (0ms), Kartu Info Lansia (80ms), dan Blok Tombol Tindakan Wali (160ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/walisetup/WaliSetupScreens.kt`:
+    - `DetailOmaOpaScreen`: Header (0ms), Field Wali (80ms), Toggle Gender (160ms), Field Lansia & Umur (240ms), Tombol Lanjutkan (320ms).
+    - `CircleKeluargaScreen`: Header (0ms), Kartu Anggota (80ms), Kartu Undang & QR (160ms), Tombol Lanjutkan (240ms).
+    - `QrWaliScreen`: Header (0ms), Kartu QR Pairing (80ms), Tombol Simulasikan (160ms).
+    - `PilihPenjagaScreen`: Header (0ms), Search Bar (80ms), Kartu Kontak Radio (160ms), Tombol Pilih (240ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/oma/OmaScreens.kt`:
+    - `ScanQrScreen`: Header (0ms), Viewport Kamera & Reticle (80ms), Kartu Petunjuk (160ms), Tombol Simulasikan (240ms).
+    - `OmaPermissionsScreen`: Header (0ms), Kartu Yang Dipantau (80ms), Kartu Izin (160ms), Checklist Privasi (240ms), Tombol Setuju (320ms).
+    - `OmaPassiveScreen`: Header (0ms), Hero Avatar & Status (80ms), Kartu Sapaan L1 (160ms), Kartu Kontak Wali (240ms), Kartu Mode Gelap (320ms), Tombol Keluar (400ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianHomeScreen.kt`: Menerapkan `FadeSlideIn` bertingkat pada Header Penjaga (0ms), Banner Ketuk Pintu & Tombol Aksi (80ms), Kartu Peta Mini (160ms), Kartu Aksi Cepat (240ms), dan Kartu Riwayat (320ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianLokasiScreen.kt`: Menerapkan `FadeSlideIn` bertingkat pada Judul Tab (0ms), Kartu Melayang Oma Diyas (80ms), Viewport Peta Statis (160ms), dan Navigasi Riwayat Lokasi (240ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianLocationHistoryScreen.kt`: Menerapkan `FadeSlideIn` bertingkat pada Header Top Bar (0ms) dan 6 item pertama `LazyColumn` riwayat pergerakan (40ms - 440ms).
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianProfileScreen.kt`: Menerapkan `FadeSlideIn` bertingkat pada Judul Tab (0ms), Kartu Info Penjaga (80ms), Kartu Status Kesediaan (160ms), Kartu Lansia Dipantau (240ms), Kartu Mode Gelap (320ms), dan Tombol Keluar (400ms).
+  * `docs/SCREENS.md`: Menambahkan rincian animasi masuk terpadu `FadeSlideIn` pada spesifikasi visual dan selisih desain.
+  * `docs/CHANGELOG_HISTORY.md`: Menambahkan catatan riwayat unifikasi animasi masuk.
+- Dampak ke layar/fitur/rubrik:
+  * Compose Layout & Animation: Seluruh layar di semua peran memiliki transisi masuk yang konsisten, halus, dan elegan (fade 400ms + slide 16dp ke atas) tanpa lag, meningkatkan UX dan polesan aplikasi.
+  * Lazy Loading / List Screen: Item `LazyColumn` pada Riwayat Aktivitas, Notifikasi, dan Riwayat Lokasi hanya menganimasikan 6 item awal saat pertama kali dimuat tanpa mengulang saat scroll.
+  * Robustness & State: Menggunakan `rememberSaveable` di level animasi mencegah konten transparan macet (stuck) saat rotasi layar atau navigasi balik dari back stack.
+- Hasil build/lint:
+  * `./gradlew assembleDemoDebug assembleFullDebug`: BUILD SUCCESSFUL
+  * `./gradlew lintDemoRelease`: BUILD SUCCESSFUL (0 errors, 35 warnings)
+
+---
+
+### [2026-10-21 01:30] Perbaikan Build Variant Demo (Tahap A & Tahap B 5 Prioritas Tinggi)
+- Alasan/permintaan: Menyelesaikan audit review Jetpack Compose UTS IF570L: memperbaiki 6 error inspection launcher icon mipmap-anydpi (Tahap A) dan mengimplementasikan 5 temuan prioritas Tinggi dari audit rubrik UTS (Tahap B).
+- File diubah:
+  * Dihapus: `app/src/main/res/mipmap-anydpi/ic_launcher.xml` dan `ic_launcher_round.xml` (vektor fallback API 23-25 yang salah penempatan di folder mipmap; minSdk 26 sudah memiliki adaptive icon di `mipmap-anydpi-v26`).
+  * `app/build.gradle.kts`: Override `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_KEY`, dan `GOOGLE_WEB_CLIENT_ID` menjadi string kosong `""` di flavor `demo` agar kredensial `local.properties` tidak bocor ke APK demo UTS; flavor `full` tetap menggunakan kredensial asli.
+  * `app/src/main/java/com/chat/ketukprojectmap/data/model/HomeSampleData.kt` & `HomeScreen.kt`: Menambahkan field `id: String` pada `RecentActivity` ("act_3", "act_4", "act_7") dan meneruskan `activity.id` langsung ke `onActivityClick`, memperbaiki bug salah buka item detail alert.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/login/LoginScreen.kt` & `ui/components/AuthComponents.kt`: Mengganti `remember` menjadi `rememberSaveable` untuk `email`, `password`, dan `passwordVisible`; membatasi panjang input; menambahkan validasi format email & sandi minimal 6 karakter secara live; serta memblokir tombol submit sampai valid.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/register/RegisterViewModel.kt` & `RegisterScreen.kt`: Menambahkan `.take(13)` pada nomor HP, batas panjang karakter nama/email/password; validasi live untuk nama, format email, nomor HP (9-13 digit), sandi (min 8 karakter), dan konfirmasi sandi; serta memblokir tombol "Daftar" sampai seluruh form valid.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/walisetup/WaliSetupScreens.kt`: Membatasi panjang nama wali dan lansia `.take(60)` di `DetailOmaOpaScreen`; menggunakan `rememberSaveable` untuk `hasAddedExtraMember` di `CircleKeluargaScreen` agar anggota tambahan ("Kakak Raka") bertahan saat rotasi layar.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/notifikasi/NotifikasiScreen.kt`: Menggunakan `rememberSaveable` untuk `unreadIds` agar status "Tandai dibaca" dan klik notifikasi bertahan saat rotasi layar.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/profile/ProfileScreen.kt`: Menggunakan `rememberSaveable` untuk `showLogoutDialog`.
+  * `SupabaseProvider.kt`, `AuthRepository.kt`, `GuardianHomeScreen.kt`, `HomeScreen.kt`, `LoginScreen.kt`, `OmaScreens.kt`, `RegisterScreen.kt`: Memakai fully-qualified `com.chat.ketukprojectmap.BuildConfig.*` agar aman dari penghapusan import otomatis oleh IDE ("Optimize imports on the fly").
+- Dampak ke layar/fitur/rubrik:
+  * Screen Implementation & Navigation: Klik aktivitas di Beranda Wali membuka detail item yang tepat (`act_3`/`act_4`/`act_7`).
+  * State Management: Seluruh input form, dialog logout, status notifikasi, dan penambahan anggota circle tidak lagi hilang saat rotasi layar (portrait/landscape).
+  * Form Input & Validation: Validasi live dengan feedback pesan error dan pemblokiran tombol submit pada Login dan Register; panjang HP dibatasi maksimal 13 digit.
+  * Dummy Data & Deliverable: APK flavor demo bebas dari kebocoran kredensial Supabase di BuildConfig; error lint berkurang menjadi 0 error.
+- Hasil build/lint:
+  * `./gradlew assembleDemoDebug assembleDemoRelease assembleFullDebug`: BUILD SUCCESSFUL
+  * `./gradlew lintDemoRelease`: BUILD SUCCESSFUL (0 errors, 35 warnings)
+
+---
+
+## [2026-10-19 07:50] Tugas Khusus: Perapian Tampilan & Responsivitas (Kartu Demo Login, Tombol & Header Penjaga, Padding Bottom Bar, dan Preview Multi-Device)
+
+- **Tujuan:** Merapikan tampilan dan meningkatkan responsivitas antarmuka aplikasi pada layar sempit (320dp) dan aksesibilitas (fontScale 1.3) tanpa mengubah logika bisnis, navigasi, mode terang, maupun sistem autentikasi, dengan maksimal 5 file kode.
+- **Referensi desain:** `docs/figma/01. Authentication.png`, `docs/figma/05. Core Phase Penjaga.png`, dan `docs/SCREENS.md`.
+- **Ringkasan perubahan:**
+  - `LoginScreen.kt`:
+    1. Memecah judul kartu akun demo menjadi 2 teks: judul tebal "Akun Demo UTS" dan keterangan sekunder "Ketuk baris untuk isi otomatis. Sandi: Ketuk123".
+    2. Menyusun setiap akun demo menjadi 2 baris vertikal (label peran + email di baris atas, nama lengkap di baris bawah) agar teks tidak terpotong atau terpecah di tengah saat layar sempit.
+    3. Menambahkan baris catatan petunjuk di bawah daftar akun: "Tombol 'Lanjut dengan Google' (simulasi) langsung membuka halaman Pilih Peran."
+    4. Menambahkan preview aksesibilitas `LoginScreenAccessibilityPreview` (360dp, fontScale = 1.3f).
+  - `GuardianHomeScreen.kt`:
+    1. Mengganti tinggi tetap tombol aksi banner "Oma aman" dan "Butuh bantuan" dengan `heightIn(min = 48.dp)` di dalam `BoxWithConstraints`. Saat ruang sempit (< 270dp di kartu) atau fontScale > 1.15f, tombol otomatis tersusun vertikal selebar kartu sehingga teks utuh dan tidak terpotong.
+    2. Menyesuaikan header Beranda Penjaga: sapaan "Halo, Markolintang" menggunakan ukuran 22sp dengan `weight(1f)` dan `TextOverflow.Ellipsis`, serta tombol panah demo dan lonceng notifikasi dibuat proporsional agar sapaan muat 1 baris pada layar 360dp.
+    3. Judul banner "Tolong ketuk pintu Oma Diyas" diizinkan 2 baris rapi dengan `lineHeight = 20.sp`.
+    4. Menambah padding bawah konten scrollable menjadi `64.dp + navBarInset + 32.dp` agar kartu riwayat terakhir tidak terhalang bottom nav bar.
+    5. Menambahkan `@Preview` untuk 320dp, 360dp, dan aksesibilitas 360dp fontScale 1.3.
+  - `GuardianLokasiScreen.kt`:
+    1. Menambah padding bawah konten scrollable menjadi `64.dp + navBarInset + 32.dp`.
+    2. Menambahkan `@Preview` untuk 320dp, 360dp, dan aksesibilitas 360dp fontScale 1.3.
+  - `GuardianProfileScreen.kt`:
+    1. Menambah padding bawah konten scrollable menjadi `64.dp + navBarInset + 32.dp`.
+    2. Menambahkan `@Preview` untuk 320dp, 360dp, dan aksesibilitas 360dp fontScale 1.3.
+  - `OmaScreens.kt` (`OmaPassiveScreen`):
+    1. Menambahkan `@Preview` untuk 320dp dan 360dp (melengkapi preview aksesibilitas fontScale 1.3 yang sudah ada).
+- **File dibuat:** Tidak ada
+- **File diubah:**
+  1. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/login/LoginScreen.kt`
+  2. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianHomeScreen.kt`
+  3. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianLokasiScreen.kt`
+  4. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianProfileScreen.kt`
+  5. `app/src/main/java/com/chat/ketukprojectmap/ui/screens/oma/OmaScreens.kt`
+  6. `docs/SCREENS.md`
+  7. `docs/CHANGELOG_HISTORY.md`
+- **File dihapus:** Tidak ada
+- **Error/masalah:** Tidak ada
+- **Solusi yang berhasil:** Penerapan `BoxWithConstraints` dan layout dinamis pada kartu demo dan banner penjaga memastikan keterbacaan penuh tanpa pemotongan teks pada berbagai resolusi dan skala font.
+- **Status build:** `./gradlew assembleDemoDebug assembleFullDebug` **BUILD SUCCESSFUL**
+- **Belum selesai:** Tahap 5 (`README.txt` & Finalisasi UTS).
+
+---
+
 ## [2026-10-19 06:15] Tahap 4: Alur Penjaga M10 (Beranda, Lokasi, Riwayat Lokasi 7 Hari, dan Profil Penjaga)
 
 - **Tujuan:** Mengimplementasikan seluruh alur Penjaga (M10) sesuai `05. Core Phase Penjaga.png` dan `flowchart.png`, mengoreksi sapaan Beranda Wali menjadi `"Halo, Nanda"`, memperbarui dokumentasi aset/proyek, dan menambahkan layar Riwayat Lokasi 7 Hari serta Profil Penjaga dengan mode gelap manual dan tombol keluar yang membersihkan back stack.

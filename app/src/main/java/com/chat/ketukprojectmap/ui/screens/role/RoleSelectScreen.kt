@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chat.ketukprojectmap.R
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.components.KetukButton
 import com.chat.ketukprojectmap.ui.theme.KetukTheme
 import com.chat.ketukprojectmap.ui.theme.Terakota
@@ -83,19 +84,21 @@ fun RoleSelectScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Column(modifier = Modifier.padding(horizontal = 32.dp)) {
-            Text(
-                text = "Siapa kamu?",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.textPrimary
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = "Pilih peranmu untuk melanjutkan",
-                fontSize = 12.sp,
-                color = colors.textPrimary
-            )
+        FadeSlideIn(delayMillis = 0) {
+            Column(modifier = Modifier.padding(horizontal = 32.dp)) {
+                Text(
+                    text = "Siapa kamu?",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textPrimary
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "Pilih peranmu untuk melanjutkan",
+                    fontSize = 12.sp,
+                    color = colors.textPrimary
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -108,60 +111,70 @@ fun RoleSelectScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 32.dp, vertical = 4.dp)
         ) {
-            RoleCard(
-                illustration = R.drawable.role_wali,
-                illustrationSize = illustrationSize,
-                title = "Saya wali Oma dan Opa",
-                description = "Saya adalah anak, cucu, atau keluarga yang merawat Oma dan Opa.",
-                isSelected = selectedRole == UserRole.WALI,
-                onClick = { viewModel.selectRole(UserRole.WALI) }
-            )
+            FadeSlideIn(delayMillis = 80) {
+                RoleCard(
+                    illustration = R.drawable.role_wali,
+                    illustrationSize = illustrationSize,
+                    title = "Saya wali Oma dan Opa",
+                    description = "Saya adalah anak, cucu, atau keluarga yang merawat Oma dan Opa.",
+                    isSelected = selectedRole == UserRole.WALI,
+                    onClick = { viewModel.selectRole(UserRole.WALI) }
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            RoleCard(
-                illustration = R.drawable.role_penjaga,
-                illustrationSize = illustrationSize,
-                title = "Saya penjaga Oma dan Opa",
-                description = "Saya adalah tetangga atau orang yang paling dekat dari rumah Oma dan Opa.",
-                isSelected = selectedRole == UserRole.PENJAGA,
-                onClick = { viewModel.selectRole(UserRole.PENJAGA) }
-            )
+            FadeSlideIn(delayMillis = 160) {
+                RoleCard(
+                    illustration = R.drawable.role_penjaga,
+                    illustrationSize = illustrationSize,
+                    title = "Saya penjaga Oma dan Opa",
+                    description = "Saya adalah tetangga atau orang yang paling dekat dari rumah Oma dan Opa.",
+                    isSelected = selectedRole == UserRole.PENJAGA,
+                    onClick = { viewModel.selectRole(UserRole.PENJAGA) }
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            RoleCard(
-                illustration = R.drawable.role_opa,
-                illustrationSize = illustrationSize,
-                title = "Saya adalah Oma/Opa",
-                description = "Saya ingin memantau kesehatan dan aktivitas saya sendiri.",
-                isSelected = selectedRole == UserRole.OMA_OPA,
-                onClick = { viewModel.selectRole(UserRole.OMA_OPA) }
-            )
+            FadeSlideIn(delayMillis = 240) {
+                RoleCard(
+                    illustration = R.drawable.role_opa,
+                    illustrationSize = illustrationSize,
+                    title = "Saya adalah Oma/Opa",
+                    description = "Saya ingin memantau kesehatan dan aktivitas saya sendiri.",
+                    isSelected = selectedRole == UserRole.OMA_OPA,
+                    onClick = { viewModel.selectRole(UserRole.OMA_OPA) }
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Pesan error simpan role
-        if (state.error != null) {
-            Text(
-                text = state.error.orEmpty(),
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(horizontal = 36.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
+        FadeSlideIn(delayMillis = 320) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Pesan error simpan role
+                if (state.error != null) {
+                    Text(
+                        text = state.error.orEmpty(),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(horizontal = 36.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
-        Box(modifier = Modifier.padding(horizontal = 32.dp)) {
-            KetukButton(
-                text = if (state.isSaving) "Menyimpan..." else "Lanjutkan",
-                onClick = {
-                    // TODO: peran penjaga dan oma/opa sementara juga menuju home
-                    viewModel.confirm(onSuccess = onNavigateToHome)
-                },
-                enabled = selectedRole != null && !state.isSaving
-            )
+                Box(modifier = Modifier.padding(horizontal = 32.dp)) {
+                    KetukButton(
+                        text = if (state.isSaving) "Menyimpan..." else "Lanjutkan",
+                        onClick = {
+                            // TODO: peran penjaga dan oma/opa sementara juga menuju home
+                            viewModel.confirm(onSuccess = onNavigateToHome)
+                        },
+                        enabled = selectedRole != null && !state.isSaving
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))

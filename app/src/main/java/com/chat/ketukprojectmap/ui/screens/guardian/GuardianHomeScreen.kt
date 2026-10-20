@@ -8,7 +8,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -26,16 +25,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.chat.ketukprojectmap.BuildConfig
 import com.chat.ketukprojectmap.R
 import com.chat.ketukprojectmap.data.dummy.ActivityItem
 import com.chat.ketukprojectmap.data.dummy.DummyData
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.theme.ErrorMerah
 import com.chat.ketukprojectmap.ui.theme.KetukTheme
 import com.chat.ketukprojectmap.ui.theme.Terakota
@@ -66,7 +67,7 @@ fun GuardianHomeScreen(
     val colors = KetukTheme.colors
 
     // TODO(tim): tombol khusus demo, tidak ada di Figma
-    BackHandler(enabled = BuildConfig.DEMO_MODE && selectedTab == 0) {
+    BackHandler(enabled = com.chat.ketukprojectmap.BuildConfig.DEMO_MODE && selectedTab == 0) {
         onNavigateBackToRole()
     }
 
@@ -165,67 +166,77 @@ private fun GuardianHomeContent(
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
-            .padding(bottom = 64.dp + navBarInset + 24.dp)
+            .padding(bottom = 64.dp + navBarInset + 32.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // 1. Header: Tombol Panah Demo + Sapaan + Lonceng Notifikasi dengan Titik Merah
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // TODO(tim): tombol panah khusus demo, tidak ada di Figma
-            if (BuildConfig.DEMO_MODE) {
-                IconButton(
-                    onClick = onNavigateBackToRole,
-                    modifier = Modifier.size(40.dp)
+        FadeSlideIn(delayMillis = 0) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // TODO(tim): tombol panah khusus demo, tidak ada di Figma
+                if (com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) {
+                    IconButton(
+                        onClick = onNavigateBackToRole,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = "Kembali ke Pilih Peran",
+                            tint = Terakota
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+                }
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 6.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Kembali ke Pilih Peran",
-                        tint = Terakota
+                    Text(
+                        text = "Halo, Markolintang",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.textPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Penjaga terdekat - Oma Diyas",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.textSecondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
-                Spacer(modifier = Modifier.width(6.dp))
-            }
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Halo, Markolintang",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.textPrimary
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "Penjaga terdekat - Oma Diyas",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colors.textSecondary
-                )
-            }
-
-            // Ikon Lonceng Notifikasi dengan Badge Titik Merah
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onOpenNotifications),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.nav_notifikasi),
-                    contentDescription = "Notifikasi",
-                    modifier = Modifier.size(24.dp)
-                )
-                if (uiState.unreadNotificationsCount > 0) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .offset(x = (-6).dp, y = 6.dp)
-                            .size(9.dp)
-                            .clip(CircleShape)
-                            .background(ErrorMerah)
+                // Ikon Lonceng Notifikasi dengan Badge Titik Merah
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .clickable(onClick = onOpenNotifications),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.nav_notifikasi),
+                        contentDescription = "Notifikasi",
+                        modifier = Modifier.size(22.dp)
                     )
+                    if (uiState.unreadNotificationsCount > 0) {
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .offset(x = (-4).dp, y = 4.dp)
+                                .size(9.dp)
+                                .clip(CircleShape)
+                                .background(ErrorMerah)
+                        )
+                    }
                 }
             }
         }
@@ -233,89 +244,93 @@ private fun GuardianHomeContent(
         Spacer(modifier = Modifier.height(18.dp))
 
         // 2. Banner Komposit Interaktif: "Tolong ketuk pintu Oma Diyas" + 2 Tombol
-        GuardianAlertBannerCard(
-            status = uiState.checkStatus,
-            onConfirmSafe = onConfirmSafe,
-            onHelpRequested = onHelpRequested
-        )
+        FadeSlideIn(delayMillis = 80) {
+            GuardianAlertBannerCard(
+                status = uiState.checkStatus,
+                onConfirmSafe = onConfirmSafe,
+                onHelpRequested = onHelpRequested
+            )
+        }
 
         Spacer(modifier = Modifier.height(18.dp))
 
         // 3. Kartu Mini Peta: "Rumah Oma Diyas - Jl. Syeckh Nawawi Albantani 13"
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onOpenLocationTab),
-            shape = RoundedCornerShape(18.dp),
-            colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
-            border = BorderStroke(1.dp, colors.cardBorder),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-        ) {
-            Column(modifier = Modifier.padding(14.dp)) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(130.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.peta_lokasi),
-                        contentDescription = "Peta Rumah Oma Diyas",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        modifier = Modifier.weight(1f),
-                        verticalAlignment = Alignment.CenterVertically
+        FadeSlideIn(delayMillis = 160) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(onClick = onOpenLocationTab),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
+                border = BorderStroke(1.dp, colors.cardBorder),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(14.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(130.dp)
+                            .clip(RoundedCornerShape(14.dp))
                     ) {
-                        Surface(
-                            modifier = Modifier.size(36.dp),
-                            shape = CircleShape,
-                            color = Terakota.copy(alpha = 0.14f)
+                        Image(
+                            painter = painterResource(R.drawable.peta_lokasi),
+                            contentDescription = "Peta Rumah Oma Diyas",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Home,
-                                    contentDescription = null,
-                                    tint = Terakota,
-                                    modifier = Modifier.size(20.dp)
+                            Surface(
+                                modifier = Modifier.size(36.dp),
+                                shape = CircleShape,
+                                color = Terakota.copy(alpha = 0.14f)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Home,
+                                        contentDescription = null,
+                                        tint = Terakota,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column {
+                                Text(
+                                    text = "Rumah Oma Diyas",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.textPrimary
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = DummyData.defaultElder.address,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = colors.textSecondary
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.width(12.dp))
-
-                        Column {
-                            Text(
-                                text = "Rumah Oma Diyas",
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = colors.textPrimary
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = DummyData.defaultElder.address,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = colors.textSecondary
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Rounded.ChevronRight,
+                            contentDescription = "Buka Lokasi",
+                            tint = Terakota,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
-
-                    Icon(
-                        imageVector = Icons.Rounded.ChevronRight,
-                        contentDescription = "Buka Lokasi",
-                        tint = Terakota,
-                        modifier = Modifier.size(24.dp)
-                    )
                 }
             }
         }
@@ -323,74 +338,82 @@ private fun GuardianHomeContent(
         Spacer(modifier = Modifier.height(20.dp))
 
         // 4. Bagian "Aksi cepat" (Lacak & Hubungi)
-        Text(
-            text = "Aksi cepat",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = colors.textPrimary
-        )
+        FadeSlideIn(delayMillis = 240) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Aksi cepat",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textPrimary
+                )
 
-        Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            // Kartu Lacak (Terakota Muda)
-            GuardianQuickActionCard(
-                title = "Lacak",
-                icon = Icons.Rounded.Navigation,
-                backgroundColor = colors.aksiAktivitas,
-                iconColor = Terakota,
-                onClick = { onQuickAction("Lacak") },
-                modifier = Modifier.weight(1f)
-            )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    // Kartu Lacak (Terakota Muda)
+                    GuardianQuickActionCard(
+                        title = "Lacak",
+                        icon = Icons.Rounded.Navigation,
+                        backgroundColor = colors.aksiAktivitas,
+                        iconColor = Terakota,
+                        onClick = { onQuickAction("Lacak") },
+                        modifier = Modifier.weight(1f)
+                    )
 
-            // Kartu Hubungi (Hijau Muda)
-            GuardianQuickActionCard(
-                title = "Hubungi",
-                icon = Icons.Rounded.Call,
-                backgroundColor = colors.aksiHp,
-                iconColor = colors.accentGreen,
-                onClick = { onQuickAction("Hubungi") },
-                modifier = Modifier.weight(1f)
-            )
+                    // Kartu Hubungi (Hijau Muda)
+                    GuardianQuickActionCard(
+                        title = "Hubungi",
+                        icon = Icons.Rounded.Call,
+                        backgroundColor = colors.aksiHp,
+                        iconColor = colors.accentGreen,
+                        onClick = { onQuickAction("Hubungi") },
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(22.dp))
 
         // 5. Bagian "Riwayat"
-        Text(
-            text = "Riwayat",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = colors.textPrimary
-        )
+        FadeSlideIn(delayMillis = 320) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Riwayat",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textPrimary
+                )
 
-        Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(18.dp),
-            colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
-            border = BorderStroke(1.dp, colors.cardBorder),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 6.dp)
-            ) {
-                uiState.historyItems.forEachIndexed { index, item ->
-                    GuardianHistoryRow(
-                        item = item,
-                        onClick = { onHistoryItemClick(item) }
-                    )
-                    if (index < uiState.historyItems.size - 1) {
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            color = colors.divider
-                        )
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
+                    border = BorderStroke(1.dp, colors.cardBorder),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp)
+                    ) {
+                        uiState.historyItems.forEachIndexed { index, item ->
+                            GuardianHistoryRow(
+                                item = item,
+                                onClick = { onHistoryItemClick(item) }
+                            )
+                            if (index < uiState.historyItems.size - 1) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    color = colors.divider
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -466,7 +489,9 @@ private fun GuardianAlertBannerCard(
                         },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary
+                        color = colors.textPrimary,
+                        maxLines = 2,
+                        lineHeight = 20.sp
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
@@ -484,59 +509,122 @@ private fun GuardianAlertBannerCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Baris Tombol Aksi "Oma aman" & "Butuh bantuan"
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Tombol "Oma aman" (Hijau Sage)
-                Button(
-                    onClick = onConfirmSafe,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(46.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.chipAman,
-                        contentColor = colors.textPrimary
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Check,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Oma aman",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+            // Baris / Kolom Tombol Aksi "Oma aman" & "Butuh bantuan"
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val fontScale = LocalDensity.current.fontScale
+                // Pada layar sempit (< 270dp di dalam kartu) atau fontScale > 1.15f, susun ke bawah agar teks utuh dan tidak terpotong
+                val stackVertically = maxWidth < 270.dp || fontScale > 1.15f
 
-                // Tombol "Butuh bantuan" (Merah muda / Terakota muda)
-                Button(
-                    onClick = onHelpRequested,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(46.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colors.cardWali,
-                        contentColor = Terakota
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.PriorityHigh,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Butuh bantuan",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                if (stackVertically) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Button(
+                            onClick = onConfirmSafe,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = colors.chipAman,
+                                contentColor = colors.textPrimary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Oma aman",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        Button(
+                            onClick = onHelpRequested,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = colors.cardWali,
+                                contentColor = Terakota
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.PriorityHigh,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Butuh bantuan",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Button(
+                            onClick = onConfirmSafe,
+                            modifier = Modifier
+                                .weight(1f)
+                                .heightIn(min = 48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = colors.chipAman,
+                                contentColor = colors.textPrimary
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Oma aman",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        Button(
+                            onClick = onHelpRequested,
+                            modifier = Modifier
+                                .weight(1f)
+                                .heightIn(min = 48.dp),
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = colors.cardWali,
+                                contentColor = Terakota
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.PriorityHigh,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "Butuh bantuan",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -736,6 +824,30 @@ private fun PreviewGuardianHomeLight() {
 @Composable
 private fun PreviewGuardianHomeDark() {
     KetukTheme(darkTheme = true) {
+        GuardianHomeScreen()
+    }
+}
+
+@Preview(name = "Guardian Home - 320dp", widthDp = 320, heightDp = 640, showBackground = true)
+@Composable
+private fun PreviewGuardianHome320() {
+    KetukTheme(darkTheme = false) {
+        GuardianHomeScreen()
+    }
+}
+
+@Preview(name = "Guardian Home - 360dp", widthDp = 360, heightDp = 800, showBackground = true)
+@Composable
+private fun PreviewGuardianHome360() {
+    KetukTheme(darkTheme = false) {
+        GuardianHomeScreen()
+    }
+}
+
+@Preview(name = "Guardian Home - Aksesibilitas 360dp fontScale 1.3", widthDp = 360, heightDp = 800, fontScale = 1.3f, showBackground = true)
+@Composable
+private fun PreviewGuardianHomeAccessibility() {
+    KetukTheme(darkTheme = false) {
         GuardianHomeScreen()
     }
 }

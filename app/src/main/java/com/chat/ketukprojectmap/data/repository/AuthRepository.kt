@@ -1,7 +1,5 @@
 package com.chat.ketukprojectmap.data.repository
 
-import com.chat.ketukprojectmap.BuildConfig
-
 /**
  * Kontrak autentikasi untuk aplikasi Ketuk.
  * Di mode `demo` (UTS) memakai [FakeAuthRepository] (in-memory offline).
@@ -44,4 +42,4 @@ interface AuthRepository {
  * Satu-satunya titik pemilihan implementasi [AuthRepository] berdasarkan [BuildConfig.DEMO_MODE].
  */
 fun AuthRepository(): AuthRepository =
-    if (BuildConfig.DEMO_MODE) FakeAuthRepository else SupabaseAuthRepository()
+    if (com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) FakeAuthRepository else SupabaseAuthRepository()

@@ -40,12 +40,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.chat.ketukprojectmap.BuildConfig
 import com.chat.ketukprojectmap.R
 import com.chat.ketukprojectmap.data.model.*
 import com.chat.ketukprojectmap.ui.screens.riwayat.RiwayatScreen
 import com.chat.ketukprojectmap.ui.screens.lokasi.LokasiScreen
 import com.chat.ketukprojectmap.ui.screens.profile.ProfileScreen
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -67,7 +67,7 @@ fun HomeScreen(
     val colors = KetukTheme.colors
 
     // TODO(tim): tombol khusus demo, tidak ada di Figma
-    BackHandler(enabled = BuildConfig.DEMO_MODE && selectedTab == 0) {
+    BackHandler(enabled = com.chat.ketukprojectmap.BuildConfig.DEMO_MODE && selectedTab == 0) {
         onNavigateBackToRole()
     }
 
@@ -222,45 +222,6 @@ fun HomeContent(
 }
 
 @Composable
-fun FadeSlideIn(
-    visible: Boolean,
-    delayMillis: Int,
-    content: @Composable () -> Unit
-) {
-    var localVisible by remember { mutableStateOf(false) }
-
-    LaunchedEffect(visible) {
-        if (visible) {
-            delay(delayMillis.toLong().milliseconds)
-            localVisible = true
-        } else {
-            localVisible = false
-        }
-    }
-
-    val alpha by animateFloatAsState(
-        targetValue = if (localVisible) 1f else 0f,
-        animationSpec = tween(durationMillis = 400),
-        label = "alpha"
-    )
-
-    val offsetY by animateDpAsState(
-        targetValue = if (localVisible) 0.dp else 16.dp,
-        animationSpec = tween(durationMillis = 400),
-        label = "offsetY"
-    )
-
-    Box(
-        modifier = Modifier.graphicsLayer {
-            this.alpha = alpha
-            translationY = offsetY.toPx()
-        }
-    ) {
-        content()
-    }
-}
-
-@Composable
 fun HeaderSection(
     userName: String,
     onOpenNotifications: () -> Unit,
@@ -274,7 +235,7 @@ fun HeaderSection(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             // TODO(tim): tombol khusus demo, tidak ada di Figma
-            if (BuildConfig.DEMO_MODE) {
+            if (com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
                         onClick = onNavigateBackToRole,
@@ -670,15 +631,10 @@ fun RecentActivitiesSection(
 
         Column {
             recentActivities.forEachIndexed { index, activity ->
-                val itemId = when (index) {
-                    0 -> "act_1"
-                    1 -> "act_2"
-                    else -> "act_7"
-                }
                 TimelineItem(
                     activity = activity,
                     showLine = index < recentActivities.lastIndex,
-                    onClick = { onActivityClick(itemId) }
+                    onClick = { onActivityClick(activity.id) }
                 )
             }
         }
@@ -882,4 +838,4 @@ fun HomeScreenDarkPreview() {
     KetukTheme(darkTheme = true) {
         HomeScreen()
     }
-}
+}

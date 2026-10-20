@@ -48,7 +48,9 @@ import com.chat.ketukprojectmap.R
 import com.chat.ketukprojectmap.data.dummy.CircleMember
 import com.chat.ketukprojectmap.data.dummy.DummyData
 import com.chat.ketukprojectmap.data.dummy.ElderGender
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.components.KetukButton
+import com.chat.ketukprojectmap.ui.components.staggerDelay
 import com.chat.ketukprojectmap.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -114,64 +116,72 @@ fun DetailOmaOpaScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "Detail Oma/Opa",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.textPrimary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Isi detailmu sebagai wali dan juga detail Oma/Opa\nagar Ketuk dapat menyapa !",
-                fontSize = 12.sp,
-                color = colors.textPrimary.copy(alpha = 0.8f),
-                lineHeight = 16.sp
-            )
+            FadeSlideIn(delayMillis = 0) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Detail Oma/Opa",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.textPrimary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Isi detailmu sebagai wali dan juga detail Oma/Opa\nagar Ketuk dapat menyapa !",
+                        fontSize = 12.sp,
+                        color = colors.textPrimary.copy(alpha = 0.8f),
+                        lineHeight = 16.sp
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // 1. Field Nama Wali
-            SetupLabeledTextField(
-                label = "Masukkan nama anda",
-                value = waliName,
-                onValueChange = { waliName = it },
-                keyboardType = KeyboardType.Text,
-                isError = waliNameError != null,
-                supportingText = waliNameError
-            )
+            FadeSlideIn(delayMillis = 80) {
+                SetupLabeledTextField(
+                    label = "Masukkan nama anda",
+                    value = waliName,
+                    onValueChange = { waliName = it.take(60) },
+                    keyboardType = KeyboardType.Text,
+                    isError = waliNameError != null,
+                    supportingText = waliNameError
+                )
+            }
 
             Spacer(modifier = Modifier.height(14.dp))
 
             // 2. Toggle Pill Opa / Oma
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                color = colors.cardSurface,
-                border = BorderStroke(1.dp, colors.divider)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+            FadeSlideIn(delayMillis = 160) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
+                    color = colors.cardSurface,
+                    border = BorderStroke(1.dp, colors.divider)
                 ) {
-                    ElderGender.entries.forEach { gender ->
-                        val isSelected = selectedGender == gender
-                        Surface(
-                            onClick = { selectedGenderName = gender.name },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(42.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            color = if (isSelected) Terakota else Color.Transparent
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    text = gender.label,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = if (isSelected) colors.onAccent else colors.textPrimary
-                                )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        ElderGender.entries.forEach { gender ->
+                            val isSelected = selectedGender == gender
+                            Surface(
+                                onClick = { selectedGenderName = gender.name },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(42.dp),
+                                shape = RoundedCornerShape(10.dp),
+                                color = if (isSelected) Terakota else Color.Transparent
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = gender.label,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = if (isSelected) colors.onAccent else colors.textPrimary
+                                    )
+                                }
                             }
                         }
                     }
@@ -180,51 +190,55 @@ fun DetailOmaOpaScreen(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // 3. Field Nama Oma/Opa
-            SetupLabeledTextField(
-                label = "Masukkan nama ${selectedGender.label} anda",
-                value = elderName,
-                onValueChange = { elderName = it },
-                keyboardType = KeyboardType.Text,
-                isError = elderNameError != null,
-                supportingText = elderNameError
-            )
+            // 3. Field Nama Oma/Opa & 4. Field Umur
+            FadeSlideIn(delayMillis = 240) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    SetupLabeledTextField(
+                        label = "Masukkan nama ${selectedGender.label} anda",
+                        value = elderName,
+                        onValueChange = { elderName = it.take(60) },
+                        keyboardType = KeyboardType.Text,
+                        isError = elderNameError != null,
+                        supportingText = elderNameError
+                    )
 
-            Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
-            // 4. Field Umur Oma/Opa dengan badge "Tahun" di kanan dalam field
-            SetupLabeledTextField(
-                label = "Masukkan umur ${selectedGender.label} anda",
-                value = elderAgeText,
-                onValueChange = { input ->
-                    // Tolak karakter non-angka dan batasi 3 digit
-                    val digitsOnly = input.filter { it.isDigit() }.take(3)
-                    elderAgeText = digitsOnly
-                },
-                keyboardType = KeyboardType.Number,
-                isError = elderAgeError != null,
-                supportingText = elderAgeError,
-                trailingBadge = {
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = Terakota
-                    ) {
-                        Text(
-                            text = "Tahun",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = colors.onAccent,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
-                        )
-                    }
+                    SetupLabeledTextField(
+                        label = "Masukkan umur ${selectedGender.label} anda",
+                        value = elderAgeText,
+                        onValueChange = { input ->
+                            // Tolak karakter non-angka dan batasi 3 digit
+                            val digitsOnly = input.filter { it.isDigit() }.take(3)
+                            elderAgeText = digitsOnly
+                        },
+                        keyboardType = KeyboardType.Number,
+                        isError = elderAgeError != null,
+                        supportingText = elderAgeError,
+                        trailingBadge = {
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = Terakota
+                            ) {
+                                Text(
+                                    text = "Tahun",
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colors.onAccent,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                    )
                 }
-            )
+            }
 
             Spacer(modifier = Modifier.height(28.dp))
         }
 
         // TODO(tim): Tombol Lanjutkan ditambahkan agar form dapat disubmit ke tahap Circle Keluarga
-        Box(
+        FadeSlideIn(
+            delayMillis = 320,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 32.dp, vertical = 20.dp)
@@ -313,7 +327,20 @@ fun CircleKeluargaScreen(
     val colors = KetukTheme.colors
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    var members by remember { mutableStateOf(DummyData.initialCircleMembers) }
+    var hasAddedExtraMember by rememberSaveable { mutableStateOf(false) }
+    val members = remember(hasAddedExtraMember) {
+        if (hasAddedExtraMember) {
+            DummyData.initialCircleMembers + CircleMember(
+                id = "circle_4",
+                name = "Kakak Raka",
+                roleLabel = "Anggota",
+                isLeader = false,
+                phone = "+62 813 9988 7766"
+            )
+        } else {
+            DummyData.initialCircleMembers
+        }
+    }
 
     Scaffold(
         containerColor = colors.screenBackground,
@@ -347,125 +374,230 @@ fun CircleKeluargaScreen(
             ) {
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Text(
-                    text = "Circle Keluarga",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.textPrimary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Kelola daftar keluarga yang bisa melihat\ndan menerima notifikasi",
-                    fontSize = 12.sp,
-                    color = colors.textPrimary.copy(alpha = 0.8f),
-                    lineHeight = 16.sp
-                )
+                FadeSlideIn(delayMillis = 0) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "Circle Keluarga",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Kelola daftar keluarga yang bisa melihat\ndan menerima notifikasi",
+                            fontSize = 12.sp,
+                            color = colors.textPrimary.copy(alpha = 0.8f),
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // Kartu 1: Anggota Circle
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
-                    border = BorderStroke(1.dp, colors.divider),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                FadeSlideIn(delayMillis = 80) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
+                        border = BorderStroke(1.dp, colors.divider),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Anggota Circle",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.textPrimary
+                                )
+                                Text(
+                                    text = "${members.size} Anggota",
+                                    fontSize = 11.sp,
+                                    color = colors.textPrimary.copy(alpha = 0.5f)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            members.forEachIndexed { index, member ->
+                                CircleMemberRow(
+                                    member = member,
+                                    onClick = {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                "Simulasi Mockup: Detail anggota ${member.name}"
+                                            )
+                                        }
+                                    }
+                                )
+                                if (index < members.lastIndex) {
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(vertical = 8.dp),
+                                        thickness = 0.8.dp,
+                                        color = colors.divider.copy(alpha = 0.6f)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            // Tombol + Tambah Anggota
+                            OutlinedButton(
+                                onClick = {
+                                    if (!hasAddedExtraMember) {
+                                        hasAddedExtraMember = true
+                                    }
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar(
+                                            "Simulasi Mockup: Tambah anggota keluarga ke Circle"
+                                        )
+                                    }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(1.dp, colors.divider),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = colors.cardSurface,
+                                    contentColor = colors.textPrimary
+                                ),
+                                contentPadding = PaddingValues(horizontal = 12.dp)
+                            ) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Surface(
+                                        modifier = Modifier.size(26.dp),
+                                        shape = CircleShape,
+                                        color = Terakota
+                                    ) {
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Add,
+                                                contentDescription = null,
+                                                tint = colors.onAccent,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = "Tambah Anggota",
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = colors.textPrimary
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Kartu 2: Undang Keluarga Lain
+                FadeSlideIn(delayMillis = 160) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
+                        border = BorderStroke(1.dp, colors.divider),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
                             Text(
-                                text = "Anggota Circle",
+                                text = "Undang Keluarga Lain",
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.textPrimary
                             )
+                            Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "${members.size} Anggota",
+                                text = "Bagikan QR code atau tautan undangan untuk\nmenambahkan anggota baru.",
                                 fontSize = 11.sp,
-                                color = colors.textPrimary.copy(alpha = 0.5f)
+                                color = colors.textPrimary.copy(alpha = 0.65f),
+                                lineHeight = 14.sp
                             )
-                        }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
-                        members.forEachIndexed { index, member ->
-                            CircleMemberRow(
-                                member = member,
-                                onClick = {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            "Simulasi Mockup: Detail anggota ${member.name}"
-                                        )
-                                    }
-                                }
-                            )
-                            if (index < members.lastIndex) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(vertical = 8.dp),
-                                    thickness = 0.8.dp,
-                                    color = colors.divider.copy(alpha = 0.6f)
+                            // QR tetap berlatar terang (qrCardWali) agar dapat dipindai di mode gelap
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(colors.qrCardWali)
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.qr_pairing),
+                                    contentDescription = "QR Undangan Circle Keluarga",
+                                    modifier = Modifier.size(104.dp),
+                                    contentScale = ContentScale.Fit
                                 )
                             }
-                        }
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
-                        // Tombol + Tambah Anggota
-                        OutlinedButton(
-                            onClick = {
-                                if (members.size == 3) {
-                                    members = members + CircleMember(
-                                        id = "circle_4",
-                                        name = "Kakak Raka",
-                                        roleLabel = "Anggota",
-                                        isLeader = false,
-                                        phone = "+62 813 9988 7766"
-                                    )
-                                }
-                                scope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        "Simulasi Mockup: Tambah anggota keluarga ke Circle"
-                                    )
-                                }
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            border = BorderStroke(1.dp, colors.divider),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                containerColor = colors.cardSurface,
-                                contentColor = colors.textPrimary
-                            ),
-                            contentPadding = PaddingValues(horizontal = 12.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Surface(
-                                    modifier = Modifier.size(26.dp),
-                                    shape = CircleShape,
-                                    color = Terakota
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.Add,
-                                            contentDescription = null,
-                                            tint = colors.onAccent,
-                                            modifier = Modifier.size(16.dp)
-                                        )
+                            // Tombol Bagikan QR
+                            Button(
+                                onClick = {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Simulasi Mockup: Bagikan QR Circle Keluarga")
                                     }
-                                }
-                                Spacer(modifier = Modifier.width(12.dp))
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(42.dp),
+                                shape = RoundedCornerShape(50),
+                                colors = ButtonDefaults.buttonColors(containerColor = Terakota)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Share,
+                                    contentDescription = null,
+                                    tint = colors.onAccent,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "Tambah Anggota",
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium,
+                                    text = "Bagikan QR",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = colors.onAccent
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // Tombol Salin Tautan
+                            OutlinedButton(
+                                onClick = {
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Simulasi Mockup: Salin Tautan Undangan Circle")
+                                    }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(42.dp),
+                                shape = RoundedCornerShape(50),
+                                border = BorderStroke(1.dp, colors.borderWali),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = colors.cardWali.copy(alpha = 0.5f),
+                                    contentColor = colors.textPrimary
+                                )
+                            ) {
+                                Text(
+                                    text = "Salin Tautan",
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
                                     color = colors.textPrimary
                                 )
                             }
@@ -475,113 +607,12 @@ fun CircleKeluargaScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Kartu 2: Undang Keluarga Lain
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
-                    border = BorderStroke(1.dp, colors.divider),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Undang Keluarga Lain",
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textPrimary
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "Bagikan QR code atau tautan undangan untuk\nmenambahkan anggota baru.",
-                            fontSize = 11.sp,
-                            color = colors.textPrimary.copy(alpha = 0.65f),
-                            lineHeight = 14.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // QR tetap berlatar terang (qrCardWali) agar dapat dipindai di mode gelap
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(colors.qrCardWali)
-                                .padding(vertical = 16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Image(
-                                painter = painterResource(R.drawable.qr_pairing),
-                                contentDescription = "QR Undangan Circle Keluarga",
-                                modifier = Modifier.size(104.dp),
-                                contentScale = ContentScale.Fit
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Tombol Bagikan QR
-                        Button(
-                            onClick = {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar("Simulasi Mockup: Bagikan QR Circle Keluarga")
-                                }
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(42.dp),
-                            shape = RoundedCornerShape(50),
-                            colors = ButtonDefaults.buttonColors(containerColor = Terakota)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Share,
-                                contentDescription = null,
-                                tint = colors.onAccent,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Bagikan QR",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = colors.onAccent
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // Tombol Salin Tautan
-                        OutlinedButton(
-                            onClick = {
-                                scope.launch {
-                                    snackbarHostState.showSnackbar("Simulasi Mockup: Salin Tautan Undangan Circle")
-                                }
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(42.dp),
-                            shape = RoundedCornerShape(50),
-                            border = BorderStroke(1.dp, colors.borderWali),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                containerColor = colors.cardWali.copy(alpha = 0.5f),
-                                contentColor = colors.textPrimary
-                            )
-                        ) {
-                            Text(
-                                text = "Salin Tautan",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = colors.textPrimary
-                            )
-                        }
-                    }
+                FadeSlideIn(delayMillis = 240) {
+                    KetukButton(
+                        text = "Lanjutkan",
+                        onClick = onContinue
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                KetukButton(
-                    text = "Lanjutkan",
-                    onClick = onContinue
-                )
 
                 Spacer(modifier = Modifier.height(24.dp))
             }
@@ -702,49 +733,56 @@ fun QrWaliScreen(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Text(
-                    text = "QR Wali ${DummyData.defaultElder.nickname}",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.textPrimary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Arahkan QR ke HP Oma/Opa untuk mengakses",
-                    fontSize = 12.sp,
-                    color = colors.textPrimary.copy(alpha = 0.8f)
-                )
+                FadeSlideIn(delayMillis = 0) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = "QR Wali ${DummyData.defaultElder.nickname}",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Arahkan QR ke HP Oma/Opa untuk mengakses",
+                            fontSize = 12.sp,
+                            color = colors.textPrimary.copy(alpha = 0.8f)
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(28.dp))
 
                 // QR tetap berlatar putih (qrSurface) agar dapat dipindai di mode gelap
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = colors.qrSurface),
-                    border = BorderStroke(1.dp, colors.divider),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                ) {
-                    Box(
+                FadeSlideIn(delayMillis = 80) {
+                    Card(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(28.dp),
-                        contentAlignment = Alignment.Center
+                            .fillMaxWidth()
+                            .aspectRatio(1f),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(containerColor = colors.qrSurface),
+                        border = BorderStroke(1.dp, colors.divider),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Image(
-                            painter = painterResource(R.drawable.qr_pairing),
-                            contentDescription = "QR Pairing Wali Oma Diyas",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Fit
-                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(28.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.qr_pairing),
+                                contentDescription = "QR Pairing Wali Oma Diyas",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
                     }
                 }
             }
 
             // TODO(tim): Tombol simulasi pindai ditambahkan agar alur demo bisa lanjut ke Loading Pairing -> Pilih Penjaga
-            Box(
+            FadeSlideIn(
+                delayMillis = 160,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp, vertical = 24.dp)
@@ -878,57 +916,64 @@ fun PilihPenjagaScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = "Pilih Penjaga Terdekat",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.textPrimary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Pastikan penjaga menerima undangan mu",
-                fontSize = 12.sp,
-                color = colors.textPrimary.copy(alpha = 0.8f)
-            )
+            FadeSlideIn(delayMillis = 0) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Pilih Penjaga Terdekat",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.textPrimary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Pastikan penjaga menerima undangan mu",
+                        fontSize = 12.sp,
+                        color = colors.textPrimary.copy(alpha = 0.8f)
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
             // Search Bar "Cari nama atau nomor..."
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp),
-                placeholder = {
-                    Text(
-                        text = "Cari nama atau nomor...",
-                        fontSize = 13.sp,
-                        color = colors.textPrimary.copy(alpha = 0.45f)
+            FadeSlideIn(delayMillis = 80) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    shape = RoundedCornerShape(14.dp),
+                    placeholder = {
+                        Text(
+                            text = "Cari nama atau nomor...",
+                            fontSize = 13.sp,
+                            color = colors.textPrimary.copy(alpha = 0.45f)
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Rounded.Search,
+                            contentDescription = "Cari",
+                            tint = IkonBiru,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    },
+                    textStyle = TextStyle(fontSize = 13.sp, color = colors.textPrimary),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = colors.cardSurface,
+                        unfocusedContainerColor = colors.cardSurface,
+                        focusedBorderColor = Terakota,
+                        unfocusedBorderColor = colors.divider,
+                        cursorColor = Terakota
                     )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Rounded.Search,
-                        contentDescription = "Cari",
-                        tint = IkonBiru,
-                        modifier = Modifier.size(20.dp)
-                    )
-                },
-                textStyle = TextStyle(fontSize = 13.sp, color = colors.textPrimary),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = colors.cardSurface,
-                    unfocusedContainerColor = colors.cardSurface,
-                    focusedBorderColor = Terakota,
-                    unfocusedBorderColor = colors.divider,
-                    cursorColor = Terakota
                 )
-            )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Kartu Daftar Kontak Penjaga
-            Card(
+            FadeSlideIn(delayMillis = 160) {
+                Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
@@ -1024,14 +1069,17 @@ fun PilihPenjagaScreen(
                     }
                 }
             }
+        }
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            KetukButton(
-                text = "Pilih sebagai Penjaga",
-                onClick = onGuardianConfirmed,
-                enabled = selectedGuardianId.isNotBlank()
-            )
+            FadeSlideIn(delayMillis = 240) {
+                KetukButton(
+                    text = "Pilih sebagai Penjaga",
+                    onClick = onGuardianConfirmed,
+                    enabled = selectedGuardianId.isNotBlank()
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
         }

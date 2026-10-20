@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.WarningAmber
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +27,8 @@ import androidx.compose.ui.unit.sp
 import com.chat.ketukprojectmap.data.dummy.DummyData
 import com.chat.ketukprojectmap.data.dummy.EscalationLevel
 import com.chat.ketukprojectmap.data.dummy.NotificationItem
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
+import com.chat.ketukprojectmap.ui.components.staggerDelay
 import com.chat.ketukprojectmap.ui.theme.*
 
 // TODO(tim): Layar Notifikasi tidak punya frame khusus di Figma 01-05; diisi dengan 5 item DummyData.initialNotifications
@@ -35,9 +39,14 @@ fun NotifikasiScreen(
     onOpenDetailAlert: (String) -> Unit = {}
 ) {
     val colors = KetukTheme.colors
-    val notifications = remember {
-        mutableStateListOf<NotificationItem>().apply {
-            addAll(DummyData.initialNotifications)
+    var unreadIds by rememberSaveable {
+        mutableStateOf(
+            DummyData.initialNotifications.filter { it.isUnread }.map { it.id }
+        )
+    }
+    val notifications = remember(unreadIds) {
+        DummyData.initialNotifications.map { item ->
+            item.copy(isUnread = item.id in unreadIds)
         }
     }
 
@@ -65,9 +74,7 @@ fun NotifikasiScreen(
                     if (notifications.any { it.isUnread }) {
                         TextButton(
                             onClick = {
-                                for (i in notifications.indices) {
-                                    notifications[i] = notifications[i].copy(isUnread = false)
-                                }
+                                unreadIds = emptyList()
                             }
                         ) {
                             Text(
@@ -110,22 +117,37 @@ fun NotifikasiScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 contentPadding = PaddingValues(vertical = 12.dp)
             ) {
-                items(
+                itemsIndexed(
                     items = notifications,
-                    key = { it.id }
-                ) { item ->
-                    NotificationCard(
-                        item = item,
-                        onClick = {
-                            val idx = notifications.indexOfFirst { it.id == item.id }
-                            if (idx >= 0) {
-                                notifications[idx] = notifications[idx].copy(isUnread = false)
-                            }
-                            item.relatedActivityId?.let { actId ->
-                                onOpenDetailAlert(actId)
-                            }
+                    key = { _, item -> item.id }
+                ) { index, item ->
+                    if (index < 6) {
+                        FadeSlideIn(delayMillis = staggerDelay(index, baseDelayMillis = 40)) {
+                            NotificationCard(
+                                item = item,
+                                onClick = {
+                                    if (item.id in unreadIds) {
+                                        unreadIds = unreadIds - item.id
+                                    }
+                                    item.relatedActivityId?.let { actId ->
+                                        onOpenDetailAlert(actId)
+                                    }
+                                }
+                            )
                         }
-                    )
+                    } else {
+                        NotificationCard(
+                            item = item,
+                            onClick = {
+                                if (item.id in unreadIds) {
+                                    unreadIds = unreadIds - item.id
+                                }
+                                item.relatedActivityId?.let { actId ->
+                                    onOpenDetailAlert(actId)
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }

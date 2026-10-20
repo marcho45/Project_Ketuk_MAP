@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chat.ketukprojectmap.R
 import com.chat.ketukprojectmap.data.dummy.DummyData
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.components.KetukDarkModeCard
 import com.chat.ketukprojectmap.ui.components.KetukLogoutButton
 import com.chat.ketukprojectmap.ui.screens.profile.ProfileViewModel
@@ -54,105 +55,109 @@ fun GuardianProfileScreen(
             .statusBarsPadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
-            .padding(bottom = 64.dp + navBarInset + 24.dp)
+            .padding(bottom = 64.dp + navBarInset + 32.dp)
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Judul Tab
-        Text(
-            text = "Profil Penjaga",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = colors.textPrimary
-        )
+        FadeSlideIn(delayMillis = 0) {
+            Text(
+                text = "Profil Penjaga",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = colors.textPrimary
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // KARTU 1: Info Akun Penjaga (Markolintang)
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
-            border = BorderStroke(1.dp, colors.cardBorder),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(
-                        modifier = Modifier.size(56.dp),
-                        shape = CircleShape,
-                        color = Terakota.copy(alpha = 0.15f)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Rounded.Person,
-                                contentDescription = null,
-                                tint = Terakota,
-                                modifier = Modifier.size(30.dp)
+        FadeSlideIn(delayMillis = 80) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
+                border = BorderStroke(1.dp, colors.cardBorder),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            modifier = Modifier.size(56.dp),
+                            shape = CircleShape,
+                            color = Terakota.copy(alpha = 0.15f)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Person,
+                                    contentDescription = null,
+                                    tint = Terakota,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(14.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = guardian.name,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.textPrimary
                             )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Surface(
+                                shape = RoundedCornerShape(50),
+                                color = Terakota.copy(alpha = 0.14f)
+                            ) {
+                                Text(
+                                    text = "Penjaga Terdekat",
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Terakota
+                                )
+                            }
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(14.dp))
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 14.dp),
+                        color = colors.divider
+                    )
 
-                    Column(modifier = Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.Email,
+                            contentDescription = null,
+                            tint = colors.textSecondary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = guardian.name,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
+                            text = "penjaga@ketuk.app",
+                            style = MaterialTheme.typography.bodyMedium,
                             color = colors.textPrimary
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Surface(
-                            shape = RoundedCornerShape(50),
-                            color = Terakota.copy(alpha = 0.14f)
-                        ) {
-                            Text(
-                                text = "Penjaga Terdekat",
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Terakota
-                            )
-                        }
                     }
-                }
 
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 14.dp),
-                    color = colors.divider
-                )
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Rounded.Email,
-                        contentDescription = null,
-                        tint = colors.textSecondary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "penjaga@ketuk.app",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.textPrimary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Rounded.Phone,
-                        contentDescription = null,
-                        tint = colors.textSecondary,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = guardian.phone,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.textPrimary
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Rounded.Phone,
+                            contentDescription = null,
+                            tint = colors.textSecondary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = guardian.phone,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.textPrimary
+                        )
+                    }
                 }
             }
         }
@@ -160,124 +165,130 @@ fun GuardianProfileScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // KARTU 2: Status Kesediaan & Radius
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
-            border = BorderStroke(1.dp, colors.cardBorder),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(
-                        modifier = Modifier.size(40.dp),
-                        shape = CircleShape,
-                        color = colors.accentGreen.copy(alpha = 0.15f)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Rounded.Shield,
-                                contentDescription = null,
-                                tint = colors.accentGreen,
-                                modifier = Modifier.size(22.dp)
+        FadeSlideIn(delayMillis = 160) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
+                border = BorderStroke(1.dp, colors.cardBorder),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            modifier = Modifier.size(40.dp),
+                            shape = CircleShape,
+                            color = colors.accentGreen.copy(alpha = 0.15f)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Shield,
+                                    contentDescription = null,
+                                    tint = colors.accentGreen,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Status Penjaga",
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = colors.textPrimary
+                            )
+                            Text(
+                                text = "Siap Membantu • Aktif",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = colors.accentGreen,
+                                fontWeight = FontWeight.SemiBold
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "Status Penjaga",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textPrimary
-                        )
-                        Text(
-                            text = "Siap Membantu • Aktif",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = colors.accentGreen,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
+                    Text(
+                        text = "Radius kesiapan 200 m di sekitar Jl. Syeckh Nawawi Albantani. Notifikasi ketuk pintu akan langsung berdering saat eskalasi L3.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = colors.textSecondary
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Text(
-                    text = "Radius kesiapan 200 m di sekitar Jl. Syeckh Nawawi Albantani. Notifikasi ketuk pintu akan langsung berdering saat eskalasi L3.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = colors.textSecondary
-                )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // KARTU 3: Lansia yang Dipantau (Oma Diyas)
-        Text(
-            text = "Lansia yang dipantau",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = colors.textPrimary
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
-            border = BorderStroke(1.dp, colors.cardBorder),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Image(
-                        painter = painterResource(R.drawable.oma_avatar),
-                        contentDescription = elder.nickname,
-                        modifier = Modifier
-                            .size(54.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-
-                    Spacer(modifier = Modifier.width(14.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = "${elder.nickname} (${elder.fullName})",
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textPrimary
-                        )
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = "${elder.age} Tahun • 170 m darimu",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = colors.textSecondary
-                        )
-                    }
-                }
-
-                HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 12.dp),
-                    color = colors.divider
+        FadeSlideIn(delayMillis = 240) {
+            Column {
+                Text(
+                    text = "Lansia yang dipantau",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.textPrimary
                 )
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Rounded.Home,
-                        contentDescription = null,
-                        tint = colors.accentGreen,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = "${elder.area} - ${elder.address}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textPrimary
-                    )
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
+                    border = BorderStroke(1.dp, colors.cardBorder),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Image(
+                                painter = painterResource(R.drawable.oma_avatar),
+                                contentDescription = elder.nickname,
+                                modifier = Modifier
+                                    .size(54.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+
+                            Spacer(modifier = Modifier.width(14.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "${elder.nickname} (${elder.fullName})",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.textPrimary
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "${elder.age} Tahun • 170 m darimu",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = colors.textSecondary
+                                )
+                            }
+                        }
+
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 12.dp),
+                            color = colors.divider
+                        )
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Rounded.Home,
+                                contentDescription = null,
+                                tint = colors.accentGreen,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "${elder.area} - ${elder.address}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = colors.textPrimary
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -285,21 +296,25 @@ fun GuardianProfileScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // KARTU 4: Pengaturan Mode Gelap
-        KetukDarkModeCard()
+        FadeSlideIn(delayMillis = 320) {
+            KetukDarkModeCard()
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // Tombol Keluar (Logout)
-        KetukLogoutButton(
-            onClick = {
-                if (!isLoggingOut) {
-                    showLogoutDialog = true
-                }
-            },
-            isLoggingOut = isLoggingOut,
-            text = "Keluar",
-            loadingText = "Keluar..."
-        )
+        FadeSlideIn(delayMillis = 400) {
+            KetukLogoutButton(
+                onClick = {
+                    if (!isLoggingOut) {
+                        showLogoutDialog = true
+                    }
+                },
+                isLoggingOut = isLoggingOut,
+                text = "Keluar",
+                loadingText = "Keluar..."
+            )
+        }
     }
 
     // Dialog Konfirmasi Keluar
@@ -376,6 +391,30 @@ private fun PreviewGuardianProfileLight() {
 @Composable
 private fun PreviewGuardianProfileDark() {
     KetukTheme(darkTheme = true) {
+        GuardianProfileScreen()
+    }
+}
+
+@Preview(name = "Profil Penjaga - 320dp", widthDp = 320, heightDp = 640, showBackground = true)
+@Composable
+private fun PreviewGuardianProfile320() {
+    KetukTheme(darkTheme = false) {
+        GuardianProfileScreen()
+    }
+}
+
+@Preview(name = "Profil Penjaga - 360dp", widthDp = 360, heightDp = 800, showBackground = true)
+@Composable
+private fun PreviewGuardianProfile360() {
+    KetukTheme(darkTheme = false) {
+        GuardianProfileScreen()
+    }
+}
+
+@Preview(name = "Profil Penjaga - Aksesibilitas 360dp fontScale 1.3", widthDp = 360, heightDp = 800, fontScale = 1.3f, showBackground = true)
+@Composable
+private fun PreviewGuardianProfileAccessibility() {
+    KetukTheme(darkTheme = false) {
         GuardianProfileScreen()
     }
 }

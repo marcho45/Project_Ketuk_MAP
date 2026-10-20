@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chat.ketukprojectmap.R
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.theme.KetukTheme
 import com.chat.ketukprojectmap.ui.theme.Terakota
 
@@ -95,123 +96,138 @@ fun VerificationScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // ===== Kotak kode (satu input tersembunyi) =====
-            BasicTextField(
-                value = state.code,
-                onValueChange = viewModel::onCodeChange,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                cursorBrush = SolidColor(Color.Transparent),
-                textStyle = TextStyle(color = Color.Transparent),
-                decorationBox = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        repeat(VerificationViewModel.CODE_LENGTH) { index ->
-                            CodeBox(
-                                digit = state.code.getOrNull(index)?.toString() ?: "",
-                                isActive = index == minOf(
-                                    state.code.length,
-                                    VerificationViewModel.CODE_LENGTH - 1
-                                ),
-                                isError = state.errorMessage != null,
-                                modifier = Modifier.weight(1f)
-                            )
+            FadeSlideIn(delayMillis = 80) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    BasicTextField(
+                        value = state.code,
+                        onValueChange = viewModel::onCodeChange,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        cursorBrush = SolidColor(Color.Transparent),
+                        textStyle = TextStyle(color = Color.Transparent),
+                        decorationBox = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                repeat(VerificationViewModel.CODE_LENGTH) { index ->
+                                    CodeBox(
+                                        digit = state.code.getOrNull(index)?.toString() ?: "",
+                                        isActive = index == minOf(
+                                            state.code.length,
+                                            VerificationViewModel.CODE_LENGTH - 1
+                                        ),
+                                        isError = state.errorMessage != null,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
                         }
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Info tujuan email
+                    Text(
+                        text = "Kode dikirim ke $email",
+                        fontSize = 12.sp,
+                        color = colors.textPrimary.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center
+                    )
+
+                    // Pesan error / info
+                    state.errorMessage?.let {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = it,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.error,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    state.infoMessage?.let {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = it,
+                            fontSize = 12.sp,
+                            color = colors.statusSuccess,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Info tujuan email
-            Text(
-                text = "Kode dikirim ke $email",
-                fontSize = 12.sp,
-                color = colors.textPrimary.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-
-            // Pesan error / info
-            state.errorMessage?.let {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = it,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Center
-                )
-            }
-            state.infoMessage?.let {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = it,
-                    fontSize = 12.sp,
-                    color = colors.statusSuccess,
-                    textAlign = TextAlign.Center
-                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // ===== Tombol Confirm =====
-            Button(
-                onClick = { viewModel.onConfirm(email = email, onSuccess = onConfirm) },
-                enabled = state.isCodeComplete && !state.isLoading,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Terakota,
-                    disabledContainerColor = Terakota.copy(alpha = 0.5f)
-                )
-            ) {
-                Text(
-                    text = if (state.isLoading) "Memeriksa..." else confirmText,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.onAccent
-                )
+            FadeSlideIn(delayMillis = 160) {
+                Button(
+                    onClick = { viewModel.onConfirm(email = email, onSuccess = onConfirm) },
+                    enabled = state.isCodeComplete && !state.isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Terakota,
+                        disabledContainerColor = Terakota.copy(alpha = 0.5f)
+                    )
+                ) {
+                    Text(
+                        text = if (state.isLoading) "Memeriksa..." else confirmText,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.onAccent
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
             // ===== Teks Resend =====
-            Row(horizontalArrangement = Arrangement.Center) {
-                Text(
-                    text = resendQuestion,
-                    fontSize = 12.sp,
-                    color = colors.textPrimary
-                )
-                Text(
-                    text = if (state.resendSeconds > 0) {
-                        "$resendAction (${state.resendSeconds}s)"
-                    } else {
-                        resendAction
-                    },
-                    fontSize = 12.sp,
-                    color = if (state.canResend) colors.linkColor else colors.textPrimary.copy(alpha = 0.5f),
-                    modifier = Modifier.clickable(enabled = state.canResend) {
-                        viewModel.onResend(email)
-                    }
-                )
+            FadeSlideIn(delayMillis = 240) {
+                Row(horizontalArrangement = Arrangement.Center) {
+                    Text(
+                        text = resendQuestion,
+                        fontSize = 12.sp,
+                        color = colors.textPrimary
+                    )
+                    Text(
+                        text = if (state.resendSeconds > 0) {
+                            "$resendAction (${state.resendSeconds}s)"
+                        } else {
+                            resendAction
+                        },
+                        fontSize = 12.sp,
+                        color = if (state.canResend) colors.linkColor else colors.textPrimary.copy(alpha = 0.5f),
+                        modifier = Modifier.clickable(enabled = state.canResend) {
+                            viewModel.onResend(email)
+                        }
+                    )
+                }
             }
         }
 
         // 3. Maskot paling atas, menimpa lengkungan panel
-        Image(
-            painter = painterResource(R.drawable.maskot_hp),
-            contentDescription = "Maskot Tok memegang HP",
+        FadeSlideIn(
+            delayMillis = 0,
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = mascotTop)
-                .size(mascotSize),
-            contentScale = ContentScale.Fit
-        )
+        ) {
+            Image(
+                painter = painterResource(R.drawable.maskot_hp),
+                contentDescription = "Maskot Tok memegang HP",
+                modifier = Modifier.size(mascotSize),
+                contentScale = ContentScale.Fit
+            )
+        }
     }
 }
 
@@ -273,4 +289,4 @@ fun VerificationScreenDarkPreview() {
     KetukTheme(darkTheme = true) {
         VerificationScreen(email = "nama@email.com", onConfirm = {})
     }
-}
+}

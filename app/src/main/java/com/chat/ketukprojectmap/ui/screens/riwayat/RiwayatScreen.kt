@@ -14,6 +14,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +39,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chat.ketukprojectmap.data.dummy.ActivityCategory
 import com.chat.ketukprojectmap.data.dummy.ActivityItem
 import com.chat.ketukprojectmap.data.dummy.EscalationLevel
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
+import com.chat.ketukprojectmap.ui.components.staggerDelay
 import com.chat.ketukprojectmap.ui.theme.*
 
 @Composable
@@ -66,43 +69,47 @@ fun RiwayatScreen(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Riwayat aktivitas",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(horizontal = 24.dp)
-            )
+            FadeSlideIn(delayMillis = 0) {
+                Text(
+                    text = "Riwayat aktivitas",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(
-                    label = "Semua",
-                    isSelected = selectedFilter == RiwayatFilter.SEMUA,
-                    onClick = { viewModel.selectFilter(RiwayatFilter.SEMUA) }
-                )
-                FilterChip(
-                    label = "Aktivitas",
-                    isSelected = selectedFilter == RiwayatFilter.AKTIVITAS,
-                    onClick = { viewModel.selectFilter(RiwayatFilter.AKTIVITAS) }
-                )
-                FilterChip(
-                    label = "HP",
-                    isSelected = selectedFilter == RiwayatFilter.HP,
-                    onClick = { viewModel.selectFilter(RiwayatFilter.HP) }
-                )
-                FilterChip(
-                    label = "Sapa",
-                    isSelected = selectedFilter == RiwayatFilter.SAPA,
-                    onClick = { viewModel.selectFilter(RiwayatFilter.SAPA) }
-                )
+            FadeSlideIn(delayMillis = 80) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        label = "Semua",
+                        isSelected = selectedFilter == RiwayatFilter.SEMUA,
+                        onClick = { viewModel.selectFilter(RiwayatFilter.SEMUA) }
+                    )
+                    FilterChip(
+                        label = "Aktivitas",
+                        isSelected = selectedFilter == RiwayatFilter.AKTIVITAS,
+                        onClick = { viewModel.selectFilter(RiwayatFilter.AKTIVITAS) }
+                    )
+                    FilterChip(
+                        label = "HP",
+                        isSelected = selectedFilter == RiwayatFilter.HP,
+                        onClick = { viewModel.selectFilter(RiwayatFilter.HP) }
+                    )
+                    FilterChip(
+                        label = "Sapa",
+                        isSelected = selectedFilter == RiwayatFilter.SAPA,
+                        onClick = { viewModel.selectFilter(RiwayatFilter.SAPA) }
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -127,10 +134,10 @@ fun RiwayatScreen(
                         .padding(horizontal = 24.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(
+                    itemsIndexed(
                         items = filteredItems,
-                        key = { it.id }
-                    ) { item ->
+                        key = { _, item -> item.id }
+                    ) { index, item ->
                         AnimatedVisibility(
                             visible = true,
                             enter = fadeIn(animationSpec = tween(300)) +
@@ -138,10 +145,19 @@ fun RiwayatScreen(
                             exit = fadeOut(animationSpec = tween(300)) +
                                    shrinkVertically(animationSpec = tween(300))
                         ) {
-                            RiwayatItemCard(
-                                item = item,
-                                onClick = { onItemClick(item.id) }
-                            )
+                            if (index < 6) {
+                                FadeSlideIn(delayMillis = staggerDelay(index, baseDelayMillis = 160)) {
+                                    RiwayatItemCard(
+                                        item = item,
+                                        onClick = { onItemClick(item.id) }
+                                    )
+                                }
+                            } else {
+                                RiwayatItemCard(
+                                    item = item,
+                                    onClick = { onItemClick(item.id) }
+                                )
+                            }
                         }
                     }
                 }

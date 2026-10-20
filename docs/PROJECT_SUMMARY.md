@@ -1,6 +1,6 @@
 # Project Summary - Ketuk Project MAP
 
-**Terakhir diperbarui:** 2026-10-19 06:10 WIB (Tahap 4 Sedang Berjalan)
+**Terakhir diperbarui:** 2026-10-21 (Tahap 4 Selesai & Perbaikan Audit UTS)
 
 ---
 
@@ -26,6 +26,7 @@
 1. **`demo` (Khusus Pengumpulan UTS IF570L):**
    - `applicationIdSuffix = ".demo"`, `versionNameSuffix = "-demo"`
    - `buildConfigField("boolean", "DEMO_MODE", "true")`
+   - `buildConfigField("String", "SUPABASE_URL", "\"\"")` (dan seluruh anon key / OAuth ID dikosongkan agar aman dari kebocoran kredensial)
    - Berjalan **100% offline in-memory** menggunakan `FakeAuthRepository` dan `DummyData` tanpa menginisialisasi `SupabaseProvider.client`.
 2. **`full` (Khusus Kelanjutan UAS / Project Akhir):**
    - `buildConfigField("boolean", "DEMO_MODE", "false")`
@@ -99,7 +100,7 @@ com.chat.ketukprojectmap/
 | M9 | Lokasi Oma Diyas, Notifikasi, & Profil Wali | Wali | ✅ Selesai | Foto `penjaga_lintang`, umur `67`, `NotifikasiScreen` 5 item, switch tema & tombol `Keluar` |
 | M4 | Pindai QR, Loading Pairing, Persetujuan & Izin | Oma/Opa | ✅ Selesai | Sesuai `03. Initial Phase oma.png` (viewport kamera, reticle, laser animasi, izin, privasi) |
 | M5 | Mode Pasif Oma/Opa + Dialog Sapa L1 | Oma/Opa | ✅ Selesai | Sesuai `flowchart.png` (Hero Oma, dialog Sapa L1, switch tema, panah demo, & `Keluar`) |
-| M10 | Beranda, Lokasi, Riwayat Lokasi, Profil Penjaga | Penjaga | 🟡 Sedang Dikerjakan (Tahap 4) | Sesuai `05. Core Phase Penjaga.png` & `flowchart.png` (3 tab + Riwayat Lokasi 7 hari) |
+| M10 | Beranda, Lokasi, Riwayat Lokasi, Profil Penjaga | Penjaga | ✅ Selesai (Tahap 4) | Sesuai `05. Core Phase Penjaga.png` & `flowchart.png` (3 tab + Riwayat Lokasi 7 hari) |
 
 ---
 
@@ -107,17 +108,18 @@ com.chat.ketukprojectmap/
 
 | # | Kriteria Rubrik UTS | Bobot | Status Saat Ini | Catatan Progress |
 |---|---|---|---|---|
-| 1 | **Screen Implementation (>= 5 Jenis Layar)** | 15 Poin | 🟢 **Sangat Lengkap (Tahap 4)** | Sudah memiliki **List Screen** (`RiwayatScreen`, `GuardianLocationHistoryScreen`), **Detail Screen** (`DetailAlertScreen(itemId)`), **Form/Input Screen** (`DetailOmaOpaScreen`, `LoginScreen`, `RegisterScreen`, `VerificationScreen`), **Native-Feature Mockup** (`QrWaliScreen`, `ScanQrScreen`, `LokasiScreen`, `GuardianLokasiScreen`), dan **Free Choice** (`Splash`, `Onboarding`, `RoleSelect`, `CircleKeluarga`, `PilihPenjaga`, `HomeScreen`, `OmaPassiveScreen`, `GuardianHomeScreen`, `NotifikasiScreen`, `ProfileScreen`). |
-| 2 | **UI Theming (Material 3 Custom Theme)** | 15 Poin | ✅ **Selesai (100%)** | `Color.kt`, `Type.kt` (`PlusJakartaSans`), `Shape.kt` (`KetukShapes`), dan `Theme.kt` (`KetukLightColorScheme` + `KetukDarkColorScheme` + `KetukTheme.colors`) aktif penuh dengan switch mode gelap tersimpan di SharedPreferences. |
-| 3 | **State Management** | 15 Poin | 🟢 **Sangat Baik** | ViewModel untuk Auth, Role, Home, Riwayat, Lokasi, Profil, Penjaga + `rememberSaveable` pada tab bottom bar, dialog, banner interaktif, dan seluruh form. |
-| 4 | **Navigation + Argument Passing** | 15 Poin | 🟢 **Sangat Baik** | `KetukNavHost.kt` mengirim dan mengonsumsi argumen `detail_alert/{itemId}` serta `verification?email={email}`, memiliki helper terpusat `homeRouteForRole` & `setupRouteForRole` untuk 3 peran, dan pengelolaan `popUpTo(..., inclusive = true)` yang bersih. |
-| 5 | **Form Input & Validation** | 15 Poin | ✅ **Selesai (100%)** | `LoginScreen`, `RegisterScreen`, `VerificationScreen`, dan `DetailOmaOpaScreen` menggunakan `KeyboardType` yang tepat (`Email`, `Password`, `Number`), `isError = true`, `supportingText` merah, dan blokir submit saat tidak valid. |
-| 6 | **Dummy Data Implementation** | 15 Poin | ✅ **Selesai (100%)** | Paket `data/dummy/` (`DummyModels.kt` & `DummyData.kt`) terhubung penuh ke seluruh layar Wali, Oma/Opa, dan Penjaga. |
-| 7 | **Deliverables (`README.txt` & APK Demo)** | 10 Poin | 🟡 Tahap 5 | Build `assembleDemoDebug` & `assembleFullDebug` sukses; `README.txt` dibuat di Tahap 5. |
+| 1 | **Screen Implementation (>= 5 Jenis Layar)** | 15 Poin | ✅ **Selesai (100% - 19 Layar)** | Sudah memiliki **List Screen** (`RiwayatScreen`, `GuardianLocationHistoryScreen`), **Detail Screen** (`DetailAlertScreen(itemId)` dengan pemetaan ID langsung), **Form/Input Screen** (`DetailOmaOpaScreen`, `LoginScreen`, `RegisterScreen`, `VerificationScreen`), **Native-Feature Mockup** (`QrWaliScreen`, `ScanQrScreen`, `LokasiScreen`, `GuardianLokasiScreen`), dan **Free Choice** (`Splash`, `Onboarding`, `RoleSelect`, `CircleKeluarga`, `PilihPenjaga`, `HomeScreen`, `OmaPassiveScreen`, `GuardianHomeScreen`, `NotifikasiScreen`, `ProfileScreen`, `GuardianProfileScreen`). |
+| 2 | **UI Theming (Material 3 Custom Theme)** | 15 Poin | ✅ **Selesai (100%)** | `Color.kt`, `Type.kt` (`InterFont`), `Shape.kt` (`KetukShapes`), dan `Theme.kt` (`KetukLightColorScheme` + `KetukDarkColorScheme` + `KetukTheme.colors`) aktif penuh dengan switch mode gelap tersimpan di SharedPreferences (`ketuk_prefs`). |
+| 3 | **State Management** | 15 Poin | ✅ **Selesai (100%)** | 10 ViewModel dengan StateFlow read-only + `rememberSaveable` pada form Login/Register, dialog logout, status notifikasi dibaca, penambahan anggota circle, dan banner status Penjaga (aman saat rotasi layar). |
+| 4 | **Navigation + Argument Passing** | 15 Poin | ✅ **Selesai (100%)** | `KetukNavHost.kt` mengirim dan mengonsumsi argumen `detail_alert/{itemId}` serta `verification?email={email}`, helper terpusat `homeRouteForRole` & `setupRouteForRole`, dan pengelolaan `popUpTo(0, inclusive = true)` yang bersih saat logout. |
+| 5 | **Form Input & Validation** | 15 Poin | ✅ **Selesai (100%)** | `LoginScreen`, `RegisterScreen`, `VerificationScreen`, dan `DetailOmaOpaScreen` menggunakan `KeyboardType` tepat, validasi live (email format, digit filter + .take(13) HP, rentang umur 40-120), pesan error merah, dan pemblokiran submit sampai valid. |
+| 6 | **Dummy Data Implementation** | 15 Poin | ✅ **Selesai (100%)** | Paket `data/dummy/` (`DummyModels.kt` & `DummyData.kt`) terhubung penuh ke seluruh layar Wali, Oma/Opa, dan Penjaga. Varian `demo` 100% terisolasi tanpa Supabase/jaringan. |
+| 7 | **Deliverables (`README.txt` & APK Demo)** | 10 Poin | 🟡 **Siap Finalisasi** | Build `assembleDemoDebug`, `assembleDemoRelease`, dan `assembleFullDebug` sukses; `lintDemoRelease` 0 error; APK demo siap instal; tinggal pembuatan `README.txt` di root project. |
 
 ---
 
 ## 6. Daftar TODO & Tahap Berikutnya
-- **Tahap 4:** Implementasi alur Penjaga (`GuardianHomeScreen` 3 tab: Beranda dengan banner interaktif + tombol kembali khusus `DEMO_MODE`, Lokasi dengan kontrol peta & layar `GuardianLocationHistoryScreen` 7 hari, serta `GuardianProfileScreen`).
-- **Tahap 5:** Pembuatan `README.txt` UTS, audit akhir 7 kriteria rubrik, dan build final `assembleDemoDebug`.
+- **Tahap 4 (Selesai):** Implementasi alur Penjaga (`GuardianHomeScreen` 3 tab: Beranda dengan banner interaktif, Lokasi dengan kontrol peta & `GuardianLocationHistoryScreen` 7 hari, serta `GuardianProfileScreen`).
+- **Tahap Audit & Perbaikan (Selesai):** Pembersihan `ic_launcher` di `mipmap-anydpi`, pemetaan ID aktivitas Beranda Wali, form live validation, `rememberSaveable` state preservation, dan proteksi fully-qualified `BuildConfig`.
+- **Tahap 5 (Berikutnya):** Pembuatan `README.txt` UTS di root project, rekaman video demo 5 menit sesuai skrip rubrik, dan pengemasan file zip tugas.
 

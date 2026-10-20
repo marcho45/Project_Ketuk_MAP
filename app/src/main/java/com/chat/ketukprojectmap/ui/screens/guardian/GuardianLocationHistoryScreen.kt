@@ -5,7 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chat.ketukprojectmap.data.dummy.DummyData
 import com.chat.ketukprojectmap.data.dummy.LocationHistoryItem
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
+import com.chat.ketukprojectmap.ui.components.staggerDelay
 import com.chat.ketukprojectmap.ui.theme.KetukTheme
 import com.chat.ketukprojectmap.ui.theme.Terakota
 import kotlinx.coroutines.launch
@@ -49,37 +51,39 @@ fun GuardianLocationHistoryScreen(
                 .padding(innerPadding)
         ) {
             // Header Top Bar
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = onNavigateBack,
-                    modifier = Modifier.size(44.dp)
+            FadeSlideIn(delayMillis = 0) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = "Kembali ke Lokasi Penjaga",
-                        tint = colors.textPrimary
-                    )
-                }
+                    IconButton(
+                        onClick = onNavigateBack,
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = "Kembali ke Lokasi Penjaga",
+                            tint = colors.textPrimary
+                        )
+                    }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
 
-                Column {
-                    Text(
-                        text = "Riwayat Lokasi",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary
-                    )
-                    Text(
-                        text = "Pergerakan Oma Diyas dalam 7 hari terakhir",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = colors.textSecondary
-                    )
+                    Column {
+                        Text(
+                            text = "Riwayat Lokasi",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = colors.textPrimary
+                        )
+                        Text(
+                            text = "Pergerakan Oma Diyas dalam 7 hari terakhir",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colors.textSecondary
+                        )
+                    }
                 }
             }
 
@@ -91,16 +95,30 @@ fun GuardianLocationHistoryScreen(
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                items(historyList, key = { it.id }) { item ->
-                    LocationHistoryCard(
-                        item = item,
-                        onClick = {
-                            scope.launch {
-                                snackbarHostState.currentSnackbarData?.dismiss()
-                                snackbarHostState.showSnackbar("Simulasi Mockup: Membuka koordinat ${item.placeName}")
-                            }
+                itemsIndexed(historyList, key = { _, item -> item.id }) { index, item ->
+                    if (index < 6) {
+                        FadeSlideIn(delayMillis = staggerDelay(index, baseDelayMillis = 40)) {
+                            LocationHistoryCard(
+                                item = item,
+                                onClick = {
+                                    scope.launch {
+                                        snackbarHostState.currentSnackbarData?.dismiss()
+                                        snackbarHostState.showSnackbar("Simulasi Mockup: Membuka koordinat ${item.placeName}")
+                                    }
+                                }
+                            )
                         }
-                    )
+                    } else {
+                        LocationHistoryCard(
+                            item = item,
+                            onClick = {
+                                scope.launch {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar("Simulasi Mockup: Membuka koordinat ${item.placeName}")
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }

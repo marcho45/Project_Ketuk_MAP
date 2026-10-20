@@ -34,11 +34,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.chat.ketukprojectmap.BuildConfig
 import com.chat.ketukprojectmap.R
 import com.chat.ketukprojectmap.data.remote.SupabaseProvider
 import com.chat.ketukprojectmap.ui.components.AuthCloud
 import com.chat.ketukprojectmap.ui.components.AuthField
+import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.theme.*
 import io.github.jan.supabase.compose.auth.composable.NativeSignInResult
 import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
@@ -56,7 +56,7 @@ fun RegisterScreen(
     val colors = KetukTheme.colors
 
     // Login Google: di mode demo langsung via FakeAuthRepository (800ms), di mode full pakai Supabase
-    val googleSignIn = if (!BuildConfig.DEMO_MODE) {
+    val googleSignIn = if (!com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) {
         SupabaseProvider.client.composeAuth.rememberSignInWithGoogle(
             onResult = { result ->
                 when (result) {
@@ -73,7 +73,7 @@ fun RegisterScreen(
         null
     }
     val onGoogleClick: () -> Unit = {
-        if (BuildConfig.DEMO_MODE) {
+        if (com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) {
             viewModel.signInWithGoogleDemo(onRegisterSuccess)
         } else {
             googleSignIn?.startFlow()
@@ -126,7 +126,9 @@ fun RegisterScreen(
                 .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            RegisterHeader(mascotSize = mascotSize)
+            FadeSlideIn(delayMillis = 0) {
+                RegisterHeader(mascotSize = mascotSize)
+            }
 
             Spacer(modifier = Modifier.height(28.dp))
 
@@ -233,87 +235,99 @@ private fun RegisterForm(
     onGoogleClick: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        AuthField(
-            label = "Nama Lengkap",
-            value = uiState.fullName,
-            onValueChange = viewModel::onFullNameChange,
-            placeholder = "Masukkan nama lengkap",
-            leadingIcon = Icons.Rounded.Person,
-            isError = uiState.fullNameError.isNotEmpty(),
-            errorMessage = uiState.fullNameError
-        )
+        FadeSlideIn(delayMillis = 80) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                AuthField(
+                    label = "Nama Lengkap",
+                    value = uiState.fullName,
+                    onValueChange = viewModel::onFullNameChange,
+                    placeholder = "Masukkan nama lengkap",
+                    leadingIcon = Icons.Rounded.Person,
+                    isError = uiState.fullNameError.isNotEmpty(),
+                    errorMessage = uiState.fullNameError
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                AuthField(
+                    label = "Email",
+                    value = uiState.email,
+                    onValueChange = viewModel::onEmailChange,
+                    placeholder = "Contoh: nama@email.com",
+                    leadingIcon = Icons.Rounded.Email,
+                    keyboardType = KeyboardType.Email,
+                    isError = uiState.emailError.isNotEmpty(),
+                    errorMessage = uiState.emailError
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        AuthField(
-            label = "Email",
-            value = uiState.email,
-            onValueChange = viewModel::onEmailChange,
-            placeholder = "Contoh: nama@email.com",
-            leadingIcon = Icons.Rounded.Email,
-            keyboardType = KeyboardType.Email,
-            isError = uiState.emailError.isNotEmpty(),
-            errorMessage = uiState.emailError
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        AuthField(
-            label = "Nomor HP",
-            value = uiState.phoneNumber,
-            onValueChange = viewModel::onPhoneNumberChange,
-            placeholder = "Contoh: 0867 6767 6767",
-            leadingIcon = Icons.Rounded.Phone,
-            keyboardType = KeyboardType.Phone,
-            isError = uiState.phoneNumberError.isNotEmpty(),
-            errorMessage = uiState.phoneNumberError
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        AuthField(
-            label = "Password",
-            value = uiState.password,
-            onValueChange = viewModel::onPasswordChange,
-            placeholder = "Minimal 8 karakter",
-            leadingIcon = Icons.Rounded.Lock,
-            isPassword = true,
-            isError = uiState.passwordError.isNotEmpty(),
-            errorMessage = uiState.passwordError
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        AuthField(
-            label = "Konfirmasi Password",
-            value = uiState.confirmPassword,
-            onValueChange = viewModel::onConfirmPasswordChange,
-            placeholder = "Masukkan ulang password",
-            leadingIcon = Icons.Rounded.Lock,
-            isPassword = true,
-            isError = uiState.confirmPasswordError.isNotEmpty(),
-            errorMessage = uiState.confirmPasswordError
-        )
-
-        // ===== Pesan error umum (email terdaftar, tidak ada internet, dst.) =====
-        if (uiState.error.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = uiState.error,
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(start = 4.dp)
+        FadeSlideIn(delayMillis = 160) {
+            AuthField(
+                label = "Nomor HP",
+                value = uiState.phoneNumber,
+                onValueChange = viewModel::onPhoneNumberChange,
+                placeholder = "Contoh: 0867 6767 6767",
+                leadingIcon = Icons.Rounded.Phone,
+                keyboardType = KeyboardType.Phone,
+                isError = uiState.phoneNumberError.isNotEmpty(),
+                errorMessage = uiState.phoneNumberError
             )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        FadeSlideIn(delayMillis = 240) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                AuthField(
+                    label = "Password",
+                    value = uiState.password,
+                    onValueChange = viewModel::onPasswordChange,
+                    placeholder = "Minimal 8 karakter",
+                    leadingIcon = Icons.Rounded.Lock,
+                    isPassword = true,
+                    isError = uiState.passwordError.isNotEmpty(),
+                    errorMessage = uiState.passwordError
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                AuthField(
+                    label = "Konfirmasi Password",
+                    value = uiState.confirmPassword,
+                    onValueChange = viewModel::onConfirmPasswordChange,
+                    placeholder = "Masukkan ulang password",
+                    leadingIcon = Icons.Rounded.Lock,
+                    isPassword = true,
+                    isError = uiState.confirmPasswordError.isNotEmpty(),
+                    errorMessage = uiState.confirmPasswordError
+                )
+
+                // ===== Pesan error umum (email terdaftar, tidak ada internet, dst.) =====
+                if (uiState.error.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = uiState.error,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        RegisterFormButtons(
-            uiState = uiState,
-            onRegister = { viewModel.register(onRegisterSuccess, onNeedVerification) },
-            onNavigateToLogin = onNavigateToLogin,
-            onGoogleClick = onGoogleClick
-        )
+        FadeSlideIn(delayMillis = 320) {
+            RegisterFormButtons(
+                uiState = uiState,
+                onRegister = { viewModel.register(onRegisterSuccess, onNeedVerification) },
+                onNavigateToLogin = onNavigateToLogin,
+                onGoogleClick = onGoogleClick
+            )
+        }
     }
 }
 
@@ -325,11 +339,13 @@ private fun RegisterFormButtons(
     onGoogleClick: () -> Unit
 ) {
     // Dihitung dari uiState supaya ikut berubah saat pengguna mengetik
+    val emailRegex = remember { "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex() }
     val canSubmit = uiState.fullName.isNotBlank() &&
             uiState.email.isNotBlank() &&
-            uiState.phoneNumber.isNotBlank() &&
-            uiState.password.isNotBlank() &&
-            uiState.confirmPassword.isNotBlank()
+            emailRegex.matches(uiState.email.trim()) &&
+            uiState.phoneNumber.length in 9..13 &&
+            uiState.password.length >= 8 &&
+            uiState.confirmPassword == uiState.password
 
     val colors = KetukTheme.colors
     val fieldBg = colors.authFieldBackground
@@ -468,4 +484,4 @@ private fun RegisterScreenDarkPreview() {
             onRegisterSuccess = {}
         )
     }
-}
+}

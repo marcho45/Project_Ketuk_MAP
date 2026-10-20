@@ -355,3 +355,29 @@ Seluruh pengerjaan variant `demo` harus memenuhi 7 kriteria penilaian UTS beriku
 5. **Form Input & Validation (15 poin):** `KeyboardType` yang tepat (`Number`, `Email`, `Password`) + validasi lengkap (hanya angka & rentang umur 40-120, format email, field wajib tidak boleh kosong) + `isError` dan `supportingText` + blokir tombol submit sampai valid.
 6. **Dummy Data Implementation (15 poin):** Data realistis dan bervariasi menggunakan Kotlin `data class` terpusat sesuai nama-nama di Figma (`Nanda Valeri`, `Oma Diyas / Sri Diyas Anjarwati`, `Markolintang`, `Jl. Syeckh Nawawi Albantani 13`, dll.).
 7. **Documentation & Deliverable Completeness (10 poin):** `README.txt` lengkap di root project (deskripsi aplikasi, nama & NIM anggota kelompok: Nanda Valeri 127234, Lintang Balakosa A 126968, Paulus Marchionni S 126937, pembagian tugas, serta panduan akun demo), APK `demo` siap instal, dan kode proyek yang rapi.
+
+
+======================================================================
+15. ATURAN DOKUMENTASI DAN ALUR KERJA AGENT
+======================================================================
+## Sebelum mengerjakan tugas apa pun
+- Baca docs/PROJECT_SUMMARY.md, docs/SCREENS.md, dan 10 entri terbaru docs/CHANGELOG_HISTORY.md.
+- Baca docs/ASSETS.md kalau tugas menyangkut gambar/ikon/font.
+- Fokus ke flavor "demo" (UTS). Jangan ubah flavor "full" kecuali diminta.
+
+## Setelah setiap perubahan yang berhasil
+- Tambahkan entri BARU di bagian PALING ATAS docs/CHANGELOG_HISTORY.md dengan format:
+  ### [YYYY-MM-DD HH:mm] Judul singkat
+  - Alasan/permintaan:
+  - File diubah: (path dan ringkasan)
+  - Dampak ke layar/fitur/rubrik:
+  - Hasil build/lint:
+- Update docs/SCREENS.md kalau ada layar ditambah, dihapus, atau berubah perilaku/navigasi.
+- Update docs/ASSETS.md kalau ada aset ditambah/diganti.
+- Update docs/PROJECT_SUMMARY.md kalau arsitektur, flavor, theme, atau fitur utama berubah.
+- Jangan menghapus entri lama. Hanya menambah.
+- Jangan menulis kredensial atau isi local.properties ke dokumen apa pun.
+
+## Aturan umum
+- Sebelum selesai, jalankan build yang relevan dan tulis hasilnya di changelog.
+- Kalau tugas hanya membaca/audit (tanpa edit), tidak perlu update dokumen.

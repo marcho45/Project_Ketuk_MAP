@@ -36,6 +36,7 @@ enum class QuickActionType {
 }
 
 data class RecentActivity(
+    val id: String,
     val type: ActivityIconType,
     val title: String,
     val quote: String? = null,
@@ -93,16 +94,19 @@ object HomeSampleData {
         ),
         recentActivities = listOf(
             RecentActivity(
+                id = "act_3",
                 type = ActivityIconType.CHECK,
                 title = "Oma Diyas minum obat",
                 time = "Hari ini, 08:12"
             ),
             RecentActivity(
+                id = "act_4",
                 type = ActivityIconType.BELL,
                 title = "Aktivitas jalan pagi",
                 time = "Hari ini, 06:45"
             ),
             RecentActivity(
+                id = "act_7",
                 type = ActivityIconType.CHAT,
                 title = "Pesan dari Oma Diyas",
                 quote = "Terima kasih sudah selalu ada",
