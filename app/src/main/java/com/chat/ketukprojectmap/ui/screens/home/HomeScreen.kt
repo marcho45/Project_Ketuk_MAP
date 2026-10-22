@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -66,9 +65,9 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val colors = KetukTheme.colors
 
-    // TODO(tim): tombol khusus demo, tidak ada di Figma
-    BackHandler(enabled = com.chat.ketukprojectmap.BuildConfig.DEMO_MODE && selectedTab == 0) {
-        onNavigateBackToRole()
+    // Tab bawah: back dari tab selain Home kembali ke tab Home; back di Home keluar aplikasi
+    BackHandler(enabled = selectedTab != 0) {
+        selectedTab = 0
     }
 
     LaunchedEffect(Unit) {
@@ -234,35 +233,12 @@ fun HeaderSection(
         verticalAlignment = Alignment.Top
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            // TODO(tim): tombol khusus demo, tidak ada di Figma
-            if (com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(
-                        onClick = onNavigateBackToRole,
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = Terakota
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Halo, $userName",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            } else {
-                Text(
-                    text = "Halo, $userName",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
+            Text(
+                text = "Halo, $userName",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "Oma kamu hari ini bagaimana?",

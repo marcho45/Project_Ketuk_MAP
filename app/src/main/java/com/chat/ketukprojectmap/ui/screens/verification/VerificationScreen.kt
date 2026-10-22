@@ -68,7 +68,13 @@ fun VerificationScreen(
         val panelTop = maxHeight * 0.32f
         val mascotTop = maxHeight * 0.15f
         val mascotSize = minOf(maxWidth * 0.62f, maxHeight * 0.30f)
-        val codeTop = maxOf(maxHeight * 0.555f - panelTop, 0.dp)
+        val mascotBottom = mascotTop + mascotSize
+        // Posisi kotak kode (sama seperti sebelumnya: 55,5% tinggi layar)
+        val codeY = maxHeight * 0.555f
+        // Area scroll dimulai TEPAT di bawah maskot, jadi konten yang di-scroll
+        // terpotong di situ dan tidak pernah menyelinap di bawah maskot.
+        val scrollTop = maxOf(mascotBottom, panelTop)
+        val codeTopInScroll = maxOf(codeY - scrollTop, 0.dp)
         val sidePadding = 32.dp
 
         // 1. Latar desa (mulai di bawah status bar)
@@ -83,16 +89,23 @@ fun VerificationScreen(
             contentScale = ContentScale.Crop
         )
 
-        // 2. Panel bawah (digambar sebelum maskot)
-        Column(
+        // 2a. Panel bawah: hanya latar berlengkung, tidak ikut scroll
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = panelTop)
                 .clip(RoundedCornerShape(topStart = cornerRadius, topEnd = cornerRadius))
                 .background(colors.screenBackground)
+        )
+
+        // 2b. Isi panel yang bisa di-scroll (dimulai di bawah maskot)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = scrollTop)
                 .imePadding()
                 .verticalScroll(rememberScrollState())
-                .padding(start = sidePadding, end = sidePadding, top = codeTop, bottom = 24.dp),
+                .padding(start = sidePadding, end = sidePadding, top = codeTopInScroll, bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // ===== Kotak kode (satu input tersembunyi) =====
@@ -135,7 +148,7 @@ fun VerificationScreen(
 
                     // Info tujuan email
                     Text(
-                        text = "Kode dikirim ke $email",
+                        text = if (email.isNotBlank()) "Kode dikirim ke $email" else "Kode dikirim ke email kamu",
                         fontSize = 12.sp,
                         color = colors.textPrimary.copy(alpha = 0.7f),
                         textAlign = TextAlign.Center
@@ -214,7 +227,8 @@ fun VerificationScreen(
             }
         }
 
-        // 3. Maskot paling atas, menimpa lengkungan panel
+        // 3. Maskot paling atas, menimpa lengkungan panel. Posisinya TETAP
+        //    (tidak ikut scroll), dan konten tidak bisa masuk ke bawahnya.
         FadeSlideIn(
             delayMillis = 0,
             modifier = Modifier

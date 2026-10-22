@@ -1,3 +1,71 @@
+### [2026-10-22 09:50] Penyeragaman Panjang Kode Verifikasi OTP 6 Digit untuk Demo dan Full
+- Alasan/permintaan: Menyesuaikan panjang kode OTP pada layar verifikasi (`VerificationViewModel.kt`) menjadi 6 digit untuk kedua build variant (`demo` dan `full`), selaras dengan konfigurasi default token autentikasi Supabase Auth. Memastikan tidak ada file/kode lain yang diubah.
+- File diubah:
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/verification/VerificationViewModel.kt`: Menyeragamkan `const val CODE_LENGTH: Int = 6` (berlaku untuk `demo` dan `full`).
+  * `docs/SCREENS.md`: Memperbarui tabel status layar, spesifikasi visual, dan catatan selisih kesepakatan tim untuk OTP 6 digit.
+  * `docs/CHANGELOG_HISTORY.md`: Menambahkan riwayat perubahan verifikasi 6 digit.
+- Dampak ke layar/fitur/rubrik:
+  * Konsistensi Autentikasi: Layar verifikasi OTP di flavor `demo` dan `full` kini konsisten menampilkan 6 kotak input digit yang proporsional sesuai standar token Supabase.
+  * Integritas Kode: Tidak ada kode lain di luar `VerificationViewModel.kt` yang diubah (0 perubahan pada `data/remote/` dan `data/repository/`).
+- Hasil build/lint:
+  * `./gradlew compileDemoDebugKotlin`: BUILD SUCCESSFUL
+  * `./gradlew compileFullDebugKotlin`: BUILD SUCCESSFUL
+
+---
+
+### [2026-10-22 09:20] Pembersihan Panah Back di UI dan Penataan Perilaku Back Sistem di Seluruh Layar
+- Alasan/permintaan: 
+  (A) Merapikan panah back di UI: Menghapus IconButton/ArrowBack dan spacer/padding pendukungnya di seluruh layar aplikasi (Login, Setup Wali: DetailOmaOpa, CircleKeluarga, QrWali, PilihPenjaga; Oma/Opa: ScanQr, OmaPermissions, OmaPassive; Penjaga: GuardianHome, GuardianLocationHistory; Wali: Home, DetailAlert, Notifikasi), KECUALI di RoleSelectScreen ("Siapa kamu?"). Di RoleSelectScreen, tombol panah back di UI ditampilkan di kedua flavor (demo dan full) dengan tata letak asli Figma.
+  (B) Penataan perilaku back sistem (tombol hardware / gesture HP):
+  1. Splash di-pop dari back stack (popUpTo inclusive).
+  2. Onboarding dan Login: back keluar aplikasi. Onboarding di-pop saat masuk Login.
+  3. Register kembali ke Login; OTP (full) kembali ke Register.
+  4. RoleSelectScreen ("Siapa kamu?"): back UI dan back sistem kembali ke Login.
+  5. Setelah menekan "Lanjutkan" di RoleSelect: seluruh wizard dan auth di-pop. Layar pertama tiap peran (DetailOmaOpa, ScanQr, GuardianHome) menjadi root (back keluar aplikasi).
+  6. Alur Wali: CircleKeluarga back ke DetailOmaOpa; QrWali back ke CircleKeluarga.
+  7. Selama pairing di QrWali dan ScanQr: BackHandler aktif no-op mencegah pembatalan proses.
+  8. Setelah pairing selesai: wizard setup di-pop. PilihPenjaga (Wali) dan OmaPermissions (Oma) menjadi root (back keluar aplikasi).
+  9. Setelah selesai wizard: navigasi ke Home masing-masing peran membersihkan back stack (popUpTo(0) inclusive). Back di Home keluar aplikasi.
+  10. Bottom Tabs: Back pada tab selain Tab 0 kembali ke Tab 0; back pada Tab 0 keluar aplikasi. Sub-layar (Riwayat Lokasi, Notifikasi, Detail Alert) kembali ke pemanggilnya.
+- File diubah:
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/role/RoleSelectScreen.kt`: Menghapus kondisi `!BuildConfig.DEMO_MODE` sehingga IconButton panah back dan spacing (8dp & 16dp) tampil tanpa syarat di kedua flavor sesuai Figma.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/login/LoginScreen.kt`: Menghapus IconButton panah kembali dan BackHandler demo agar back sistem langsung keluar aplikasi.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/walisetup/WaliSetupScreens.kt`: Menghapus IconButton panah kembali dari `DetailOmaOpaScreen`, `CircleKeluargaScreen`, `QrWaliScreen`, dan `PilihPenjagaScreen`. Menambahkan BackHandler no-op selama `isPairing == true` di `QrWaliScreen`.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/oma/OmaScreens.kt`: Menghapus IconButton panah kembali di `ScanQrScreen` dan `OmaPermissionsScreen`. Menghapus IconButton panah kembali demo dan demo BackHandler di `OmaPassiveScreen`. Menambahkan BackHandler no-op selama pairing di `ScanQrScreen` dan `LoadingPairingOmaContent`. Menjaga penuh perubahan desain baru pengguna di `OmaPassiveScreen`.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/home/HomeScreen.kt`: Menghapus IconButton panah kembali demo di Header Tab 0. Mengonfigurasi `BackHandler(enabled = selectedTab != 0) { selectedTab = 0 }` sehingga tab lain kembali ke Tab 0, dan Tab 0 keluar aplikasi.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianHomeScreen.kt`: Menghapus IconButton panah kembali demo di Header Tab 0. Mengonfigurasi `BackHandler(enabled = selectedTab != 0) { selectedTab = 0 }`.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/guardian/GuardianLocationHistoryScreen.kt`: Menghapus IconButton panah kembali dari header TopAppBar.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/detail/DetailAlertScreen.kt`: Menghapus `navigationIcon` panah kembali dari TopAppBar.
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/notifikasi/NotifikasiScreen.kt`: Menghapus `navigationIcon` panah kembali dari TopAppBar.
+  * `app/src/main/java/com/chat/ketukprojectmap/navigation/KetukNavHost.kt`: Mengonfigurasi popUpTo inclusive pada seluruh transisi navigasi komit (Lanjutkan di RoleSelect, sukses pairing, simpan penjaga / izin oma, dan perpindahan peran).
+  * `docs/SCREENS.md`: Memperbarui tabel status layar, spesifikasi visual, dan catatan selisih desain terkait penghapusan panah back di UI dan standarisasi navigasi back sistem.
+  * `docs/CHANGELOG_HISTORY.md`: Menambahkan riwayat perubahan pembersihan back arrow UI dan penataan back sistem.
+- Dampak ke layar/fitur/rubrik:
+  * Keselarasan Desain UI / Figma: UI seluruh layar kini 100% selaras dengan desain Figma (tanpa panah kembali redundan di form/wizard/home), kecuali RoleSelectScreen yang mempertahankan tombol panah kembali di UI.
+  * State & Back Stack Management: Alur back sistem teratur, mencegah user tersasar kembali ke splash, onboarding, atau wizard form yang sudah di-submit.
+- Hasil build/lint:
+  * `./gradlew compileDemoDebugKotlin`: BUILD SUCCESSFUL
+  * `./gradlew compileFullDebugKotlin`: BUILD SUCCESSFUL
+
+---
+
+### [2026-10-22 07:45] Penyesuaian Tombol Back UI Layar Pilih Peran Khusus Flavor Demo
+- Alasan/permintaan: Mengoreksi ruang lingkup peniadaan tombol back UI pada `RoleSelectScreen.kt` agar hanya berlaku untuk flavor `demo` (lewat pengecekan `!BuildConfig.DEMO_MODE`). Flavor `full` dikembalikan 100% identik dengan implementasi asli (IconButton + ArrowBack + spacing 8dp/16dp). Menghapus catatan selisih global di Bagian 4 docs/SCREENS.md.
+- File diubah:
+  * `app/src/main/java/com/chat/ketukprojectmap/ui/screens/role/RoleSelectScreen.kt`: Menambahkan percabangan `if (!BuildConfig.DEMO_MODE) { ... } else { Spacer(height = 32.dp) }`. Pada mode `full`, tombol back UI (IconButton + ArrowBack) dan jarak asal (8dp & 16dp) tampil utuh; pada mode `demo`, tombol disembunyikan dengan padding atas 32dp. BackHandler dan parameter onNavigateBack dipertahankan di kedua flavor.
+  * `docs/SCREENS.md`: Memperbarui deskripsi M3 Pilih Peran bahwa peniadaan tombol UI hanya khusus flavor `demo` sedangkan flavor `full` tidak berubah; menghapus entri selisih kesepakatan tim di Bagian 4.
+  * `docs/CHANGELOG_HISTORY.md`: Mengoreksi riwayat perubahan tombol back UI Pilih Peran agar spesifik untuk flavor demo.
+- Dampak ke layar/fitur/rubrik:
+  * Flavor demo: Layar Pilih Peran ("Siapa kamu?") tampil bersih tanpa tombol back di sudut kiri atas; layout judul rapi dengan jarak ideal 32dp dari status bar. Navigasi mundur tetap didukung via gesture/hardware back HP.
+  * Flavor full: Kode dan visual kembali 100% identik dengan desain asal (tombol panah kembali di kiri atas tetap ada).
+  * System Back & Stability: Navigasi back perangkat/gesture sistem tetap mengembalikan user ke halaman Login di kedua flavor tanpa crash.
+- Hasil build/lint:
+  * `./gradlew assembleDemoDebug`: BUILD SUCCESSFUL
+  * `./gradlew assembleFullDebug`: BUILD SUCCESSFUL
+  * `./gradlew lintDemoRelease`: BUILD SUCCESSFUL (0 errors, 35 warnings)
+
+---
+
 ### [2026-10-21 02:45] Unifikasi Animasi Masuk (FadeSlideIn Bertingkat) Seluruh Layar
 - Alasan/permintaan: Menyeragamkan animasi masuk (fade + slide-up bertingkat) di seluruh layar dan semua peran (Auth, Wali, Oma/Opa, Penjaga) mengikuti pola standar Home Wali (alpha 400ms, translasi Y 16dp dari bawah, stagger delay 80ms per blok hingga maks 600ms).
 - File diubah:

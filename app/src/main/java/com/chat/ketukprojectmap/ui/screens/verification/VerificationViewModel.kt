@@ -123,7 +123,7 @@ class VerificationViewModel(
     }
 
     companion object {
-        val CODE_LENGTH: Int = if (com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) 4 else 6
+        const val CODE_LENGTH: Int = 6
         const val RESEND_DELAY_SECONDS = 60
     }
 }

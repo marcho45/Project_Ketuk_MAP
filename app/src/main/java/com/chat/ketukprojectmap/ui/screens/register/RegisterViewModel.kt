@@ -173,12 +173,12 @@ class RegisterViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                // Detail teknis cukup di logcat, jangan ditampilkan ke pengguna
                 android.util.Log.e("KetukRegister", "Register gagal", e)
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = mapError(e.message.orEmpty().lowercase()) +
-                                " [" + e.message.orEmpty().take(120) + "]"
+                        error = mapError(e.message.orEmpty().lowercase())
                     )
                 }
             }

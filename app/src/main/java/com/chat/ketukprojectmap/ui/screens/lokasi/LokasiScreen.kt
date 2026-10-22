@@ -1,9 +1,18 @@
 package com.chat.ketukprojectmap.ui.screens.lokasi
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -16,14 +25,21 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Navigation
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -42,6 +58,8 @@ fun LokasiScreen(
 ) {
     val lokasiData by viewModel.lokasiData.collectAsState()
     var contentVisible by remember { mutableStateOf(false) }
+    // Posisi panel bawah: true = terbuka, false = tertutup (peta lebih luas)
+    var sheetExpanded by rememberSaveable { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val colors = KetukTheme.colors
@@ -59,20 +77,23 @@ fun LokasiScreen(
 
     val navBarPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
 
-    Box(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.screenBackground)
             .statusBarsPadding()
     ) {
-        // Urutan penting: widthIn dulu, baru fillMaxSize, supaya lebar benar-benar dibatasi 600dp di tablet
+        // Tinggi maksimum panel: sisakan ruang untuk judul dan bottom bar.
+        // Di layar kecil / font besar, isi panel yang terbuka bisa di-scroll.
+        val sheetMaxHeight = maxOf(maxHeight - 64.dp - navBarPadding - 140.dp, 200.dp)
+
+        // Lapisan bawah: judul + peta (peta mengisi sisa ruang, panel menimpa di atasnya)
         Column(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .widthIn(max = 600.dp)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(bottom = 64.dp + navBarPadding + 24.dp)
+                .padding(bottom = 64.dp + navBarPadding)
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -88,35 +109,50 @@ fun LokasiScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            FadeSlideIn(visible = contentVisible, delayMillis = 80) {
+            FadeSlideIn(
+                visible = contentVisible,
+                delayMillis = 80,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
                 Image(
                     painter = painterResource(R.drawable.peta_lokasi),
                     contentDescription = "Peta lokasi ${lokasiData.elderName}",
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
                         .padding(horizontal = 24.dp)
-                        .aspectRatio(1.09f)
                         .clip(RoundedCornerShape(24.dp)),
                     contentScale = ContentScale.Crop
                 )
             }
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            FadeSlideIn(visible = contentVisible, delayMillis = 160) {
-                LokasiBottomSheet(
-                    lokasiData = lokasiData,
-                    onShowRoute = {
-                        showMockupMessage("Simulasi Mockup: Membuka rute ke ${DummyData.defaultElder.address}")
-                    },
-                    onCallElder = {
-                        showMockupMessage("Simulasi Mockup: Menghubungi ${lokasiData.elderName}")
-                    },
-                    onGuardianClick = {
-                        showMockupMessage("Simulasi Mockup: Detail penjaga terdekat ${lokasiData.guardianName} (${lokasiData.guardianDistance})")
-                    }
-                )
-            }
+        // Lapisan atas: panel bawah yang bisa ditarik / dipencet
+        FadeSlideIn(
+            visible = contentVisible,
+            delayMillis = 160,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .widthIn(max = 600.dp)
+                .fillMaxWidth()
+                .padding(bottom = 64.dp + navBarPadding)
+        ) {
+            LokasiBottomSheet(
+                lokasiData = lokasiData,
+                expanded = sheetExpanded,
+                onExpandedChange = { sheetExpanded = it },
+                maxHeight = sheetMaxHeight,
+                onShowRoute = {
+                    showMockupMessage("Simulasi Mockup: Membuka rute ke ${DummyData.defaultElder.address}")
+                },
+                onCallElder = {
+                    showMockupMessage("Simulasi Mockup: Menghubungi ${lokasiData.elderName}")
+                },
+                onGuardianClick = {
+                    showMockupMessage("Simulasi Mockup: Detail penjaga terdekat ${lokasiData.guardianName} (${lokasiData.guardianDistance})")
+                }
+            )
         }
 
         SnackbarHost(
@@ -128,52 +164,127 @@ fun LokasiScreen(
     }
 }
 
+/**
+ * Panel bawah lokasi.
+ *
+ * - [expanded] true: kartu Oma + tombol aksi + kartu penjaga terlihat.
+ * - [expanded] false: hanya garis (handle) dan kartu Oma, peta lebih luas.
+ * - Handle bisa ditarik naik (buka) / turun (tutup) dan bisa dipencet untuk
+ *   bolak-balik. Kalau [onExpandedChange] null, handle hanya hiasan.
+ * - [maxHeight] diisi agar isi panel bisa di-scroll di layar kecil. Kalau
+ *   Dp.Unspecified (default), panel memakai tinggi isinya (tanpa scroll).
+ */
 @Composable
 fun LokasiBottomSheet(
     lokasiData: LokasiData,
+    expanded: Boolean = true,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
+    maxHeight: Dp = Dp.Unspecified,
     onShowRoute: () -> Unit = {},
     onCallElder: () -> Unit = {},
     onGuardianClick: () -> Unit = {}
 ) {
     val colors = KetukTheme.colors
+    val hasMaxHeight = maxHeight != Dp.Unspecified
+
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (hasMaxHeight) Modifier.heightIn(max = maxHeight) else Modifier),
         shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
         color = colors.sheetBackground,
         border = BorderStroke(1.dp, colors.cardBorder)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
+        Column(modifier = Modifier.fillMaxWidth()) {
+            SheetHandle(
+                expanded = expanded,
+                onExpandedChange = onExpandedChange
+            )
+
+            Column(
                 modifier = Modifier
-                    .width(48.dp)
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(MaterialTheme.colorScheme.primary)
-            )
+                    .fillMaxWidth()
+                    .weight(1f, fill = false)
+                    .then(
+                        if (hasMaxHeight) Modifier.verticalScroll(rememberScrollState())
+                        else Modifier
+                    )
+                    .padding(start = 20.dp, end = 20.dp, bottom = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                ElderInfoCard(lokasiData)
 
-            Spacer(modifier = Modifier.height(20.dp))
+                AnimatedVisibility(
+                    visible = expanded,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    Column {
+                        Spacer(modifier = Modifier.height(12.dp))
 
-            ElderInfoCard(lokasiData)
+                        ActionButtons(
+                            onShowRoute = onShowRoute,
+                            onCallElder = onCallElder
+                        )
 
-            Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
-            ActionButtons(
-                onShowRoute = onShowRoute,
-                onCallElder = onCallElder
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            GuardianCard(
-                lokasiData = lokasiData,
-                onClick = onGuardianClick
-            )
+                        GuardianCard(
+                            lokasiData = lokasiData,
+                            onClick = onGuardianClick
+                        )
+                    }
+                }
+            }
         }
+    }
+}
+
+/** Area handle selebar panel (tinggi 44dp): ditarik naik/turun atau dipencet. */
+@Composable
+private fun SheetHandle(
+    expanded: Boolean,
+    onExpandedChange: ((Boolean) -> Unit)?
+) {
+    val interactive = onExpandedChange != null
+    val thresholdPx = with(LocalDensity.current) { 36.dp.toPx() }
+    var dragTotal by remember { mutableFloatStateOf(0f) }
+    val dragState = rememberDraggableState { delta -> dragTotal += delta }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(44.dp)
+            .draggable(
+                state = dragState,
+                orientation = Orientation.Vertical,
+                enabled = interactive,
+                onDragStarted = { dragTotal = 0f },
+                onDragStopped = { velocity ->
+                    when {
+                        dragTotal < -thresholdPx || velocity < -800f -> onExpandedChange?.invoke(true)
+                        dragTotal > thresholdPx || velocity > 800f -> onExpandedChange?.invoke(false)
+                    }
+                }
+            )
+            .clickable(
+                enabled = interactive,
+                onClickLabel = if (expanded) "Perkecil panel" else "Perbesar panel",
+                role = Role.Button
+            ) { onExpandedChange?.invoke(!expanded) }
+            .semantics {
+                contentDescription = "Panel lokasi"
+                stateDescription = if (expanded) "Terbuka" else "Tertutup"
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .width(48.dp)
+                .height(6.dp)
+                .clip(RoundedCornerShape(3.dp))
+                .background(MaterialTheme.colorScheme.primary)
+        )
     }
 }
 
@@ -425,4 +536,4 @@ fun LokasiScreenDarkPreview() {
     KetukTheme(darkTheme = true) {
         LokasiScreen()
     }
-}
+}

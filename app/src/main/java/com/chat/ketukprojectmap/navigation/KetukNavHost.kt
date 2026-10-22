@@ -95,17 +95,14 @@ fun KetukNavHost() {
                         }
                         val targetRoute = if (role != null) Routes.homeRouteForRole(role) else Routes.role
                         navController.navigate(targetRoute) {
-                            popUpTo(Routes.login) { inclusive = true }
+                            if (role != null) {
+                                popUpTo(0) { inclusive = true }
+                            }
                         }
                     }
                 },
                 onNavigateToVerification = { navController.navigate(Routes.verification) },
-                onNavigateToRegister = { navController.navigate(Routes.register) },
-                onNavigateBack = {
-                    navController.navigate(Routes.onboarding) {
-                        popUpTo(Routes.login) { inclusive = true }
-                    }
-                }
+                onNavigateToRegister = { navController.navigate(Routes.register) }
             )
         }
 
@@ -114,10 +111,11 @@ fun KetukNavHost() {
                 onNavigateToLogin = {
                     navController.popBackStack()
                 },
-                // Confirm email mati: akun langsung aktif, user baru belum punya role
+                // Confirm email mati: akun langsung aktif, user baru belum punya role.
+                // Register dibuang dari back stack, jadi Back dari RoleSelect ke Login.
                 onRegisterSuccess = {
                     navController.navigate(Routes.role) {
-                        popUpTo(Routes.login) { inclusive = true }
+                        popUpTo(Routes.login) { inclusive = false }
                     }
                 },
                 // DIUBAH: Confirm email hidup, kirim email ke layar verifikasi.
@@ -141,10 +139,11 @@ fun KetukNavHost() {
             val email = entry.arguments?.getString("email").orEmpty()
             VerificationScreen(
                 email = email,
+                // Register dan Verification dibuang dari back stack,
+                // jadi Back dari RoleSelect kembali ke Login.
                 onConfirm = {
                     navController.navigate(Routes.role) {
-                        // Hapus Login, Register, dan Verifikasi dari back stack
-                        popUpTo(Routes.login) { inclusive = true }
+                        popUpTo(Routes.login) { inclusive = false }
                     }
                 }
                 // onResend dihapus: kirim ulang kode sudah ditangani VerificationViewModel
@@ -154,8 +153,10 @@ fun KetukNavHost() {
         composable(Routes.role) {
             RoleSelectScreen(
                 onNavigateBack = {
-                    navController.navigate(Routes.login) {
-                        popUpTo(Routes.role) { inclusive = true }
+                    if (!navController.popBackStack()) {
+                        navController.navigate(Routes.login) {
+                            popUpTo(0) { inclusive = true }
+                        }
                     }
                 },
                 onNavigateToHome = {
@@ -168,7 +169,7 @@ fun KetukNavHost() {
                             null
                         }
                         navController.navigate(Routes.setupRouteForRole(role)) {
-                            popUpTo(Routes.role) { inclusive = true }
+                            popUpTo(0) { inclusive = true }
                         }
                     }
                 }
@@ -179,9 +180,7 @@ fun KetukNavHost() {
         composable(Routes.detailOmaOpa) {
             DetailOmaOpaScreen(
                 onNavigateBack = {
-                    navController.navigate(Routes.role) {
-                        popUpTo(Routes.detailOmaOpa) { inclusive = true }
-                    }
+                    navController.popBackStack()
                 },
                 onContinue = {
                     navController.navigate(Routes.circleKeluarga)
@@ -206,7 +205,9 @@ fun KetukNavHost() {
                     navController.popBackStack()
                 },
                 onPairingComplete = {
-                    navController.navigate(Routes.pilihPenjaga)
+                    navController.navigate(Routes.pilihPenjaga) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }
@@ -218,7 +219,7 @@ fun KetukNavHost() {
                 },
                 onGuardianConfirmed = {
                     navController.navigate(Routes.home) {
-                        popUpTo(Routes.detailOmaOpa) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -231,12 +232,6 @@ fun KetukNavHost() {
                 },
                 onOpenDetailAlert = { itemId ->
                     navController.navigate(Routes.detailAlert(itemId))
-                },
-                // TODO(tim): tombol khusus demo, tidak ada di Figma
-                onNavigateBackToRole = {
-                    navController.navigate(Routes.role) {
-                        popUpTo(Routes.home) { inclusive = true }
-                    }
                 },
                 onLogout = {
                     navController.navigate(Routes.login) {
@@ -279,13 +274,11 @@ fun KetukNavHost() {
         composable(Routes.scanQr) {
             ScanQrScreen(
                 onNavigateBack = {
-                    navController.navigate(Routes.role) {
-                        popUpTo(Routes.scanQr) { inclusive = true }
-                    }
+                    navController.popBackStack()
                 },
                 onScanSuccess = {
                     navController.navigate(Routes.omaPermissions) {
-                        popUpTo(Routes.scanQr) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -295,7 +288,7 @@ fun KetukNavHost() {
             LoadingPairingOmaScreen(
                 onPairingComplete = {
                     navController.navigate(Routes.omaPermissions) {
-                        popUpTo(Routes.loadingPairingOma) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -304,13 +297,11 @@ fun KetukNavHost() {
         composable(Routes.omaPermissions) {
             OmaPermissionsScreen(
                 onNavigateBack = {
-                    navController.navigate(Routes.scanQr) {
-                        popUpTo(Routes.omaPermissions) { inclusive = true }
-                    }
+                    navController.popBackStack()
                 },
                 onAgree = {
                     navController.navigate(Routes.omaPassive) {
-                        popUpTo(Routes.role) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 }
             )
@@ -318,12 +309,6 @@ fun KetukNavHost() {
 
         composable(Routes.omaPassive) {
             OmaPassiveScreen(
-                // TODO(tim): tombol khusus demo, tidak ada di Figma
-                onNavigateBackToRole = {
-                    navController.navigate(Routes.role) {
-                        popUpTo(Routes.omaPassive) { inclusive = true }
-                    }
-                },
                 onLogout = {
                     navController.navigate(Routes.login) {
                         popUpTo(0) { inclusive = true }
@@ -337,12 +322,6 @@ fun KetukNavHost() {
             GuardianHomeScreen(
                 onOpenNotifications = { navController.navigate(Routes.notifikasi) },
                 onOpenLocationHistory = { navController.navigate(Routes.guardianLocationHistory) },
-                // TODO(tim): tombol khusus demo, tidak ada di Figma
-                onNavigateBackToRole = {
-                    navController.navigate(Routes.role) {
-                        popUpTo(Routes.guardianHome) { inclusive = true }
-                    }
-                },
                 onLogout = {
                     navController.navigate(Routes.login) {
                         popUpTo(0) { inclusive = true }

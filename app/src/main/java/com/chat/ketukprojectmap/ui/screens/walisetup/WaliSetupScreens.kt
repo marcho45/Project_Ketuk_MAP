@@ -8,6 +8,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,7 +21,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Search
@@ -93,20 +93,7 @@ fun DetailOmaOpaScreen(
             .systemBarsPadding()
             .imePadding()
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
-
-        IconButton(
-            onClick = onNavigateBack,
-            modifier = Modifier
-                .padding(start = 20.dp)
-                .size(48.dp)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                contentDescription = "Kembali",
-                tint = colors.textPrimary
-            )
-        }
+        Spacer(modifier = Modifier.height(24.dp))
 
         Column(
             modifier = Modifier
@@ -351,20 +338,7 @@ fun CircleKeluargaScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            IconButton(
-                onClick = onNavigateBack,
-                modifier = Modifier
-                    .padding(start = 20.dp)
-                    .size(48.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = "Kembali",
-                    tint = colors.textPrimary
-                )
-            }
+            Spacer(modifier = Modifier.height(28.dp))
 
             Column(
                 modifier = Modifier
@@ -703,6 +677,7 @@ fun QrWaliScreen(
     }
 
     if (isPairing) {
+        BackHandler(enabled = true) { /* no-op: abaikan back selama loading pairing */ }
         LoadingPairingWaliContent()
     } else {
         Column(
@@ -711,20 +686,7 @@ fun QrWaliScreen(
                 .background(colors.screenBackground)
                 .systemBarsPadding()
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            IconButton(
-                onClick = onNavigateBack,
-                modifier = Modifier
-                    .padding(start = 20.dp)
-                    .size(48.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = "Kembali",
-                    tint = colors.textPrimary
-                )
-            }
+            Spacer(modifier = Modifier.height(24.dp))
 
             Column(
                 modifier = Modifier
@@ -893,20 +855,7 @@ fun PilihPenjagaScreen(
             .systemBarsPadding()
             .imePadding()
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
-
-        IconButton(
-            onClick = onNavigateBack,
-            modifier = Modifier
-                .padding(start = 20.dp)
-                .size(48.dp)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                contentDescription = "Kembali",
-                tint = colors.textPrimary
-            )
-        }
+        Spacer(modifier = Modifier.height(24.dp))
 
         Column(
             modifier = Modifier
