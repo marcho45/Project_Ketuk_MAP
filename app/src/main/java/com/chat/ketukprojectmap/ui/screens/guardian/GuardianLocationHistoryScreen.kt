@@ -5,11 +5,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.*
@@ -25,7 +23,6 @@ import androidx.compose.ui.unit.sp
 import com.chat.ketukprojectmap.data.dummy.DummyData
 import com.chat.ketukprojectmap.data.dummy.LocationHistoryItem
 import com.chat.ketukprojectmap.ui.components.FadeSlideIn
-import com.chat.ketukprojectmap.ui.components.staggerDelay
 import com.chat.ketukprojectmap.ui.theme.KetukTheme
 import com.chat.ketukprojectmap.ui.theme.Terakota
 import kotlinx.coroutines.launch
@@ -50,27 +47,14 @@ fun GuardianLocationHistoryScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Header Top Bar
+            // Header Top Bar (animasi masuk hanya di header, bukan di item list)
             FadeSlideIn(delayMillis = 0) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(
-                        onClick = onNavigateBack,
-                        modifier = Modifier.size(44.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Kembali ke Lokasi Penjaga",
-                            tint = colors.textPrimary
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
                     Column {
                         Text(
                             text = "Riwayat Lokasi",
@@ -90,35 +74,23 @@ fun GuardianLocationHistoryScreen(
             HorizontalDivider(color = colors.divider)
 
             // Daftar 7 Hari Pergerakan
+            // Item tidak dibungkus FadeSlideIn: item LazyColumn dibuat ulang saat
+            // scroll, sehingga animasi alpha 0 -> 1 membuat kartu tampil kosong.
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                itemsIndexed(historyList, key = { _, item -> item.id }) { index, item ->
-                    if (index < 6) {
-                        FadeSlideIn(delayMillis = staggerDelay(index, baseDelayMillis = 40)) {
-                            LocationHistoryCard(
-                                item = item,
-                                onClick = {
-                                    scope.launch {
-                                        snackbarHostState.currentSnackbarData?.dismiss()
-                                        snackbarHostState.showSnackbar("Simulasi Mockup: Membuka koordinat ${item.placeName}")
-                                    }
-                                }
-                            )
-                        }
-                    } else {
-                        LocationHistoryCard(
-                            item = item,
-                            onClick = {
-                                scope.launch {
-                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                    snackbarHostState.showSnackbar("Simulasi Mockup: Membuka koordinat ${item.placeName}")
-                                }
+                items(historyList, key = { it.id }) { item ->
+                    LocationHistoryCard(
+                        item = item,
+                        onClick = {
+                            scope.launch {
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                                snackbarHostState.showSnackbar("Simulasi Mockup: Membuka koordinat ${item.placeName}")
                             }
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
@@ -165,8 +137,9 @@ private fun LocationHistoryCard(
                     )
                 }
 
+                // \u2022 = bullet, ditulis sebagai escape agar tidak rusak oleh encoding file
                 Text(
-                    text = "${item.dateText} • ${item.timeText}",
+                    text = "${item.dateText} \u2022 ${item.timeText}",
                     style = MaterialTheme.typography.bodySmall,
                     color = colors.textSecondary,
                     fontSize = 12.sp

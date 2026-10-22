@@ -148,81 +148,88 @@ fun RegisterScreen(
 @Composable
 private fun RegisterHeader(mascotSize: Dp) {
     val colors = KetukTheme.colors
-    Spacer(modifier = Modifier.height(48.dp))
 
-    // Maskot + bayangan + daun (sama seperti Login)
-    Box(
-        modifier = Modifier.size(
-            width = mascotSize * 1.22f,
-            height = mascotSize * 1.05f
-        ),
-        contentAlignment = Alignment.BottomCenter
+    // FIX: dibungkus Column supaya elemen tersusun vertikal (bukan bertumpuk)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(48.dp))
+
+        // Maskot + bayangan + daun (sama seperti Login)
         Box(
-            modifier = Modifier
-                .padding(bottom = 2.dp)
-                .size(width = mascotSize * 0.67f, height = 12.dp)
-                .clip(CircleShape)
-                .background(colors.authFieldBackground)
-        )
-        Image(
-            painter = painterResource(R.drawable.tok_memeriksa),
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .size(mascotSize)
-                .padding(bottom = 4.dp),
-            contentScale = ContentScale.Fit
-        )
-        Image(
-            painter = painterResource(R.drawable.asset_ketuk_daun),
-            contentDescription = null,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = mascotSize * 0.11f, bottom = 2.dp)
-                .size(mascotSize * 0.29f),
-            contentScale = ContentScale.Fit
-        )
-    }
+            modifier = Modifier.size(
+                width = mascotSize * 1.22f,
+                height = mascotSize * 1.05f
+            ),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(bottom = 2.dp)
+                    .size(width = mascotSize * 0.67f, height = 12.dp)
+                    .clip(CircleShape)
+                    .background(colors.authFieldBackground)
+            )
+            Image(
+                painter = painterResource(R.drawable.tok_memeriksa),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .size(mascotSize)
+                    .padding(bottom = 4.dp),
+                contentScale = ContentScale.Fit
+            )
+            Image(
+                painter = painterResource(R.drawable.asset_ketuk_daun),
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = mascotSize * 0.11f, bottom = 2.dp)
+                    .size(mascotSize * 0.29f),
+                contentScale = ContentScale.Fit
+            )
+        }
 
-    Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.height(36.dp))
 
-    // Logo + teks Ketuk
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Image(
-            painter = painterResource(R.drawable.logo_ketuk),
-            contentDescription = null,
-            modifier = Modifier
-                .size(34.dp)
-                .offset(y = (-2).dp),
-            contentScale = ContentScale.Fit
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = "Ketuk",
-            modifier = Modifier.offset(y = 3.dp),
-            style = TextStyle(
-                fontSize = 30.sp,
-                fontWeight = FontWeight.Bold,
-                color = Terakota,
-                platformStyle = PlatformTextStyle(includeFontPadding = false),
-                lineHeightStyle = LineHeightStyle(
-                    alignment = LineHeightStyle.Alignment.Center,
-                    trim = LineHeightStyle.Trim.Both
+        // Logo + teks Ketuk
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(R.drawable.logo_ketuk),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(34.dp)
+                    .offset(y = (-2).dp),
+                contentScale = ContentScale.Fit
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = "Ketuk",
+                modifier = Modifier.offset(y = 3.dp),
+                style = TextStyle(
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Terakota,
+                    platformStyle = PlatformTextStyle(includeFontPadding = false),
+                    lineHeightStyle = LineHeightStyle(
+                        alignment = LineHeightStyle.Alignment.Center,
+                        trim = LineHeightStyle.Trim.Both
+                    )
                 )
             )
+        }
+
+        Text(
+            text = "Yuk, buat akun barumu",
+            fontSize = 12.sp,
+            color = colors.textPrimary,
+            textAlign = TextAlign.Center
         )
     }
-
-    Text(
-        text = "Yuk, buat akun barumu",
-        fontSize = 12.sp,
-        color = colors.textPrimary,
-        textAlign = TextAlign.Center
-    )
 }
 
 @Composable
@@ -351,109 +358,113 @@ private fun RegisterFormButtons(
     val fieldBg = colors.authFieldBackground
     val fieldBorder = colors.authFieldBorder
 
-    // ===== Tombol Daftar =====
-    Button(
-        onClick = onRegister,
-        enabled = canSubmit && !uiState.isLoading,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(44.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Terakota,
-            disabledContainerColor = Terakota.copy(alpha = 0.5f)
-        )
-    ) {
-        if (uiState.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(20.dp),
-                color = colors.onAccent,
-                strokeWidth = 2.dp
+    // FIX: dibungkus Column supaya elemen tersusun vertikal (bukan bertumpuk)
+    Column(modifier = Modifier.fillMaxWidth()) {
+
+        // ===== Tombol Daftar =====
+        Button(
+            onClick = onRegister,
+            enabled = canSubmit && !uiState.isLoading,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(44.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Terakota,
+                disabledContainerColor = Terakota.copy(alpha = 0.5f)
             )
-        } else {
+        ) {
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = colors.onAccent,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Text(
+                    text = "Daftar",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.onAccent
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ===== Pemisah "atau" =====
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            HorizontalDivider(
+                modifier = Modifier.weight(1f),
+                color = colors.textPrimary.copy(alpha = 0.6f)
+            )
             Text(
-                text = "Daftar",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.onAccent
+                text = "atau",
+                fontSize = 10.sp,
+                color = colors.textPrimary,
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+            HorizontalDivider(
+                modifier = Modifier.weight(1f),
+                color = colors.textPrimary.copy(alpha = 0.6f)
             )
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ===== Tombol Google =====
+        OutlinedButton(
+            onClick = onGoogleClick,
+            enabled = !uiState.isLoading,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(44.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                containerColor = fieldBg,
+                contentColor = colors.textPrimary
+            ),
+            border = BorderStroke(1.dp, fieldBorder)
+        ) {
+            Image(
+                painter = painterResource(R.drawable.logo_google),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Lanjut dengan Google",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ===== Tautan ke Login =====
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Sudah punya akun? ",
+                fontSize = 12.sp,
+                color = colors.textPrimary
+            )
+            Text(
+                text = "Masuk",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.tertiary,
+                textDecoration = TextDecoration.Underline,
+                modifier = Modifier.clickable { onNavigateToLogin() }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
     }
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // ===== Pemisah "atau" =====
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            color = colors.textPrimary.copy(alpha = 0.6f)
-        )
-        Text(
-            text = "atau",
-            fontSize = 10.sp,
-            color = colors.textPrimary,
-            modifier = Modifier.padding(horizontal = 12.dp)
-        )
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            color = colors.textPrimary.copy(alpha = 0.6f)
-        )
-    }
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // ===== Tombol Google =====
-    OutlinedButton(
-        onClick = onGoogleClick,
-        enabled = !uiState.isLoading,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(44.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = fieldBg,
-            contentColor = colors.textPrimary
-        ),
-        border = BorderStroke(1.dp, fieldBorder)
-    ) {
-        Image(
-            painter = painterResource(R.drawable.logo_google),
-            contentDescription = null,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = "Lanjut dengan Google",
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Normal
-        )
-    }
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // ===== Tautan ke Login =====
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Sudah punya akun? ",
-            fontSize = 12.sp,
-            color = colors.textPrimary
-        )
-        Text(
-            text = "Masuk",
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.tertiary,
-            textDecoration = TextDecoration.Underline,
-            modifier = Modifier.clickable { onNavigateToLogin() }
-        )
-    }
-
-    Spacer(modifier = Modifier.height(32.dp))
 }
 
 @Preview(name = "HP kecil", widthDp = 320, heightDp = 568, showBackground = true)

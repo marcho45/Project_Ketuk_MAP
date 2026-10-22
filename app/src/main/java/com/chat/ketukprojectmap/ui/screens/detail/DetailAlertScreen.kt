@@ -9,7 +9,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Call
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.DirectionsWalk
@@ -65,15 +64,6 @@ fun DetailAlertScreen(
                         fontWeight = FontWeight.Bold,
                         color = colors.textPrimary
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = colors.textPrimary
-                        )
-                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = colors.screenBackground
@@ -280,7 +270,7 @@ fun DetailAlertScreen(
                                     color = colors.textPrimary
                                 )
                                 Text(
-                                    text = "${elder.age} tahun • ${elder.address}",
+                                    text = "${elder.age} tahun \u2022 ${elder.address}",
                                     fontSize = 12.sp,
                                     color = colors.textPrimary.copy(alpha = 0.7f)
                                 )

@@ -22,8 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.automirrored.rounded.DirectionsWalk
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -80,6 +78,10 @@ fun ScanQrScreen(
         label = "laser_pos"
     )
 
+    BackHandler(enabled = isSimulatingLoading) {
+        // no-op: abaikan back selama loading pairing
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         containerColor = colors.screenBackground
@@ -96,24 +98,7 @@ fun ScanQrScreen(
                     .padding(horizontal = 24.dp, vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Baris Atas: Tombol Kembali
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(
-                        onClick = onNavigateBack,
-                        modifier = Modifier.size(44.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Kembali",
-                            tint = colors.textPrimary
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Judul & Subjudul
                 FadeSlideIn(delayMillis = 0) {
@@ -387,6 +372,11 @@ fun LoadingPairingOmaContent(
         onPairingComplete()
     }
 
+    // Abaikan back sistem selama loading pairing
+    BackHandler(enabled = true) {
+        // no-op: layar loading pairing tidak boleh dikembalikan
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -466,19 +456,7 @@ fun OmaPermissionsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 12.dp)
         ) {
-            // Baris Atas: Tombol Kembali
-            IconButton(
-                onClick = onNavigateBack,
-                modifier = Modifier.size(44.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                    contentDescription = "Kembali",
-                    tint = colors.textPrimary
-                )
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Judul & Subjudul
             FadeSlideIn(delayMillis = 0) {
@@ -713,14 +691,17 @@ fun OmaPassiveScreen(
     val scope = rememberCoroutineScope()
     val isLoggingOut by profileViewModel.isLoggingOut.collectAsState()
 
-    var showSapaDialog by rememberSaveable { mutableStateOf(false) }
     var showLogoutDialog by rememberSaveable { mutableStateOf(false) }
-    var sapaStatusText by rememberSaveable { mutableStateOf("Status normal: Aktivitas HP terdeteksi") }
 
-    // TODO(tim): tombol panah kembali khusus DEMO_MODE, tidak ada di Figma
-    if (com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) {
-        BackHandler {
-            onNavigateBackToRole()
+    // Kata pertama nickname ("Oma"/"Opa") dipakai untuk judul sapaan
+    val elder = DummyData.defaultElder
+    val sapaanOma = elder.nickname.substringBefore(' ')
+
+    // Helper: tampilkan snackbar simulasi
+    fun showMock(message: String) {
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            snackbarHostState.showSnackbar(message)
         }
     }
 
@@ -735,42 +716,46 @@ fun OmaPassiveScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp, vertical = 16.dp)
         ) {
-            // Header: Tombol Panah Kembali Demo + Judul
+            // 1. Baris header: ikon rumah + "Halo, <nama>" + chip "KETUK Aktif"
             FadeSlideIn(delayMillis = 0) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // TODO(tim): tombol khusus demo, tidak ada di Figma
-                    if (com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) {
-                        IconButton(
-                            onClick = onNavigateBackToRole,
-                            modifier = Modifier.size(40.dp)
-                        ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = Terakota.copy(alpha = 0.12f),
+                        modifier = Modifier.size(52.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                                contentDescription = "Kembali ke Pilih Peran",
-                                tint = Terakota
+                                imageVector = Icons.Rounded.Home,
+                                contentDescription = null,
+                                tint = Terakota,
+                                modifier = Modifier.size(30.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.width(6.dp))
                     }
+
+                    Spacer(modifier = Modifier.width(12.dp))
 
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Ketuk Aktif",
-                            style = MaterialTheme.typography.headlineMedium,
+                            text = "Halo,",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.textSecondary
+                        )
+                        Text(
+                            text = elder.nickname,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = colors.textPrimary
                         )
-                        Text(
-                            text = "Aplikasi berjalan tenang menjaga Oma",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = colors.textSecondary
-                        )
                     }
 
-                    // Badge Status Perlindungan Aktif
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Chip status perlindungan aktif
                     Surface(
                         shape = RoundedCornerShape(20.dp),
                         color = colors.accentGreen.copy(alpha = 0.16f),
@@ -788,7 +773,7 @@ fun OmaPassiveScreen(
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "Aman",
+                                text = "KETUK Aktif",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = colors.accentGreen
@@ -798,213 +783,218 @@ fun OmaPassiveScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // KARTU HERO LANSIA (Informasi Oma Diyas)
+            // 2. Judul besar di tengah + subjudul
             FadeSlideIn(delayMillis = 80) {
-                Card(
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
-                    border = BorderStroke(1.dp, colors.cardBorder),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.oma_avatar),
-                            contentDescription = "Avatar Oma Diyas",
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(CircleShape)
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Text(
-                            text = DummyData.defaultElder.fullName,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textPrimary
-                        )
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        Text(
-                            text = "${DummyData.defaultElder.nickname} • ${DummyData.defaultElder.age} Tahun • ${DummyData.defaultElder.area}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = colors.textSecondary
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        HorizontalDivider(color = colors.divider)
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        // Detail Status Sensor HP Lansia
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            OmaSensorStat(
-                                icon = Icons.AutoMirrored.Rounded.DirectionsWalk,
-                                label = "Langkah",
-                                value = "1.420",
-                                colors = colors
-                            )
-                            OmaSensorStat(
-                                icon = Icons.Rounded.BatteryChargingFull,
-                                label = "Baterai",
-                                value = "78%",
-                                colors = colors
-                            )
-                            OmaSensorStat(
-                                icon = Icons.Rounded.CheckCircle,
-                                label = "Status",
-                                value = "Sehat",
-                                colors = colors
-                            )
-                        }
-                    }
+                    Text(
+                        text = "$sapaanOma, sehat hari ini?",
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = colors.textPrimary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = "Ketuk salah satu tombol di bawah ya.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.textSecondary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // KARTU SIMULASI SAPAAN L1 ("Oma baik-baik saja?") Sesuai flowchart.png
+            // 3. Ilustrasi Oma (oma_ungu) dengan latar lingkaran lembut
             FadeSlideIn(delayMillis = 160) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(230.dp)
+                            .clip(CircleShape)
+                            .background(Terakota.copy(alpha = 0.06f))
+                    )
+                    Image(
+                        painter = painterResource(R.drawable.oma_ungu),
+                        contentDescription = "Ilustrasi $sapaanOma",
+                        modifier = Modifier.size(210.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 4. Dua tombol besar: "Saya baik-baik saja" & "Saya butuh bantuan"
+            FadeSlideIn(delayMillis = 240) {
+                OmaBigActionButton(
+                    icon = Icons.Rounded.Check,
+                    title = "Saya baik-baik saja",
+                    subtitle = "Terima kasih, semua aman",
+                    containerColor = colors.accentGreen,
+                    iconTint = colors.accentGreen,
+                    onClick = {
+                        showMock("Simulasi Mockup: Kabar \"Saya baik-baik saja\" dikirim ke ${DummyData.defaultWaliName} (Wali)")
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            FadeSlideIn(delayMillis = 320) {
+                OmaBigActionButton(
+                    icon = Icons.Rounded.VolunteerActivism,
+                    title = "Saya butuh bantuan",
+                    subtitle = "Tolong segera hubungi wali / penjaga",
+                    containerColor = Terakota,
+                    iconTint = Terakota,
+                    onClick = {
+                        showMock("Simulasi Mockup: Permintaan bantuan dikirim ke Wali & Penjaga!")
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            // 5. Kartu "Kirim Pesan Cepat" dengan 3 pesan siap kirim
+            FadeSlideIn(delayMillis = 400) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = colors.cardHighlight),
-                    border = BorderStroke(1.dp, Terakota.copy(alpha = 0.35f)),
+                    colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
+                    border = BorderStroke(1.dp, colors.cardBorder),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
-                    Column(modifier = Modifier.padding(18.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
                             Surface(
                                 shape = CircleShape,
-                                color = Terakota.copy(alpha = 0.16f),
-                                modifier = Modifier.size(36.dp)
+                                color = Terakota.copy(alpha = 0.14f),
+                                modifier = Modifier.size(40.dp)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         imageVector = Icons.Rounded.ChatBubbleOutline,
                                         contentDescription = null,
                                         tint = Terakota,
-                                        modifier = Modifier.size(20.dp)
+                                        modifier = Modifier.size(22.dp)
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = "Simulasi Sapaan L1",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = colors.textPrimary
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Kirim Pesan Cepat",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = colors.textPrimary
+                                )
+                                Text(
+                                    text = "Pilih pesan yang ingin kamu kirim ke wali.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = colors.textSecondary
+                                )
+                            }
+
+                            Icon(
+                                imageVector = Icons.Rounded.ChevronRight,
+                                contentDescription = null,
+                                tint = colors.textSecondary,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
 
-                        Text(
-                            text = "Simulasi kondisi HP hening: jika HP hening lebih dari 4 jam, sistem memunculkan dialog sapa untuk mengonfirmasi keadaan Oma.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = colors.textSecondary,
-                            lineHeight = 18.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        // Tombol untuk memicu Dialog Sapa L1
-                        KetukButton(
-                            text = "Munculkan Sapaan",
-                            onClick = { showSapaDialog = true },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = sapaStatusText,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = colors.accentGreen,
-                            fontWeight = FontWeight.Medium
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(IntrinsicSize.Max),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OmaQuickMessageChip(
+                                icon = Icons.Rounded.EmojiEmotions,
+                                text = "Saya baik-baik saja",
+                                tint = colors.accentGreen,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                onClick = { showMock("Simulasi Mockup: Pesan \"Saya baik-baik saja\" dikirim ke Wali") }
+                            )
+                            OmaQuickMessageChip(
+                                icon = Icons.Rounded.Favorite,
+                                text = "Terima kasih selalu ada",
+                                tint = Terakota,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                onClick = { showMock("Simulasi Mockup: Pesan \"Terima kasih selalu ada\" dikirim ke Wali") }
+                            )
+                            OmaQuickMessageChip(
+                                icon = Icons.Rounded.Home,
+                                text = "Saya di rumah ya",
+                                tint = colors.accentGreen,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight(),
+                                onClick = { showMock("Simulasi Mockup: Pesan \"Saya di rumah ya\" dikirim ke Wali") }
+                            )
+                        }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // KARTU AKSI CEPAT LANSIA
-            FadeSlideIn(delayMillis = 240) {
-                Card(
+            // 6. Teks bawah: HP terpantau otomatis
+            FadeSlideIn(delayMillis = 480) {
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = colors.cardSurface),
-                    border = BorderStroke(1.dp, colors.cardBorder),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Kontak Keluarga & Pendamping",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = colors.textPrimary
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Tombol Hubungi Wali
-                        OmaActionRow(
-                            icon = Icons.Rounded.Phone,
-                            title = "Telepon Wali: ${DummyData.defaultWaliName}",
-                            subtitle = "+62 812 3456 7890",
-                            colors = colors,
-                            onClick = {
-                                scope.launch {
-                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                    snackbarHostState.showSnackbar("Simulasi Mockup: Memanggil Nanda Valeri (+62 812 3456 7890)...")
-                                }
-                            }
-                        )
-
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp), color = colors.divider)
-
-                        // Tombol Cek Sensor Gerak
-                        OmaActionRow(
-                            icon = Icons.Rounded.Sensors,
-                            title = "Status Sensor Gerak",
-                            subtitle = "Accelerometer & Step Counter Normal",
-                            colors = colors,
-                            onClick = {
-                                scope.launch {
-                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                    snackbarHostState.showSnackbar("Simulasi Mockup: Sensor gerak Oma bekerja aktif normal")
-                                }
-                            }
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Rounded.VerifiedUser,
+                        contentDescription = null,
+                        tint = colors.accentGreen,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "HP $sapaanOma terpantau otomatis",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = colors.accentGreen
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(20.dp))
 
             // PENGATURAN MODE GELAP (// TODO(tim): tidak ada di Figma)
-            FadeSlideIn(delayMillis = 320) {
+            FadeSlideIn(delayMillis = 560) {
                 KetukDarkModeCard()
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // TOMBOL KELUAR (LOGOUT)
-            FadeSlideIn(delayMillis = 400) {
+            FadeSlideIn(delayMillis = 640) {
                 KetukLogoutButton(
                     onClick = {
                         if (!isLoggingOut) {
@@ -1018,89 +1008,6 @@ fun OmaPassiveScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-        }
-
-        // DIALOG SAPA L1: "Oma baik-baik saja?"
-        if (showSapaDialog) {
-            AlertDialog(
-                onDismissRequest = { showSapaDialog = false },
-                containerColor = colors.cardSurface,
-                title = {
-                    Text(
-                        text = "Oma baik-baik saja?",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.textPrimary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
-                text = {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Ketuk mendeteksi HP hening beberapa jam. Tekan tombol di bawah untuk mengabari Nanda dan keluarga bahwa Oma aman.",
-                            fontSize = 15.sp,
-                            color = colors.textSecondary,
-                            lineHeight = 22.sp,
-                            textAlign = TextAlign.Center
-                        )
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        Button(
-                            onClick = {
-                                showSapaDialog = false
-                                sapaStatusText = "Status: Oma mengonfirmasi 'Saya baik-baik saja'"
-                                scope.launch {
-                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                    snackbarHostState.showSnackbar("Status Normal: Kabar baik dikirim ke Nanda (Wali)")
-                                }
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = colors.accentGreen),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Text(
-                                text = "Saya baik-baik saja",
-                                color = colors.onAccent,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Button(
-                            onClick = {
-                                showSapaDialog = false
-                                sapaStatusText = "Status: Memanggil bantuan darurat ke Wali & Penjaga"
-                                scope.launch {
-                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                    snackbarHostState.showSnackbar("Simulasi Mockup: Peringatan L2 dikirim ke Wali & Penjaga!")
-                                }
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Terakota),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Text(
-                                text = "Butuh bantuan",
-                                color = colors.onAccent,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
-                            )
-                        }
-                    }
-                },
-                confirmButton = {}
-            )
         }
 
         // DIALOG KONFIRMASI KELUAR
@@ -1166,87 +1073,112 @@ fun OmaPassiveScreen(
     }
 }
 
+/** Tombol aksi besar berbentuk pil: lingkaran ikon putih, judul, subjudul, dan panah. */
 @Composable
-private fun OmaSensorStat(
-    icon: ImageVector,
-    label: String,
-    value: String,
-    colors: KetukExtendedColors
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = Terakota,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = colors.textPrimary
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = colors.textSecondary
-        )
-    }
-}
-
-@Composable
-private fun OmaActionRow(
+private fun OmaBigActionButton(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    colors: KetukExtendedColors,
-    onClick: () -> Unit
+    containerColor: Color,
+    iconTint: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
+    val colors = KetukTheme.colors
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            .heightIn(min = 88.dp)
+            .clip(RoundedCornerShape(50))
+            .background(containerColor)
             .clickable(onClick = onClick)
-            .padding(vertical = 4.dp),
+            .padding(horizontal = 20.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Surface(
-            shape = CircleShape,
-            color = Terakota.copy(alpha = 0.14f),
-            modifier = Modifier.size(38.dp)
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(colors.onAccent),
+            contentAlignment = Alignment.Center
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = Terakota,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(30.dp)
+            )
         }
 
-        Spacer(modifier = Modifier.width(14.dp))
+        Spacer(modifier = Modifier.width(16.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = colors.textPrimary
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = colors.onAccent
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = colors.textSecondary
+                fontSize = 13.sp,
+                color = colors.onAccent.copy(alpha = 0.92f)
             )
         }
+
+        Spacer(modifier = Modifier.width(8.dp))
 
         Icon(
             imageVector = Icons.Rounded.ChevronRight,
             contentDescription = null,
-            tint = colors.textSecondary,
-            modifier = Modifier.size(20.dp)
+            tint = colors.onAccent,
+            modifier = Modifier.size(28.dp)
+        )
+    }
+}
+
+/** Satu pesan cepat: ikon di atas, teks di bawah (muat di layar sempit). */
+@Composable
+private fun OmaQuickMessageChip(
+    icon: ImageVector,
+    text: String,
+    tint: Color,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val colors = KetukTheme.colors
+    val shape = RoundedCornerShape(14.dp)
+    Column(
+        modifier = modifier
+            .clip(shape)
+            .background(colors.screenBackground)
+            .border(1.dp, colors.cardBorder, shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 6.dp, vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(CircleShape)
+                .background(tint.copy(alpha = 0.16f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = text,
+            fontSize = 12.sp,
+            lineHeight = 15.sp,
+            color = colors.textPrimary,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -1326,4 +1258,3 @@ private fun PreviewOmaPassive360() {
         OmaPassiveScreen(onLogout = {})
     }
 }
-

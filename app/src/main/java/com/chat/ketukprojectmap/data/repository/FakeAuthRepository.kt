@@ -86,9 +86,6 @@ object FakeAuthRepository : AuthRepository {
 
     override suspend fun verifySignupCode(email: String, code: String) {
         delay(DEMO_DELAY_MS)
-        if (code.length != 4 || !code.all { it.isDigit() }) {
-            throw IllegalArgumentException("Kode OTP harus 4 digit angka")
-        }
         val trimmed = email.trim().lowercase()
         val user = registeredUsers[trimmed]
         if (user != null) {

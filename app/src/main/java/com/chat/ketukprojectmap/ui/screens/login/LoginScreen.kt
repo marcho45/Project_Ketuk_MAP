@@ -14,13 +14,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.activity.compose.BackHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -120,9 +118,6 @@ fun LoginContent(
         password.isNotEmpty() && password.length < 6 -> "Password minimal 6 karakter"
         else -> null
     }
-
-    // Handle tombol back fisik HP
-    BackHandler(onBack = onNavigateBack)
 
     val colors = KetukTheme.colors
     // Warna sesuai Figma: latar field peach + border terakota
@@ -456,22 +451,6 @@ fun LoginContent(
             }
 
             Spacer(modifier = Modifier.height(32.dp))
-        }
-
-        // ===== Tombol Kembali =====
-        IconButton(
-            onClick = onNavigateBack,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .systemBarsPadding()
-                .padding(start = 8.dp, top = 4.dp)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                contentDescription = "Kembali",
-                tint = Terakota,
-                modifier = Modifier.size(28.dp)
-            )
         }
     }
 }

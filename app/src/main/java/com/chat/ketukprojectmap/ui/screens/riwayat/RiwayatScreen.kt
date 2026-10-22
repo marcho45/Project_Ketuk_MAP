@@ -1,19 +1,13 @@
 package com.chat.ketukprojectmap.ui.screens.riwayat
 
 import android.content.res.Configuration
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -42,6 +36,10 @@ import com.chat.ketukprojectmap.data.dummy.EscalationLevel
 import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.components.staggerDelay
 import com.chat.ketukprojectmap.ui.theme.*
+
+// Jumlah item awal yang dianimasikan bertingkat (stagger). Item setelahnya
+// muncul tanpa delay supaya tetap mulus saat di-scroll.
+private const val STAGGER_ITEM_COUNT = 8
 
 @Composable
 fun RiwayatScreen(
@@ -138,26 +136,20 @@ fun RiwayatScreen(
                         items = filteredItems,
                         key = { _, item -> item.id }
                     ) { index, item ->
-                        AnimatedVisibility(
-                            visible = true,
-                            enter = fadeIn(animationSpec = tween(300)) +
-                                    expandVertically(animationSpec = tween(300)),
-                            exit = fadeOut(animationSpec = tween(300)) +
-                                   shrinkVertically(animationSpec = tween(300))
-                        ) {
-                            if (index < 6) {
-                                FadeSlideIn(delayMillis = staggerDelay(index, baseDelayMillis = 160)) {
-                                    RiwayatItemCard(
-                                        item = item,
-                                        onClick = { onItemClick(item.id) }
-                                    )
-                                }
+                        // FIX: semua item memakai FadeSlideIn supaya animasinya konsisten.
+                        // Hanya STAGGER_ITEM_COUNT item awal yang diberi delay bertingkat;
+                        // sisanya delay 0 agar tidak "kosong" sesaat saat di-scroll.
+                        FadeSlideIn(
+                            delayMillis = if (index < STAGGER_ITEM_COUNT) {
+                                staggerDelay(index, baseDelayMillis = 160)
                             } else {
-                                RiwayatItemCard(
-                                    item = item,
-                                    onClick = { onItemClick(item.id) }
-                                )
+                                0
                             }
+                        ) {
+                            RiwayatItemCard(
+                                item = item,
+                                onClick = { onItemClick(item.id) }
+                            )
                         }
                     }
                 }
@@ -325,4 +317,3 @@ fun RiwayatScreenDarkPreview() {
         RiwayatScreen()
     }
 }
-

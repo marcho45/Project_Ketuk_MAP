@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -66,9 +65,9 @@ fun GuardianHomeScreen(
     val scope = rememberCoroutineScope()
     val colors = KetukTheme.colors
 
-    // TODO(tim): tombol khusus demo, tidak ada di Figma
-    BackHandler(enabled = com.chat.ketukprojectmap.BuildConfig.DEMO_MODE && selectedTab == 0) {
-        onNavigateBackToRole()
+    // Tab bawah: back dari tab selain Home kembali ke tab Home; back di Home keluar aplikasi
+    BackHandler(enabled = selectedTab != 0) {
+        selectedTab = 0
     }
 
     Box(
@@ -176,21 +175,6 @@ private fun GuardianHomeContent(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // TODO(tim): tombol panah khusus demo, tidak ada di Figma
-                if (com.chat.ketukprojectmap.BuildConfig.DEMO_MODE) {
-                    IconButton(
-                        onClick = onNavigateBackToRole,
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = "Kembali ke Pilih Peran",
-                            tint = Terakota
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(4.dp))
-                }
-
                 Column(
                     modifier = Modifier
                         .weight(1f)
