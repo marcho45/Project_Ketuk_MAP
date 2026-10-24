@@ -26,6 +26,7 @@ import com.chat.ketukprojectmap.ui.components.FadeSlideIn
 import com.chat.ketukprojectmap.ui.theme.KetukTheme
 import com.chat.ketukprojectmap.ui.theme.Terakota
 import kotlinx.coroutines.launch
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 
 // TODO(tim): Layar Riwayat Lokasi 7 hari tidak memiliki frame khusus di Figma 05;
 // dibuat untuk memenuhi rubrik List Screen dan melengkapi fitur kartu "Riwayat Lokasi"
@@ -52,9 +53,17 @@ fun GuardianLocationHistoryScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                        .padding(start = 12.dp, end = 24.dp, top = 16.dp, bottom = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = colors.textPrimary
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
                     Column {
                         Text(
                             text = "Riwayat Lokasi",
